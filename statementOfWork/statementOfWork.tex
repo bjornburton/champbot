@@ -7,8 +7,8 @@
 \documentclass[]{article}
 
 %opening
-\title{Statement of Work Draft}
-\author{Bjorn \& Quentin\\Georgia VT}
+\title{Champbot Entry 2015}
+\author{Bj{\"o}rn \& Quentin\\Georgia VT}
 
 
 % don't get so uptight
@@ -20,6 +20,8 @@
 % text and typefaces
 \usepackage{listings}
 \usepackage{verbatim} %for block comments mostly
+
+\usepackage{fmtcount} % equivalent to \usepackage[super]{nth}
 
 % Euler for math | Palatino for rm | Helvetica for ss | Courier for tt
 \usepackage[utf8]{inputenc} % input charater set is the good one
@@ -135,41 +137,83 @@
 \begin{document}
 \maketitle
 
-
-    Major deliverables and when they're expected.
-    The tasks that support the deliverables
-    The project's governance process, along with how often governing committees will meet.
-    What resources are required for the project, what facilities will be used and whose equipment will be needed, as well as testing requirements.
-    Who will pay which costs and when.
-
-
 \section{Project Summary}
-This is a summary of the project, with a strict 1-page limit.
-Intellectual Merits of the Proposal Activity
-Address these here.
-Broader Impacts of the Proposal Activity
-Address these here.
+This project will include the design and construction an ROV, closely resembling Champ.
+This will successfully navigate the course of the Champbot Challenge as well as execute all optional maneuvers.
+The education of ourselves and others will be a large part of this exercise.  
+
+The project will begin with a feature-matrix and a dFMEA (so we don't find ourselves DNF).
+Since fire and blades are involved, a risk-assessment will be completed during development.
 
 \section{Objectives}
-\subsection(Merit of the Proposed Work)
+\subsection{Navigation}
+Navigation is non-optional and so has priority and will be implemented and tested first.
+In negotiating the slalom around the five buoys, in the prescribed pattern, it must be reasonably quick.
+Executing this in a reasonable time will better hold the attention of the spectators.
+
+There will be two drive units providing speed and agility through pirouette turning.
+
+
+\subsection{Ignition}
+The target will be ignited using a gas flame from its mouth.
+After all, if Champ will be spewing fire, this is where it should emanate.
+
+It's hoped that the flames will be quite visible to the crowed on the shore.
+The fuel will likely be butane, owing to the low pressure, bright flame and relative safety.
+
+Since this is a wet environment, with submersion, ignition will be electro-thermal rather than arc based.
+
+\subsection{Accuracy}
+Like some of last year's entries, the float should be dropped from Champ's mouth.
+Also like last-years entries, champs neck will be extended to better center into the target.
+The mechanics will be a dropping jaw. This must be executed before ignition so that the mouth is clear. 
+
+
+\subsection{Submersion}
+The Submersion for well over 10 seconds will be be supported.
+The dive and rise should be startlingly quick, and repeatable, to impress the crowd.
+
+Since this is a short-term dive, with no forward motion planned, power, rather than ballast, will be used. Downward-force is through the temporary re-purposing of the main-drive assembly as a rotary dive-plane. The pitch control will probably be through thrust reaction and not require another servo.
+
+\subsection{Spectacle, Technical and Aesthetics}
+Since these all have a point-value equal to the more direct tasks, they will figure heavily into the entire project.
+
 
 \section{Statement of Work}
+There is much to do and many unknowns but the success of this project, in its entirely, is very likely.
+
+The schedule is ordered so that unforeseen delays are unlikely to result in a no-show or disqualification.
 
 \subsection{Schedule}
+\begin{tabular}{ r p{.7\textwidth} }
+ \\ Week 23 & Main drive/dive units complete; sealed and with mounts.
+ \\ Week 26 & Remote control and power systems complete. Firmware functional.
+ \\ Week 29 & Buoyant structure complete, along with motor control
+ \\ Week 30 & Early lake test, finalize firmware and spring-rates 
+ \\ Week 32 & Jaw control added and tested
+ \\ Week 34 & Fire-control hardware and firmware added and tested
+ \\ Week 36 & Skeleton \& Skin complete and installed
+ \\ Week 37 & Final lake test to finalize buoyancy and address and handling issues
+ \\ Week 39 & Corrections will be ongoing until the event
+\end{tabular}
 
 \subsection{Budget}
+Money is always a very limited resource.
+Like many of last years entries, rather than the obvious industrial or hobby parts this project will reuse and re-purpose household appliances and material.
+Simplicity should also keep costs down.
 
+At this time it appears that the cost could be well under \$500.
+
+   
 \subsection{Team Composition and Expertise}
-Team Composition and Expertise
-Our team comprises four investigators, A, B, C, and D, whose areas of expertise span the critical areas of ...
-A’s areas of expertise include ...
-B’s areas of expertise include ...
+Bj{\"o}rn is an autodidactic engineer and life-long maker, building his first remote-control device, an optically controlled Automaton, in 1973.  
+Quentin is a brilliant \ordinalnum{1} grade student at Georgia Elementary \& Middle School (GEM), and Bj{\"o}rn's son, who loves electronics and chemistry.
 
 
 \section{Facilities}
 All work will be performed within the home.
-Github server for source control of multiple source trees.
-This project will have access to
+Github will be use for both source control and documentation at this location:
+\url{https://github.com/bjornburton/champbot}
 
 
 \end{document}

@@ -1,0 +1,4 @@
+*.html binary
+*.ods binary
+*.exe binary
+*.tex diff=tex

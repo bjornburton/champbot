@@ -1,0 +1,8 @@
+!.gitignore
+*.jpg
+*.JPG
+*.aux
+*.out
+*.log
+*.synctex.gz
+

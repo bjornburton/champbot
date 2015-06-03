@@ -7,12 +7,28 @@
 @* Introduction. This is the firmware portion of the propulsion system,
 featuring piruett turning. 
 
-This will facilitate motion.
-It will take "throttle" and "rudder" pulse-width inputs and convert them to
-the appropriate motor actions.
+This will facilitate motion by taking "thrust" and "yaw" pulse-width
+inputs and converting them to the appropriate motor actions.
 
-Throttle pulse-width will have some dead-band to allow for full stop.
-Rudder will shift the power proportion.
+Both pulse-width inputs will have some dead-band to allow for full stop.
+
+The pulse-width from the receiver will probabily be at 20 ms intervals.
+The time will range from 1000--2000 ms, with 1500 ms being for stopped.
+Port motor pulse will be applied to ???, starboard will be at ???.
+They will be sampled at about 1000 times per second.
+The median time will be subtracted from them for a pair of signed values
+thrust and yaw. The value will be scaled.
+
+The sum and difference of thrust and yaw will be translated to power to the
+port and starboard motors. When near median the motors will be disabled.
+The motors will also be disabled when there are no input pulses.
+Each motor need direction and power so that's 4 signals of output.
+With the two signal of input, I need more IO than the trinket has.
+So---I put an order in for a Pro Trinket with far more capability.
+It has an ATmega328.
+
+Jaw and fire control could be added to this board too. We will see.
+
 
 place-holder code below
 ==========================

@@ -14,6 +14,8 @@ Both pulse-width inputs will have some dead-band to allow for full stop.
 
 The pulse-width from the receiver will probabily be at 20 ms intervals.
 The time will range from 1000--2000 ms, with 1500 ms being for stopped.
+That will need to be measured.
+
 Port motor pulse will be applied to ???, starboard will be at ???.
 They will be sampled at about 1000 times per second.
 The median time will be subtracted from them for a pair of signed values
@@ -23,11 +25,16 @@ The sum and difference of thrust and yaw will be translated to power to the
 port and starboard motors. When near median the motors will be disabled.
 The motors will also be disabled when there are no input pulses.
 Each motor need direction and power so that's 4 signals of output.
-With the two signal of input, I need more IO than the trinket has.
+Afdding the two signal of input, I need more I/O than the trinket has.
 So---I put an order in for a Pro Trinket with far more capability.
 It has an ATmega328.
 
 Jaw and fire control could be added to this board too. We will see.
+
+The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
+This will do more than fine for the two motors. 
+
+
 
 
 place-holder code below

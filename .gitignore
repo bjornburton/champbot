@@ -5,4 +5,8 @@
 *.out
 *.log
 *.synctex.gz
-
+*.o
+*.toc
+*.scn
+*.idx
+*.elf

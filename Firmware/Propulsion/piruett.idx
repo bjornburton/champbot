@@ -1,0 +1,19 @@
+\I\\{armed}, 5.
+\I\\{armwait}, 5.
+\I\.{CLEAR}, \[3].
+\I\.{DDB5}, 11.
+\I\.{DDRB}, 11.
+\I\.{F\_CPU}, \[2].
+\I\\{ledcntl}, \[6], 7, \[8].
+\I\\{main}, \[7].
+\I\\{nowavecount}, 5.
+\I\.{OFF}, \[3], 7.
+\I\.{ON}, \[3].
+\I\.{PORTB}, 8.
+\I\.{PORTB5}, 8.
+\I\.{SET}, \[3].
+\I\\{state}, 6, 8.
+\I\&{statestruct}, \[5].
+\I\\{uint16\_t}, 5.
+\I\\{uint8\_t}, \[5], 6, 8.
+\I\\{wavecount}, 5.

@@ -2,11 +2,12 @@
 TARGET:= piruett
 
 # Which target board
-# BOARD:=trinket
-BOARD:=atmega328
+# for Trinket use BOARD:=trinket
+# for Pro Trinket use 
+BOARD:=atmega328p
 
 # Which microcontroller
-MCU:=atmega328
+MCU:=atmega328p
 
 # Which programmer to use
 PROGHW:=usbtiny
@@ -15,9 +16,9 @@ PROGHW:=usbtiny
 PROGSW:=avrdude
 
 # Which fuses
-LFUSE:= lfuse:w:0x62:m //default is 62, Trinket like F2
-HFUSE:= hfuse:w:0xDF:m 
-EFUSE:= efuse:w:0xFF:m
+LFUSE:= lfuse:w:0xFF:m
+HFUSE:= hfuse:w:0xD0:m 
+EFUSE:= efuse:w:0x05:m
 
 
 # Apps and Flags

@@ -1,0 +1,131 @@
+\input cwebmac
+
+% piruett
+
+\nocon % omit table of contents
+\datethis % print date on listing
+
+
+\N{1}{1}Introduction. This is the firmware portion of the propulsion system,
+featuring piruett turning.
+
+This will facilitate motion by taking "thrust" and "radius" pulse-width
+inputs and converting them to the appropriate motor actions.
+
+Both pulse-width inputs will have some dead-band to allow for full stop.
+
+The pulse-width from the receiver will probabily be at 20 ms intervals.
+The time will range from 1000--2000 ms, with 1500 ms being for stopped.
+That will need to be measured.
+
+Port motor pulse will be applied to ???, starboard will be at ???.
+They will be sampled at about 1000 times per second.
+The median time will be subtracted from them for a pair of signed values
+thrust and yaw. The value will be scaled.
+
+The sum and difference of thrust and yaw will be translated to power to the
+port and starboard motors. When near median the motors will be disabled.
+The motors will also be disabled when there are no input pulses.
+Each motor need direction and power so that's 4 signals of output.
+Afdding the two signal of input, I need more I/O than the trinket has.
+So---I put an order in for a Pro Trinket with far more capability.
+It has an ATmega328.
+
+Jaw and fire control could be added to this board too. We will see.
+
+The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
+This will do more than fine for the two motors.
+
+
+
+
+place-holder code below
+==========================
+
+Extensive use was made of the datasheet, Atmel ``Atmel ATtiny25, ATtiny45,
+ATtiny85 Datasheet'' Rev. 2586Q–AVR–08/2013 (Tue 06 Aug 2013 03:19:12 PM
+EDT).
+\Y\B\X4:Include\X\6
+\X5:Types\X\6
+\X6:Prototypes\X\par
+\fi
+
+\M{2}\PB{\.{"F\_CPU"}} is used to convey the Trinket clock rate.
+\Y\B\4\D$\.{F\_CPU}$ \5
+\T{16000000\$U\$L}\par
+\fi
+
+\M{3}Here are some Boolean definitions that are used.
+\Y\B\4\D$\.{ON}$ \5
+\T{1}\par
+\B\4\D$\.{OFF}$ \5
+\T{0}\par
+\B\4\D$\.{SET}$ \5
+\T{1}\par
+\B\4\D$\.{CLEAR}$ \5
+\T{0}\par
+\fi
+
+\M{4}\B\X4:Include\X${}\E{}$\6
+\8\#\&{include} \.{<avr/io.h>}\SHC{ need some port access }\6
+\8\#\&{include} \.{<util/delay.h>}\SHC{ need to delay }\6
+\8\#\&{include} \.{<avr/interrupt.h>}\SHC{ have need of an interrupt }\6
+\8\#\&{include} \.{<avr/sleep.h>}\SHC{ have need of sleep }\6
+\8\#\&{include} \.{<stdlib.h>}\6
+\8\#\&{include} \.{<stdint.h>}\par
+\U1.\fi
+
+\M{5}Here is a structure to keep track of the state of things.
+
+\Y\B\4\X5:Types\X${}\E{}$\6
+\&{typedef} \&{struct} ${}\{{}$\1\6
+\\{uint8\_t}\\{wavecount};\SHC{ delay to remain as if waveless, to ensure waves
+}\6
+\\{uint16\_t}\\{armwait};\SHC{ countdown index to arm siren }\6
+\\{uint8\_t}\\{armed};\SHC{ non-zero indicates that the siren is armed }\7
+\&{const} \\{uint8\_t}\\{nowavecount};\SHC{ time until siren arm }\2\6
+${}\}{}$ \&{statestruct};\par
+\U1.\fi
+
+\M{6}\B\X6:Prototypes\X${}\E{}$\6
+\&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\par
+\U1.\fi
+
+\M{7}
+Here is \PB{\\{main}(\,)}.
+\Y\B\&{int} \\{main}(\&{void})\1\1\2\2\6
+${}\{{}$\1\7
+\X11:Initialize pin outputs and inputs\X\\{ledcntl}(\.{OFF});\6
+\&{return} \T{0};\SHC{ it's the right thing to do! }\7
+\4${}\}{}$\SHC{ end main() }\2\par
+\fi
+
+\M{8}
+Here is a simple function to flip the LED on or off.
+\Y\B\&{void} \\{ledcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
+${}\{{}$\1\6
+${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
+\T{1}\LL\.{PORTB5});{}$\6
+\4${}\}{}$\2\par
+\fi
+
+\M{9}
+
+\fi
+
+\N{1}{10}These are the supporting routines, procedures and configuration
+blocks.
+
+
+Here is the block that sets-up the digital I/O pins.
+\fi
+
+\M{11}\B\X11:Initialize pin outputs and inputs\X${}\E{}$\6
+${}\{{}$\C{ set the led port direction; This is pin \#13 }\1\6
+${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5});{}$\6
+\4${}\}{}$\2\par
+\U7.\fi
+
+\inx
+\fin
+\con

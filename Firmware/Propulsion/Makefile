@@ -2,10 +2,11 @@
 TARGET:= piruett
 
 # Which target board
-BOARD:=trinket
+# BOARD:=trinket
+BOARD:=atmega328
 
 # Which microcontroller
-MCU:=attiny85
+MCU:=atmega328
 
 # Which programmer to use
 PROGHW:=usbtiny

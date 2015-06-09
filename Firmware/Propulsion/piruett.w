@@ -12,28 +12,73 @@ inputs and converting them to the appropriate motor actions.
 
 Both pulse-width inputs will have some dead-band to allow for full stop.
 
-The pulse-width from the receiver will probabily be at 20 ms intervals.
-The time will range from 1000--2000 ms, with 1500 ms being for stopped.
-That will need to be measured.
+The pulse-width from the receiver is at 20 ms intervals.
+The time ranges from 1000--2000 ms, including trim.
+1500 ms is the width for stopped.
+The levers cover \pm0.4 ms and the trim
+covers the balance.
+
+Math for radius...I think this ir right:
+
+Where:
+ t is track
+ r is radius
+ v is value
+ f is factor
+
+min r is 1
+max r is 127
+
+get this value for v
+[1]
+[127]
+[255]
+
+r=factor*abs(127-v)
+
+
+For non-zero r
+Inside=(2r-t)/2r
+Outside=(2r+t)/2r
+
 
 Port motor pulse will be applied to ???, starboard will be at ???.
-They will be sampled at about 1000 times per second.
 The median time will be subtracted from them for a pair of signed values
-thrust and yaw. The value will be scaled.
+thrust and radius. The value will be scaled.
 
-The sum and difference of thrust and yaw will be translated to power to the
+The thrust and radius will be translated to power to the
 port and starboard motors. When near median the motors will be disabled.
 The motors will also be disabled when there are no input pulses.
 Each motor need direction and power so that's 4 signals of output.
-Afdding the two signal of input, I need more I/O than the trinket has.
-So---I put an order in for a Pro Trinket with far more capability.
+
+The redius controll will also be the rotate control, if thrust is zero.
+
+Adding the two signal of input, I need more I/O than the trinket has.
+So---I now have a \$10 Pro Trinket with far more capability.
 It has an ATmega328.
 
-Jaw and fire control could be added to this board too. We will see.
-
 The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
-This will do more than fine for the two motors. 
+This has an "Input Capture Unit" that may be used for PWC decoding.
+That's an elegant solution
 
+
+
+One of the other timers will do more than fine for the two motors.
+
+For the PWC measurement, this app note, AVR135, is helpful:
+ www.atmel.com/images/doc8014.pdf
+
+In the datasheet, this section is helpful: 16.6.3
+
+Since I have two signals, maybe the best way to use this nice feature is to
+take the PWC signals into the MUX, through the comparator and into the Input
+Capture Unit. 
+First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
+for falling edge, wait, grab the time-stamp, do the math, switch the MUX, set
+for rising, reset the ICR, wait...
+MUX switch timing can be through another timer. 
+I'll ponder a bit.
+ 
 
 
 

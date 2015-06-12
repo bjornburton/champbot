@@ -1,8 +1,13 @@
+\I\X18:Configure to idle on sleep\X
+\U10.
 \I\X4:Include\X
 \U1.
-\I\X11:Initialize pin outputs and inputs\X
-\U7.
+\I\X17:Initialize pin outputs\X
+\U8.
+\I\X20:Initialize the inputs and capture mode\X
+\U8.
 \I\X6:Prototypes\X
 \U1.
 \I\X5:Types\X
 \U1.
+

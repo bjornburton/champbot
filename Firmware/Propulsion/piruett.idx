@@ -1,19 +1,47 @@
-\I\\{armed}, 5.
-\I\\{armwait}, 5.
+\I\.{ACBG}, 20.
+\I\.{ACIC}, 20.
+\I\.{ACME}, 20.
+\I\.{ACSR}, 20.
+\I\.{ADCSRA}, 20.
+\I\.{ADCSRB}, 20.
+\I\.{ADEN}, 20.
+\I\.{ADMUX}, 10, 20.
+\I\.{AIN0D}, 20.
+\I\.{AIN1D}, 20.
 \I\.{CLEAR}, \[3].
-\I\.{DDB5}, 11.
-\I\.{DDRB}, 11.
+\I\.{CS10}, 20.
+\I\.{DDB5}, 17.
+\I\.{DDRB}, 17.
+\I\.{DIDR0}, 20.
 \I\.{F\_CPU}, \[2].
-\I\\{ledcntl}, \[6], 7, \[8].
-\I\\{main}, \[7].
-\I\\{nowavecount}, 5.
-\I\.{OFF}, \[3], 7.
-\I\.{ON}, \[3].
-\I\.{PORTB}, 8.
-\I\.{PORTB5}, 8.
+\I\.{ICES1}, 13.
+\I\.{ICIE1}, 20.
+\I\.{ICNC1}, 20.
+\I\\{ledcntl}, \[6], 10, 13, \[14].
+\I\\{main}, \[8].
+\I\.{MUX0}, 10, 20.
+\I\.{MUX1}, 10.
+\I\.{MUX2}, 10.
+\I\.{OFF}, \[3], 10, 13.
+\I\.{ON}, \[3], 13.
+\I\.{PORTB}, 14.
+\I\.{PORTB5}, 14.
+\I\\{portOut}, 5.
+\I\\{radius}, 5.
+\I\\{sei}, 9.
 \I\.{SET}, \[3].
-\I\\{state}, 6, 8.
+\I\\{sleep\_mode}, 11, 12.
+\I\.{SMCR}, 18.
+\I\.{SM0}, 18.
+\I\.{SM1}, 18.
+\I\.{SM2}, 18.
+\I\\{starOut}, 5.
+\I\\{state}, 6, 14.
 \I\&{statestruct}, \[5].
+\I\.{TCCR1B}, 13, 20.
+\I\\{thrust}, 5.
+\I\.{TIMSK1}, 20.
+\I\\{toggle}, \[13].
 \I\\{uint16\_t}, 5.
-\I\\{uint8\_t}, \[5], 6, 8.
-\I\\{wavecount}, 5.
+\I\\{uint8\_t}, 5, 6, 14.
+

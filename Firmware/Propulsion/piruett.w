@@ -61,8 +61,6 @@ The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
 This has an "Input Capture Unit" that may be used for PWC decoding.
 That's an elegant solution
 
-
-
 One of the other timers will do more than fine for the two motors.
 
 For the PWC measurement, this app note, AVR135, is helpful:
@@ -72,9 +70,18 @@ In the datasheet, this section is helpful: 16.6.3
 
 Since I have two signals, maybe the best way to use this nice feature is to
 take the PWC signals into the MUX, through the comparator and into the Input
-Capture Unit. 
+Capture Unit.
+
+An interesting thin about this remote-control is that the pulses are in series.
+The channel one pulse is first, followed the cnannel two.
+In fact, channel one's fall is perfectly aligned with channel two's rise.
+This means that it will be possible to capture all of the pulses.
+
+After the two pulses are captured, their's and 18 ms before the next round.
+
 First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
-for falling edge, wait, grab the time-stamp, do modulus subtraction, switch the MUX, set for rising, reset the ICR, wait...
+for falling edge, wait, grab the time-stamp, do modulus subtraction,
+switch the MUX, set for rising, reset the ICR, wait...
  
 
 
@@ -91,12 +98,15 @@ Extensive use was made of the datasheet, Atmel ``Atmel-8271I-AVR- ATmega-Datashe
 
 @ |"F_CPU"| is used to convey the Trinket Pro clock rate.
 @d F_CPU 16000000UL
+@d BAUD 9600
 
 @ Here are some Boolean definitions that are used.
 @d ON 1
 @d OFF 0
 @d SET 1
 @d CLEAR 0
+
+
 
 @ @<Include...@>=
 # include <avr/io.h> // need some port access

@@ -7,15 +7,18 @@
 @* Introduction. This is the firmware portion of the propulsion system,
 featuring piruett turning. 
 
-This will facilitate motion by taking "thrust" and "radius" pulse-width
-inputs and converting them to the appropriate motor actions.
+This will facilitate motion by taking "thrust" and "radius" pulse-width inputs from the RC receiver by converting them to the appropriate motor actions. 
+These are from Channel 2 at A1 and channel 1 at A0, respectivily.
+The action will be similar to driving an RC car or boat.
+By keeping it natural, it should be easier to navigate the course than with a skid-steer style control.
 
+@* Implementation.
 Both pulse-width inputs will have some dead-band to allow for full stop.
 
 The pulse-width from the receiver is at 20 ms intervals.
 The time ranges from 1000--2000 ms, including trim.
-1500 ms is the width for stopped.
-The levers cover $\pm$0.4 ms and the trim
+1500~ ms is the width for stopped.
+The levers cover $\pm$0.4~ms and the trim
 covers the balance.
 
 Math for radius...I think this is right:
@@ -58,8 +61,9 @@ So---I now have a \$10 Pro Trinket with far more capability.
 It has an ATmega328.
 
 The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
-This has an "Input Capture Unit" that may be used for PWC decoding.
-That's an elegant solution
+This has an ``Input Capture Unit'' that may be used for PWC decoding.
+PWC being the type of signal from the RC receiver.
+That seems like as elegant a solution I will find and it is recommended by Atmel to use ICR ``Input Capture Register'' for this purpose.
 
 One of the other timers will do more than fine for the two motors.
 
@@ -72,22 +76,18 @@ Since I have two signals, maybe the best way to use this nice feature is to
 take the PWC signals into the MUX, through the comparator and into the Input
 Capture Unit.
 
-An interesting thin about this remote-control is that the pulses are in series.
-The channel one pulse is first, followed the cnannel two.
+An interesting thing about this Futaba receiver is that the pulses are in series.
+The channel one pulse is first, followed the channel two.
 In fact, channel one's fall is perfectly aligned with channel two's rise.
 This means that it will be possible to capture all of the pulses.
 
-After the two pulses are captured, their's and 18 ms before the next round.
+After the two pulses are captured, their's an 18~ms dead-time before the next round.
+This will provide ample time to do math and set the motor PWMs.
 
 First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
 for falling edge, wait, grab the time-stamp, do modulus subtraction,
 switch the MUX, set for rising, reset the ICR, wait...
  
-
-
-
-place-holder code below
-==========================
 
 Extensive use was made of the datasheet, Atmel ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
 @c
@@ -132,7 +132,7 @@ void ledcntl(uint8_t state); // LED ON and LED OFF
 
 @
 My lone global variable is a function pointer.
-This lets me pass arguments to the actual interrupt handlers.
+This could let me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the |"ISR()"| function.
 
 
@@ -155,7 +155,7 @@ is set; usually done through calling sei().
 @c
   sei();
 @
-Rather than burning loops, waiting 18~ms for something to happen, the ``sleep'' mode is used.
+Rather than burning loops, waiting the ballance of 18~ms for something to happen, the ``sleep'' mode is used.
 The specific type of sleep is `idle'. In idle, execution stops but timers continue.
 Interrupts are used to wake it.
 @c
@@ -177,7 +177,8 @@ Now we wait in ``idle''.
   sleep_mode();
 
 @
-If execution arrives here, some interrupt has been detected.
+If execution arrives here, some interrupt has woken it from sleep.
+There is only one possible interrupt at this time.
 @c
 
  static char toggle = 0;

@@ -9,15 +9,22 @@
 \N{1}{1}Introduction. This is the firmware portion of the propulsion system,
 featuring piruett turning.
 
-This will facilitate motion by taking "thrust" and "radius" pulse-width
-inputs and converting them to the appropriate motor actions.
+This will facilitate motion by taking "thrust" and "radius" pulse-width inputs
+from the RC receiver by converting them to the appropriate motor actions.
+These are from Channel 2 at A1 and channel 1 at A0, respectivily.
+The action will be similar to driving an RC car or boat.
+By keeping it natural, it should be easier to navigate the course than with a
+skid-steer style control.
 
+\fi
+
+\N{1}{2}Implementation.
 Both pulse-width inputs will have some dead-band to allow for full stop.
 
 The pulse-width from the receiver is at 20 ms intervals.
 The time ranges from 1000--2000 ms, including trim.
-1500 ms is the width for stopped.
-The levers cover $\pm$0.4 ms and the trim
+1500~ ms is the width for stopped.
+The levers cover $\pm$0.4~ms and the trim
 covers the balance.
 
 Math for radius...I think this is right:
@@ -60,10 +67,10 @@ So---I now have a \$10 Pro Trinket with far more capability.
 It has an ATmega328.
 
 The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
-This has an "Input Capture Unit" that may be used for PWC decoding.
-That's an elegant solution
-
-
+This has an ``Input Capture Unit'' that may be used for PWC decoding.
+PWC being the type of signal from the RC receiver.
+That seems like as elegant a solution I will find and it is recommended by
+Atmel to use ICR ``Input Capture Register'' for this purpose.
 
 One of the other timers will do more than fine for the two motors.
 
@@ -75,29 +82,37 @@ In the datasheet, this section is helpful: 16.6.3
 Since I have two signals, maybe the best way to use this nice feature is to
 take the PWC signals into the MUX, through the comparator and into the Input
 Capture Unit.
+
+An interesting thing about this Futaba receiver is that the pulses are in
+series.
+The channel one pulse is first, followed the channel two.
+In fact, channel one's fall is perfectly aligned with channel two's rise.
+This means that it will be possible to capture all of the pulses.
+
+After the two pulses are captured, their's an 18~ms dead-time before the next
+round.
+This will provide ample time to do math and set the motor PWMs.
+
 First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
-for falling edge, wait, grab the time-stamp, do modulus subtraction, switch the
-MUX, set for rising, reset the ICR, wait...
+for falling edge, wait, grab the time-stamp, do modulus subtraction,
+switch the MUX, set for rising, reset the ICR, wait...
 
-
-
-
-place-holder code below
-==========================
 
 Extensive use was made of the datasheet, Atmel ``Atmel-8271I-AVR-
 ATmega-Datasheet\_10/2014''.
-\Y\B\X4:Include\X\6
-\X5:Types\X\6
-\X6:Prototypes\X\par
+\Y\B\X5:Include\X\6
+\X6:Types\X\6
+\X7:Prototypes\X\par
 \fi
 
-\M{2}\PB{\.{"F\_CPU"}} is used to convey the Trinket Pro clock rate.
+\M{3}\PB{\.{"F\_CPU"}} is used to convey the Trinket Pro clock rate.
 \Y\B\4\D$\.{F\_CPU}$ \5
 \T{16000000\$U\$L}\par
+\B\4\D$\.{BAUD}$ \5
+\T{9600}\par
 \fi
 
-\M{3}Here are some Boolean definitions that are used.
+\M{4}Here are some Boolean definitions that are used.
 \Y\B\4\D$\.{ON}$ \5
 \T{1}\par
 \B\4\D$\.{OFF}$ \5
@@ -108,33 +123,33 @@ ATmega-Datasheet\_10/2014''.
 \T{0}\par
 \fi
 
-\M{4}\B\X4:Include\X${}\E{}$\6
+\M{5}\B\X5:Include\X${}\E{}$\6
 \8\#\&{include} \.{<avr/io.h>}\SHC{ need some port access }\6
 \8\#\&{include} \.{<util/delay.h>}\SHC{ need to delay }\6
 \8\#\&{include} \.{<avr/interrupt.h>}\SHC{ have need of an interrupt }\6
 \8\#\&{include} \.{<avr/sleep.h>}\SHC{ have need of sleep }\6
 \8\#\&{include} \.{<stdlib.h>}\6
 \8\#\&{include} \.{<stdint.h>}\par
-\U1.\fi
+\U2.\fi
 
-\M{5}Here is a structure to keep track of the state of things.
+\M{6}Here is a structure to keep track of the state of things.
 
-\Y\B\4\X5:Types\X${}\E{}$\6
+\Y\B\4\X6:Types\X${}\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
 \\{uint8\_t}\\{portOut};\SHC{ }\6
 \\{uint8\_t}\\{starOut};\SHC{ }\6
 \\{uint16\_t}\\{thrust};\SHC{ }\6
 \\{uint16\_t}\\{radius};\SHC{ }\2\6
 ${}\}{}$ \&{statestruct};\par
-\U1.\fi
+\U2.\fi
 
-\M{6}\B\X6:Prototypes\X${}\E{}$\6
+\M{7}\B\X7:Prototypes\X${}\E{}$\6
 \&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\par
-\U1.\fi
+\U2.\fi
 
-\M{7}
+\M{8}
 My lone global variable is a function pointer.
-This lets me pass arguments to the actual interrupt handlers.
+This could let me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the \PB{\.{"ISR()"}}
 function.
 
@@ -143,30 +158,30 @@ function.
 
 \fi
 
-\M{8}
+\M{9}
 Here is \PB{\\{main}(\,)}.
 \Y\B\&{int} \\{main}(\&{void})\1\1 $\{{}$\7
-\X20:Initialize the inputs and capture mode\X\X17:Initialize pin outputs\X\par
+\X21:Initialize the inputs and capture mode\X\X18:Initialize pin outputs\X\par
 \fi
 
-\M{9}
+\M{10}
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 \Y\B\\{sei}(\,);\par
 \fi
 
-\M{10}
-Rather than burning loops, waiting 18~ms for something to happen, the ``sleep''
-mode is used.
+\M{11}
+Rather than burning loops, waiting the ballance of 18~ms for something to
+happen, the ``sleep'' mode is used.
 The specific type of sleep is `idle'. In idle, execution stops but timers
 continue.
 Interrupts are used to wake it.
-\Y\B\X18:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
+\Y\B\X19:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
 ${}\.{ADMUX}\MRL{{\OR}{\K}}(\CM(\T{1}\LL\.{MUX2})\OR\CM(\T{1}\LL\.{MUX1})\OR%
 \CM(\T{1}\LL\.{MUX0})){}$;\SHC{ Set to channel 0 }\par
 \fi
 
-\M{11}
+\M{12}
 This is the loop that does the work. It should spend most of its time in \PB{%
 \\{sleep\_mode}}, comming out at each interrupt event caused by an edge.
 
@@ -174,13 +189,14 @@ This is the loop that does the work. It should spend most of its time in \PB{%
 $\{{}$\Y\par
 \fi
 
-\M{12}
+\M{13}
 Now we wait in ``idle''.
 \Y\B\\{sleep\_mode}(\,);\par
 \fi
 
-\M{13}
-If execution arrives here, some interrupt has been detected.
+\M{14}
+If execution arrives here, some interrupt has woken it from sleep.
+There is only one possible interrupt at this time.
 \Y\B\&{static} \&{char} \\{toggle}${}\K\T{0};{}$\7
 ${}\{{}$\1\6
 \&{if} (\\{toggle})\5
@@ -201,7 +217,7 @@ $\}{}$\SHC{ end for }\7
 $\}{}$\SHC{ end main() }\par
 \fi
 
-\M{14}
+\M{15}
 Here is a simple function to flip the LED on or off.
 \Y\B\&{void} \\{ledcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -210,36 +226,36 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{15}
+\M{16}
 
 \fi
 
-\N{1}{16}These are the supporting routines, procedures and configuration
+\N{1}{17}These are the supporting routines, procedures and configuration
 blocks.
 
 
 Here is the block that sets-up the digital I/O pins.
 \fi
 
-\M{17}\B\X17:Initialize pin outputs\X${}\E{}$\6
+\M{18}\B\X18:Initialize pin outputs\X${}\E{}$\6
 ${}\{{}$\C{ set the led port direction; This is pin \#13 }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5});{}$\6
 \4${}\}{}$\2\par
-\U8.\fi
+\U9.\fi
 
-\M{18}\B\X18:Configure to idle on sleep\X${}\E{}$\6
+\M{19}\B\X19:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM2});{}$\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM1});{}$\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM0});{}$\6
 \4${}\}{}$\2\par
-\U10.\fi
+\U11.\fi
 
-\M{19}
+\M{20}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{20}\B\X20:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{21}\B\X21:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{ADCSRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACME}){}$;\SHC{ Conn the MUX to (-)
 input of comparator }\6
@@ -261,7 +277,7 @@ ${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS10}){}$;\SHC{ No Prescale. Just count
 the main clock }\6
 \4${}\}{}$\2\par
 
-\U8.\fi
+\U9.\fi
 
 
 \inx

@@ -1,47 +1,48 @@
-\I\.{ACBG}, 20.
-\I\.{ACIC}, 20.
-\I\.{ACME}, 20.
-\I\.{ACSR}, 20.
-\I\.{ADCSRA}, 20.
-\I\.{ADCSRB}, 20.
-\I\.{ADEN}, 20.
-\I\.{ADMUX}, 10, 20.
-\I\.{AIN0D}, 20.
-\I\.{AIN1D}, 20.
-\I\.{CLEAR}, \[3].
-\I\.{CS10}, 20.
-\I\.{DDB5}, 17.
-\I\.{DDRB}, 17.
-\I\.{DIDR0}, 20.
-\I\.{F\_CPU}, \[2].
-\I\.{ICES1}, 13.
-\I\.{ICIE1}, 20.
-\I\.{ICNC1}, 20.
-\I\\{ledcntl}, \[6], 10, 13, \[14].
-\I\\{main}, \[8].
-\I\.{MUX0}, 10, 20.
-\I\.{MUX1}, 10.
-\I\.{MUX2}, 10.
-\I\.{OFF}, \[3], 10, 13.
-\I\.{ON}, \[3], 13.
-\I\.{PORTB}, 14.
-\I\.{PORTB5}, 14.
-\I\\{portOut}, 5.
-\I\\{radius}, 5.
-\I\\{sei}, 9.
-\I\.{SET}, \[3].
-\I\\{sleep\_mode}, 11, 12.
-\I\.{SMCR}, 18.
-\I\.{SM0}, 18.
-\I\.{SM1}, 18.
-\I\.{SM2}, 18.
-\I\\{starOut}, 5.
-\I\\{state}, 6, 14.
-\I\&{statestruct}, \[5].
-\I\.{TCCR1B}, 13, 20.
-\I\\{thrust}, 5.
-\I\.{TIMSK1}, 20.
-\I\\{toggle}, \[13].
-\I\\{uint16\_t}, 5.
-\I\\{uint8\_t}, 5, 6, 14.
+\I\.{ACBG}, 21.
+\I\.{ACIC}, 21.
+\I\.{ACME}, 21.
+\I\.{ACSR}, 21.
+\I\.{ADCSRA}, 21.
+\I\.{ADCSRB}, 21.
+\I\.{ADEN}, 21.
+\I\.{ADMUX}, 11, 21.
+\I\.{AIN0D}, 21.
+\I\.{AIN1D}, 21.
+\I\.{BAUD}, \[3].
+\I\.{CLEAR}, \[4].
+\I\.{CS10}, 21.
+\I\.{DDB5}, 18.
+\I\.{DDRB}, 18.
+\I\.{DIDR0}, 21.
+\I\.{F\_CPU}, \[3].
+\I\.{ICES1}, 14.
+\I\.{ICIE1}, 21.
+\I\.{ICNC1}, 21.
+\I\\{ledcntl}, \[7], 11, 14, \[15].
+\I\\{main}, \[9].
+\I\.{MUX0}, 11, 21.
+\I\.{MUX1}, 11.
+\I\.{MUX2}, 11.
+\I\.{OFF}, \[4], 11, 14.
+\I\.{ON}, \[4], 14.
+\I\.{PORTB}, 15.
+\I\.{PORTB5}, 15.
+\I\\{portOut}, 6.
+\I\\{radius}, 6.
+\I\\{sei}, 10.
+\I\.{SET}, \[4].
+\I\\{sleep\_mode}, 12, 13.
+\I\.{SMCR}, 19.
+\I\.{SM0}, 19.
+\I\.{SM1}, 19.
+\I\.{SM2}, 19.
+\I\\{starOut}, 6.
+\I\\{state}, 7, 15.
+\I\&{statestruct}, \[6].
+\I\.{TCCR1B}, 14, 21.
+\I\\{thrust}, 6.
+\I\.{TIMSK1}, 21.
+\I\\{toggle}, \[14].
+\I\\{uint16\_t}, 6.
+\I\\{uint8\_t}, 6, 7, 15.
 

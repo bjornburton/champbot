@@ -153,6 +153,16 @@ int main(void)
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 @c
+    DDRD &= ~(1 << DDD3);     // Clear the PD3 pin
+    // PD3 (PCINT0 pin) is now an input
+
+    PORTD |= (1 << PORTD3);    // turn On the Pull-up
+    // PD3 is now an input with pull-up enabled
+
+
+
+    EICRA |= (1 << ISC10);    // set INT1 to trigger on ANY logic change
+    EIMSK |= (1 << INT1);     // Turns on INT1
   sei();
 @
 Rather than burning loops, waiting the ballance of 18~ms for something to happen, the ``sleep'' mode is used.
@@ -162,20 +172,26 @@ Interrupts are used to wake it.
 
 @<Configure to idle on sleep...@>
 ledcntl(OFF);
-ADMUX |= (~(1<<MUX2) | ~(1<<MUX1) | ~(1<<MUX0)); // Set to channel 0  
+ADMUX &= (~(1<<MUX2) & ~(1<<MUX1) & ~(1<<MUX0)); // Set to channel 0  
 
 @
 This is the loop that does the work. It should spend most of its time in |sleep_mode|, comming out at each interrupt event caused by an edge.
 
 @c
+ 
+
  for (;;) // forever
   {@#
 
 @
 Now we wait in ``idle''.
 @c
-  sleep_mode();
 
+ SMCR |= (1<<SE);
+ sleep_mode();
+ SMCR &= ~(1<<SE);
+
+ledcntl(ON);
 @
 If execution arrives here, some interrupt has woken it from sleep.
 There is only one possible interrupt at this time.
@@ -191,7 +207,7 @@ There is only one possible interrupt at this time.
     }
     else
     {
-     ledcntl(OFF);
+     ledcntl(ON);
      TCCR1B |= (1<<ICES1); //wait for rising edge
     }
     toggle = toggle?0:1;
@@ -223,7 +239,7 @@ void ledcntl(uint8_t state)
 Here is the block that sets-up the digital I/O pins.
 @ @<Initialize pin outputs...@>=
 {
- /* set the led port direction; This is pin \#13 */
+ /* set the led port direction; This is pin \#17 */
   DDRB |= (1<<DDB5);
 }
 
@@ -238,15 +254,18 @@ Here is the block that sets-up the digital I/O pins.
 To enable this interrupt, set the ACIE bit of register ACSR.
 @ @<Initialize the inputs and capture mode...@>=
 {
- ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator
- ADMUX  |= (1<<MUX0);  // Set bit MUX0 of register ADMUX
- ADCSRA  &= ~(1<<ADEN);  // Turn off ADC to use its MUX (per 23.2) 
- DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs
- ACSR   |= (1<<ACBG);  // Connect the + input to the band-gap reference
- ACSR   |= (1<<ACIC);  // Enable input capture mode
- TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt 
- TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling 
- TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock
+ //ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator
+ //ADCSRA &= ~(1<<ADEN);  // Turn off ADC to use its MUX (per 23.2) 
+ //DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs
+ //ACSR   |= (1<<ACBG);  // Connect the + input to the band-gap reference
+ //ACSR   |= (1<<ACIC);  // Enable input capture mode
+// ACSR   |= (1<<ACIE);  // Enable comparator interrupt
+ //ACSR   &= ~(1<<ACIS0);  // 
+ //ACSR   |= (1<<ACIS1);  // 
+ //TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt 
+ //TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling 
+ //TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock
+ //PRR  &= ~(1<<PRADC);  //  
 }
 
 

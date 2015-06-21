@@ -1,47 +1,51 @@
 \I\.{ACBG}, 21.
 \I\.{ACIC}, 21.
+\I\.{ACIE}, 21.
+\I\.{ACIS1}, 21.
 \I\.{ACME}, 21.
-\I\.{ACSR}, 21.
-\I\.{ADCSRA}, 21.
-\I\.{ADCSRB}, 21.
-\I\.{ADEN}, 21.
-\I\.{ADMUX}, 11, 21.
-\I\.{AIN0D}, 21.
+\I\.{ADMUX}, 11.
 \I\.{AIN1D}, 21.
 \I\.{BAUD}, \[3].
 \I\.{CLEAR}, \[4].
 \I\.{CS10}, 21.
 \I\.{DDB5}, 18.
+\I\.{DDD3}, 10.
 \I\.{DDRB}, 18.
-\I\.{DIDR0}, 21.
+\I\.{DDRD}, 10.
+\I\.{EICRA}, 10.
+\I\.{EIMSK}, 10.
 \I\.{F\_CPU}, \[3].
 \I\.{ICES1}, 14.
 \I\.{ICIE1}, 21.
 \I\.{ICNC1}, 21.
-\I\\{ledcntl}, \[7], 11, 14, \[15].
+\I\.{INT1}, 10.
+\I\.{ISC10}, 10.
+\I\\{ledcntl}, \[7], 11, 13, 14, \[15].
 \I\\{main}, \[9].
-\I\.{MUX0}, 11, 21.
+\I\.{MUX0}, 11.
 \I\.{MUX1}, 11.
 \I\.{MUX2}, 11.
-\I\.{OFF}, \[4], 11, 14.
-\I\.{ON}, \[4], 14.
+\I\.{OFF}, \[4], 11.
+\I\.{ON}, \[4], 13, 14.
 \I\.{PORTB}, 15.
 \I\.{PORTB5}, 15.
+\I\.{PORTD}, 10.
+\I\.{PORTD3}, 10.
 \I\\{portOut}, 6.
 \I\\{radius}, 6.
+\I\.{SE}, 13.
 \I\\{sei}, 10.
 \I\.{SET}, \[4].
 \I\\{sleep\_mode}, 12, 13.
-\I\.{SMCR}, 19.
+\I\.{SMCR}, 13, 19.
 \I\.{SM0}, 19.
 \I\.{SM1}, 19.
 \I\.{SM2}, 19.
 \I\\{starOut}, 6.
 \I\\{state}, 7, 15.
 \I\&{statestruct}, \[6].
-\I\.{TCCR1B}, 14, 21.
+\I\.{TCCR1B}, 14.
 \I\\{thrust}, 6.
-\I\.{TIMSK1}, 21.
 \I\\{toggle}, \[14].
 \I\\{uint16\_t}, 6.
 \I\\{uint8\_t}, 6, 7, 15.

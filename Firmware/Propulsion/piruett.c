@@ -57,25 +57,28 @@ int main(void)
 
 
 /*21:*/
-#line 239 "./piruett.w"
+#line 255 "./piruett.w"
 
 {
-ADCSRB|= (1<<ACME);
-ADMUX|= (1<<MUX0);
-ADCSRA&= ~(1<<ADEN);
-DIDR0|= ((1<<AIN1D)|(1<<AIN0D));
-ACSR|= (1<<ACBG);
-ACSR|= (1<<ACIC);
-TIMSK1|= (1<<ICIE1);
-TCCR1B|= (1<<ICNC1);
-TCCR1B|= (1<<CS10);
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 /*:21*/
 #line 149 "./piruett.w"
 
 /*18:*/
-#line 224 "./piruett.w"
+#line 240 "./piruett.w"
 
 {
 
@@ -89,13 +92,23 @@ DDRB|= (1<<DDB5);
 /*:9*//*10:*/
 #line 155 "./piruett.w"
 
+DDRD&= ~(1<<DDD3);
+
+
+PORTD|= (1<<PORTD3);
+
+
+
+
+EICRA|= (1<<ISC10);
+EIMSK|= (1<<INT1);
 sei();
 /*:10*//*11:*/
-#line 161 "./piruett.w"
+#line 171 "./piruett.w"
 
 
 /*19:*/
-#line 230 "./piruett.w"
+#line 246 "./piruett.w"
 
 {
 SMCR&= ~(1<<SM2);
@@ -104,24 +117,30 @@ SMCR&= ~(1<<SM0);
 }
 
 /*:19*/
-#line 163 "./piruett.w"
+#line 173 "./piruett.w"
 
 ledcntl(OFF);
-ADMUX|= (~(1<<MUX2)|~(1<<MUX1)|~(1<<MUX0));
+ADMUX&= (~(1<<MUX2)&~(1<<MUX1)&~(1<<MUX0));
 
 /*:11*//*12:*/
-#line 170 "./piruett.w"
+#line 180 "./piruett.w"
+
+
 
 for(;;)
 {
 
 /*:12*//*13:*/
-#line 176 "./piruett.w"
+#line 188 "./piruett.w"
 
+
+SMCR|= (1<<SE);
 sleep_mode();
+SMCR&= ~(1<<SE);
 
+ledcntl(ON);
 /*:13*//*14:*/
-#line 182 "./piruett.w"
+#line 198 "./piruett.w"
 
 
 static char toggle= 0;
@@ -134,7 +153,7 @@ TCCR1B&= ~(1<<ICES1);
 }
 else
 {
-ledcntl(OFF);
+ledcntl(ON);
 TCCR1B|= (1<<ICES1);
 }
 toggle= toggle?0:1;
@@ -151,7 +170,7 @@ return 0;
 }
 
 /*:14*//*15:*/
-#line 212 "./piruett.w"
+#line 228 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {

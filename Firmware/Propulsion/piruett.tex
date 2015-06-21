@@ -167,7 +167,14 @@ Here is \PB{\\{main}(\,)}.
 \M{10}
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
-\Y\B\\{sei}(\,);\par
+\Y\B$\.{DDRD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{DDD3}){}$;\SHC{ Clear the PD3 pin }%
+\SHC{ PD3 (PCINT0 pin) is now an input }\6
+${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3}){}$;\SHC{ turn On the Pull-up }%
+\SHC{ PD3 is now an input with pull-up enabled }\6
+${}\.{EICRA}\MRL{{\OR}{\K}}(\T{1}\LL\.{ISC10}){}$;\SHC{ set INT1 to trigger on
+ANY logic change }\6
+${}\.{EIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{INT1}){}$;\SHC{ Turns on INT1 }\6
+\\{sei}(\,);\par
 \fi
 
 \M{11}
@@ -177,7 +184,7 @@ The specific type of sleep is `idle'. In idle, execution stops but timers
 continue.
 Interrupts are used to wake it.
 \Y\B\X19:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
-${}\.{ADMUX}\MRL{{\OR}{\K}}(\CM(\T{1}\LL\.{MUX2})\OR\CM(\T{1}\LL\.{MUX1})\OR%
+${}\.{ADMUX}\MRL{\AND{\K}}(\CM(\T{1}\LL\.{MUX2})\AND\CM(\T{1}\LL\.{MUX1})\AND%
 \CM(\T{1}\LL\.{MUX0})){}$;\SHC{ Set to channel 0 }\par
 \fi
 
@@ -191,7 +198,10 @@ $\{{}$\Y\par
 
 \M{13}
 Now we wait in ``idle''.
-\Y\B\\{sleep\_mode}(\,);\par
+\Y\B$\.{SMCR}\MRL{{\OR}{\K}}(\T{1}\LL\.{SE});{}$\6
+\\{sleep\_mode}(\,);\6
+${}\.{SMCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SE});{}$\6
+\\{ledcntl}(\.{ON});\par
 \fi
 
 \M{14}
@@ -207,7 +217,7 @@ edge }\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
-\\{ledcntl}(\.{OFF});\6
+\\{ledcntl}(\.{ON});\6
 ${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICES1}){}$;\SHC{wait for rising edge }\6
 \4${}\}{}$\2\6
 ${}\\{toggle}\K\\{toggle}\?\T{0}:\T{1};{}$\6
@@ -256,26 +266,19 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
 \M{21}\B\X21:Initialize the inputs and capture mode\X${}\E{}$\6
-${}\{{}$\1\6
-${}\.{ADCSRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACME}){}$;\SHC{ Conn the MUX to (-)
-input of comparator }\6
-${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\SHC{ Set bit MUX0 of register
-ADMUX }\6
-${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Turn off ADC to use
-its MUX (per 23.2) }\6
-${}\.{DIDR0}\MRL{{\OR}{\K}}((\T{1}\LL\.{AIN1D})\OR(\T{1}\LL\.{AIN0D})){}$;\SHC{
-Disable digital inputs }\6
-${}\.{ACSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACBG}){}$;\SHC{ Connect the + input to
-the band-gap reference }\6
-${}\.{ACSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACIC}){}$;\SHC{ Enable input capture mode
-}\6
-${}\.{TIMSK1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICIE1}){}$;\SHC{ Enable input capture
-interrupt }\6
-${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICNC1}){}$;\SHC{ Enable input capture
-noise canceling }\6
-${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS10}){}$;\SHC{ No Prescale. Just count
-the main clock }\6
-\4${}\}{}$\2\par
+$\{{}$\SHC{ADCSRB \PB{$\K$ $(\T{1}\LL\.{ACME});$}\SHC{ Conn the MUX to (-)
+input of comparator }\SHC{ADCSRA &= ~(1<<ADEN);  // Turn off ADC to use its MUX
+(per 23.2) }\SHC{DIDR0  \PB{$\K$ ( $(\T{1}\LL\.{AIN1D})$}(1<<AIN0D)); //
+Disable digital inputs }\SHC{ACSR   \PB{$\K$ $(\T{1}\LL\.{ACBG});$}\SHC{
+Connect the + input to the band-gap reference }\SHC{ACSR   \PB{$\K$ $(\T{1}\LL%
+\.{ACIC});$}\SHC{ Enable input capture mode }\SHC{ ACSR   \PB{$\K$ $(\T{1}\LL%
+\.{ACIE});$}\SHC{ Enable comparator interrupt }\SHC{ACSR   &= ~(1<<ACIS0);  //
+}\SHC{ACSR   \PB{$\K$ $(\T{1}\LL\.{ACIS1});$}\SHC{ }\SHC{TIMSK1 \PB{$\K$ $(%
+\T{1}\LL\.{ICIE1});$}\SHC{ Enable input capture interrupt }\SHC{TCCR1B \PB{$\K$
+$(\T{1}\LL\.{ICNC1});$}\SHC{ Enable input capture noise canceling }\SHC{TCCR1B %
+\PB{$\K$ $(\T{1}\LL\.{CS10});$}\SHC{ No Prescale. Just count the main clock }%
+\SHC{PRR  &= ~(1<<PRADC);  // }\6
+\,${}\}{}$\par
 
 \U9.\fi
 

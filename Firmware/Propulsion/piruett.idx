@@ -1,9 +1,15 @@
 \I\.{ACBG}, 21.
 \I\.{ACIC}, 21.
 \I\.{ACIE}, 21.
+\I\.{ACIS0}, 21.
 \I\.{ACIS1}, 21.
 \I\.{ACME}, 21.
+\I\.{ACSR}, 21.
+\I\.{ADCSRA}, 21.
+\I\.{ADCSRB}, 21.
+\I\.{ADEN}, 21.
 \I\.{ADMUX}, 11.
+\I\.{AIN0D}, 21.
 \I\.{AIN1D}, 21.
 \I\.{BAUD}, \[3].
 \I\.{CLEAR}, \[4].
@@ -12,6 +18,7 @@
 \I\.{DDD3}, 10.
 \I\.{DDRB}, 18.
 \I\.{DDRD}, 10.
+\I\.{DIDR0}, 21.
 \I\.{EICRA}, 10.
 \I\.{EIMSK}, 10.
 \I\.{F\_CPU}, \[3].
@@ -32,6 +39,8 @@
 \I\.{PORTD}, 10.
 \I\.{PORTD3}, 10.
 \I\\{portOut}, 6.
+\I\.{PRADC}, 21.
+\I\.{PRR}, 21.
 \I\\{radius}, 6.
 \I\.{SE}, 13.
 \I\\{sei}, 10.
@@ -44,8 +53,9 @@
 \I\\{starOut}, 6.
 \I\\{state}, 7, 15.
 \I\&{statestruct}, \[6].
-\I\.{TCCR1B}, 14.
+\I\.{TCCR1B}, 14, 21.
 \I\\{thrust}, 6.
+\I\.{TIMSK1}, 21.
 \I\\{toggle}, \[14].
 \I\\{uint16\_t}, 6.
 \I\\{uint8\_t}, 6, 7, 15.

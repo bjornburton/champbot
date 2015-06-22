@@ -57,21 +57,21 @@ int main(void)
 
 
 /*21:*/
-#line 255 "./piruett.w"
+#line 253 "./piruett.w"
 
 {
-
-
-
-
-
-
-
-
-
-
-
-
+ADCSRB|= (1<<ACME);
+ADCSRA&= ~(1<<ADEN);
+DIDR0|= ((1<<AIN1D)|(1<<AIN0D));
+ACSR|= (1<<ACBG);
+ACSR|= (1<<ACIC);
+ACSR|= (1<<ACIE);
+ACSR&= ~(1<<ACIS0);
+ACSR|= (1<<ACIS1);
+TIMSK1|= (1<<ICIE1);
+TCCR1B|= (1<<ICNC1);
+TCCR1B|= (1<<CS10);
+PRR&= ~(1<<PRADC);
 }
 
 /*:21*/
@@ -111,16 +111,14 @@ sei();
 #line 246 "./piruett.w"
 
 {
-SMCR&= ~(1<<SM2);
-SMCR&= ~(1<<SM1);
-SMCR&= ~(1<<SM0);
+SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
 }
 
 /*:19*/
 #line 173 "./piruett.w"
 
 ledcntl(OFF);
-ADMUX&= (~(1<<MUX2)&~(1<<MUX1)&~(1<<MUX0));
+ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 
 /*:11*//*12:*/
 #line 180 "./piruett.w"

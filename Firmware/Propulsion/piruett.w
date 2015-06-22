@@ -172,7 +172,7 @@ Interrupts are used to wake it.
 
 @<Configure to idle on sleep...@>
 ledcntl(OFF);
-ADMUX &= (~(1<<MUX2) & ~(1<<MUX1) & ~(1<<MUX0)); // Set to channel 0  
+ADMUX &= ~((1<<MUX2) | (1<<MUX1) | (1<<MUX0)); // Set to channel 0  
 
 @
 This is the loop that does the work. It should spend most of its time in |sleep_mode|, comming out at each interrupt event caused by an edge.
@@ -245,27 +245,25 @@ Here is the block that sets-up the digital I/O pins.
 
 @ @<Configure to idle on sleep...@>=
 {
-  SMCR &= ~(1<<SM2);
-  SMCR &= ~(1<<SM1);
-  SMCR &= ~(1<<SM0);
+  SMCR &= ~((1<<SM2) | (1<<SM1) | (1<<SM0));
 }
 
 @
 To enable this interrupt, set the ACIE bit of register ACSR.
 @ @<Initialize the inputs and capture mode...@>=
 {
- //ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator
- //ADCSRA &= ~(1<<ADEN);  // Turn off ADC to use its MUX (per 23.2) 
- //DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs
- //ACSR   |= (1<<ACBG);  // Connect the + input to the band-gap reference
- //ACSR   |= (1<<ACIC);  // Enable input capture mode
-// ACSR   |= (1<<ACIE);  // Enable comparator interrupt
- //ACSR   &= ~(1<<ACIS0);  // 
- //ACSR   |= (1<<ACIS1);  // 
- //TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt 
- //TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling 
- //TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock
- //PRR  &= ~(1<<PRADC);  //  
+ ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator
+ ADCSRA &= ~(1<<ADEN);  // Turn off ADC to use its MUX (per 23.2) 
+ DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs
+ ACSR   |= (1<<ACBG);  // Connect the + input to the band-gap reference
+ ACSR   |= (1<<ACIC);  // Enable input capture mode
+ ACSR   |= (1<<ACIE);  // Enable comparator interrupt
+ ACSR   &= ~(1<<ACIS0);  // 
+ ACSR   |= (1<<ACIS1);  // 
+ TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt 
+ TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling 
+ TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock
+ PRR  &= ~(1<<PRADC);  //  
 }
 
 

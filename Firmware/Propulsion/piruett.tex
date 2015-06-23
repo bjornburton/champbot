@@ -198,10 +198,7 @@ $\{{}$\Y\par
 
 \M{13}
 Now we wait in ``idle''.
-\Y\B$\.{SMCR}\MRL{{\OR}{\K}}(\T{1}\LL\.{SE});{}$\6
-\\{sleep\_mode}(\,);\6
-${}\.{SMCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SE});{}$\6
-\\{ledcntl}(\.{ON});\par
+\Y\B\\{sleep\_mode}(\,);\par
 \fi
 
 \M{14}
@@ -211,7 +208,7 @@ There is only one possible interrupt at this time.
 ${}\{{}$\1\6
 \&{if} (\\{toggle})\5
 ${}\{{}$\1\6
-\\{ledcntl}(\.{ON});\6
+\\{ledcntl}(\.{OFF});\6
 ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ wait for falling
 edge }\6
 \4${}\}{}$\2\6
@@ -224,7 +221,11 @@ ${}\\{toggle}\K\\{toggle}\?\T{0}:\T{1};{}$\6
 \4${}\}{}$\2\7
 $\}{}$\SHC{ end for }\7
 \&{return} \T{0};\SHC{ it's the right thing to do! }\7
-$\}{}$\SHC{ end main() }\par
+$\}{}$\SHC{ end main() }\6
+\.{ISR}(\\{INT1\_vect})\1\1\2\2\6
+${}\{\,\}{}$\7
+\.{ISR}(\\{TIMER1\_CAPT\_vect})\1\1\2\2\6
+${}\{\,\}{}$\par
 \fi
 
 \M{15}
@@ -267,26 +268,23 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 \M{21}\B\X21:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{ADCSRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACME}){}$;\SHC{ Conn the MUX to (-)
-input of comparator }\6
+input of comparator (per 23.2) }\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Turn off ADC to use
 its MUX (per 23.2) }\6
 ${}\.{DIDR0}\MRL{{\OR}{\K}}((\T{1}\LL\.{AIN1D})\OR(\T{1}\LL\.{AIN0D})){}$;\SHC{
-Disable digital inputs }\6
+Disable digital inputs (24.9.5) }\6
 ${}\.{ACSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACBG}){}$;\SHC{ Connect the + input to
-the band-gap reference }\6
+the band-gap reference (23.3.2) }\6
 ${}\.{ACSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACIC}){}$;\SHC{ Enable input capture mode
-}\6
-${}\.{ACSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACIE}){}$;\SHC{ Enable comparator
-interrupt }\6
-${}\.{ACSR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ACIS0}){}$;\SHC{ }\6
-${}\.{ACSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{ACIS1}){}$;\SHC{ }\6
+(23.3.2) }\SHC{ACSR   &= ~(1<<ACIS0);  // (23.3.2) }\SHC{ACSR   \PB{$\K$ $(%
+\T{1}\LL\.{ACIS1});$}\SHC{ (23.3.2) }\6
 ${}\.{TIMSK1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICIE1}){}$;\SHC{ Enable input capture
-interrupt }\6
+interrupt (16.11.8) }\6
 ${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICNC1}){}$;\SHC{ Enable input capture
-noise canceling }\6
+noise canceling (16.11.2) }\6
 ${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS10}){}$;\SHC{ No Prescale. Just count
-the main clock }\6
-${}\.{PRR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PRADC}){}$;\SHC{ }\6
+the main clock (16.11.2) }\6
+${}\.{PRR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PRADC}){}$;\SHC{  (10.11.3) }\6
 \4${}\}{}$\2\par
 
 \U9.\fi

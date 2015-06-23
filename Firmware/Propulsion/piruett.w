@@ -187,11 +187,8 @@ This is the loop that does the work. It should spend most of its time in |sleep_
 Now we wait in ``idle''.
 @c
 
- SMCR |= (1<<SE);
  sleep_mode();
- SMCR &= ~(1<<SE);
 
-ledcntl(ON);
 @
 If execution arrives here, some interrupt has woken it from sleep.
 There is only one possible interrupt at this time.
@@ -202,7 +199,7 @@ There is only one possible interrupt at this time.
  {        
   if(toggle)
     {
-     ledcntl(ON);
+     ledcntl(OFF);
      TCCR1B &= ~(1<<ICES1); // wait for falling edge
     }
     else
@@ -222,6 +219,16 @@ There is only one possible interrupt at this time.
 return 0; // it's the right thing to do!
 @#
 } // end main()
+
+ISR (INT1_vect)
+{
+}
+
+ISR (TIMER1_CAPT_vect)
+{
+}
+
+
 
 @
 Here is a simple function to flip the LED on or off.
@@ -252,18 +259,17 @@ Here is the block that sets-up the digital I/O pins.
 To enable this interrupt, set the ACIE bit of register ACSR.
 @ @<Initialize the inputs and capture mode...@>=
 {
- ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator
+ ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator (per 23.2)
  ADCSRA &= ~(1<<ADEN);  // Turn off ADC to use its MUX (per 23.2) 
- DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs
- ACSR   |= (1<<ACBG);  // Connect the + input to the band-gap reference
- ACSR   |= (1<<ACIC);  // Enable input capture mode
- ACSR   |= (1<<ACIE);  // Enable comparator interrupt
- ACSR   &= ~(1<<ACIS0);  // 
- ACSR   |= (1<<ACIS1);  // 
- TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt 
- TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling 
- TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock
- PRR  &= ~(1<<PRADC);  //  
+ DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs (24.9.5)
+ ACSR   |= (1<<ACBG);  // Connect the + input to the band-gap reference (23.3.2)
+ ACSR   |= (1<<ACIC);  // Enable input capture mode (23.3.2)
+ //ACSR   &= ~(1<<ACIS0);  // (23.3.2)
+ //ACSR   |= (1<<ACIS1);  // (23.3.2)
+ TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt (16.11.8) 
+ TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling (16.11.2)  
+ TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock (16.11.2)
+ PRR  &= ~(1<<PRADC);  //  (10.11.3) 
 }
 
 

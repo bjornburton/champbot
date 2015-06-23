@@ -57,7 +57,7 @@ int main(void)
 
 
 /*21:*/
-#line 253 "./piruett.w"
+#line 260 "./piruett.w"
 
 {
 ADCSRB|= (1<<ACME);
@@ -65,9 +65,8 @@ ADCSRA&= ~(1<<ADEN);
 DIDR0|= ((1<<AIN1D)|(1<<AIN0D));
 ACSR|= (1<<ACBG);
 ACSR|= (1<<ACIC);
-ACSR|= (1<<ACIE);
-ACSR&= ~(1<<ACIS0);
-ACSR|= (1<<ACIS1);
+
+
 TIMSK1|= (1<<ICIE1);
 TCCR1B|= (1<<ICNC1);
 TCCR1B|= (1<<CS10);
@@ -78,7 +77,7 @@ PRR&= ~(1<<PRADC);
 #line 149 "./piruett.w"
 
 /*18:*/
-#line 240 "./piruett.w"
+#line 247 "./piruett.w"
 
 {
 
@@ -108,7 +107,7 @@ sei();
 
 
 /*19:*/
-#line 246 "./piruett.w"
+#line 253 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
@@ -132,13 +131,10 @@ for(;;)
 #line 188 "./piruett.w"
 
 
-SMCR|= (1<<SE);
 sleep_mode();
-SMCR&= ~(1<<SE);
 
-ledcntl(ON);
 /*:13*//*14:*/
-#line 198 "./piruett.w"
+#line 195 "./piruett.w"
 
 
 static char toggle= 0;
@@ -146,7 +142,7 @@ static char toggle= 0;
 {
 if(toggle)
 {
-ledcntl(ON);
+ledcntl(OFF);
 TCCR1B&= ~(1<<ICES1);
 }
 else
@@ -167,8 +163,18 @@ return 0;
 
 }
 
+ISR(INT1_vect)
+{
+}
+
+ISR(TIMER1_CAPT_vect)
+{
+}
+
+
+
 /*:14*//*15:*/
-#line 228 "./piruett.w"
+#line 235 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {

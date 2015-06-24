@@ -7,10 +7,12 @@
 @* Introduction. This is the firmware portion of the propulsion system,
 featuring piruett turning. 
 
-This will facilitate motion by taking "thrust" and "radius" pulse-width inputs from the RC receiver by converting them to the appropriate motor actions. 
+This will facilitate motion by taking "thrust" and "radius" pulse-width inputs
+from the RC receiver by converting them to the appropriate motor actions. 
 These are from Channel 2 at A1 and channel 1 at A0, respectivily.
 The action will be similar to driving an RC car or boat.
-By keeping it natural, it should be easier to navigate the course than with a skid-steer style control.
+By keeping it natural, it should be easier to navigate the course than with a
+skid-steer style control.
 
 @* Implementation.
 Both pulse-width inputs will have some dead-band to allow for full stop.
@@ -63,7 +65,8 @@ It has an ATmega328.
 The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
 This has an ``Input Capture Unit'' that may be used for PWC decoding.
 PWC being the type of signal from the RC receiver.
-That seems like as elegant a solution I will find and it is recommended by Atmel to use ICR ``Input Capture Register'' for this purpose.
+That seems like as elegant a solution I will find and it is recommended by
+Atmel to use ICR ``Input Capture Register'' for this purpose.
 
 One of the other timers will do more than fine for the two motors.
 
@@ -76,12 +79,14 @@ Since I have two signals, maybe the best way to use this nice feature is to
 take the PWC signals into the MUX, through the comparator and into the Input
 Capture Unit.
 
-An interesting thing about this Futaba receiver is that the pulses are in series.
+An interesting thing about this Futaba receiver is that the pulses are in
+series.
 The channel one pulse is first, followed the channel two.
 In fact, channel one's fall is perfectly aligned with channel two's rise.
 This means that it will be possible to capture all of the pulses.
 
-After the two pulses are captured, their's an 18~ms dead-time before the next round.
+After the two pulses are captured, their's an 18~ms dead-time before the next
+round.
 This will provide ample time to do math and set the motor PWMs.
 
 First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
@@ -89,7 +94,9 @@ for falling edge, wait, grab the time-stamp, do modulus subtraction,
 switch the MUX, set for rising, reset the ICR, wait...
  
 
-Extensive use was made of the datasheet, Atmel ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
+Extensive use was made of the datasheet, Atmel
+``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
+
 @c
 @< Include @>@;
 @< Types @>@;
@@ -105,7 +112,9 @@ Extensive use was made of the datasheet, Atmel ``Atmel-8271I-AVR- ATmega-Datashe
 @d OFF 0
 @d SET 1
 @d CLEAR 0
-
+@d CH1RISE 0
+@d CH1FALL 1
+@d CH2FALL 2
 
 
 @ @<Include...@>=
@@ -116,26 +125,40 @@ Extensive use was made of the datasheet, Atmel ``Atmel-8271I-AVR- ATmega-Datashe
 # include <stdlib.h>
 # include <stdint.h>
 
-@ Here is a structure to keep track of the state of things.
+@ Here is a structure to keep track of the state of output things,
+like motor settings.
 
- @<Types@>=
+@<Types@>=
 typedef struct {
-    uint8_t portOut; // 
-    uint8_t starOut; // 
-    uint16_t thrust; // 
-    uint16_t radius; // 
-    } statestruct;
+    uint8_t portOut;  
+    uint8_t starboardOut;  
+    uint16_t thrust;  
+    uint16_t radius;  
+    uint8_t failSafe; // safety relay 
+    } outputStruct;
+
+
+@ Here is a structure to keep track of the state of intput things,
+like servo timing.
+
+@<Types@>=
+typedef struct {
+    uint16_t ch1rise;  
+    uint16_t ch1fall; 
+    uint16_t ch2fall;
+    uint16_t ch1duration;  
+    uint16_t ch2duration;  
+    uint8_t  edge;
+    } inputStruct;
 
 
 @ @<Prototypes@>=
 void ledcntl(uint8_t state); // LED ON and LED OFF
 
 @
-My lone global variable is a function pointer.
+My lone global variable may become a function pointer.
 This could let me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the |"ISR()"| function.
-
-
 
 
 @
@@ -145,6 +168,12 @@ Here is |main()|.
 int main(void)
 {@#
 
+inputStruct input_s = {                                                         
+    .ch1rise = 0,
+    .ch1fall = 0,
+    .ch2fall = 0,
+    .edge = 0
+    }; 
 
 @<Initialize the inputs and capture mode...@>
 @<Initialize pin outputs...@>
@@ -153,29 +182,43 @@ int main(void)
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 @c
-    DDRD &= ~(1 << DDD3);     // Clear the PD3 pin
-    // PD3 (PCINT0 pin) is now an input
-
-    PORTD |= (1 << PORTD3);    // turn On the Pull-up
-    // PD3 is now an input with pull-up enabled
-
-
-
-    EICRA |= (1 << ISC10);    // set INT1 to trigger on ANY logic change
-    EIMSK |= (1 << INT1);     // Turns on INT1
   sei();
+  
+ { // for test purposes
+  DDRD &= ~(1 << DDD3);     // Clear the PD3 pin
+  // PD3 (PCINT0 pin) is now an input
+
+  PORTD |= (1 << PORTD3);    // turn On the Pull-up
+  // PD3 is now an input with pull-up enabled
+
+
+  EICRA |= (1 << ISC10);    // set INT1 to trigger on ANY logic change
+  EIMSK |= (1 << INT1);     // Turns on INT1
+ }
+
 @
-Rather than burning loops, waiting the ballance of 18~ms for something to happen, the ``sleep'' mode is used.
-The specific type of sleep is `idle'. In idle, execution stops but timers continue.
+Rather than burning loops, waiting the ballance of 18~ms for something to
+happen, the ``sleep'' mode is used.
+The specific type of sleep is `idle'.
+In idle, execution stops but timers continue.
 Interrupts are used to wake it.
+It important to note that an ISR must be defined to allow the program to step
+past the sleep statement.
 @c
 
 @<Configure to idle on sleep...@>
 ledcntl(OFF);
-ADMUX &= ~((1<<MUX2) | (1<<MUX1) | (1<<MUX0)); // Set to channel 0  
 
 @
-This is the loop that does the work. It should spend most of its time in |sleep_mode|, comming out at each interrupt event caused by an edge.
+The Futaba receiver leads with channel one, rising edge, so we will start
+looking for that.
+@c
+input_s.edge = CH1RISE;
+
+
+@
+This is the loop that does the work. It should spend most of its time in
+|sleep_mode|, comming out at each interrupt event caused by an edge.
 
 @c
  
@@ -183,8 +226,35 @@ This is the loop that does the work. It should spend most of its time in |sleep_
  for (;;) // forever
   {@#
 
+@  
+Here we select what we are looking for, and from which receiver channel,
+based on ``.edge''.                                                                             
+@c 
+
+switch(input_s.edge)
+  {
+   case CH1RISE: // wait for rising edge on servo channel 1
+     ADMUX &= ~(1<<MUX0); // Set to mux channel 0 
+     TCCR1B |= (1<<ICES1);  // Rising edge (23.3.2)
+    break;
+   case CH1FALL:
+     ADMUX &= ~(1<<MUX0); // Set to mux channel 0  
+     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+    break;
+   case CH2FALL:
+     ADMUX |= (1<<MUX0); // Set to mux channel 1  
+     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+   }
+
 @
-Now we wait in ``idle''.
+Since the edge has been changed, the Input Capture Flag should probably be
+cleared. It's odd but clearing it involves writing a one to it.
+@c
+
+ TIFR1 |= (1<<ICF1); 
+
+@
+Now we wait in ``idle'' for the edge on the channel selected.
 @c
 
  sleep_mode();
@@ -192,23 +262,10 @@ Now we wait in ``idle''.
 @
 If execution arrives here, some interrupt has woken it from sleep.
 There is only one possible interrupt at this time.
+
+
 @c
 
- static char toggle = 0;
-
- {        
-  if(toggle)
-    {
-     ledcntl(OFF);
-     TCCR1B &= ~(1<<ICES1); // wait for falling edge
-    }
-    else
-    {
-     ledcntl(ON);
-     TCCR1B |= (1<<ICES1); //wait for rising edge
-    }
-    toggle = toggle?0:1;
- }
 
 
 @#
@@ -219,6 +276,10 @@ There is only one possible interrupt at this time.
 return 0; // it's the right thing to do!
 @#
 } // end main()
+
+@
+Here are the ISRs. 
+@c
 
 ISR (INT1_vect)
 {
@@ -259,17 +320,29 @@ Here is the block that sets-up the digital I/O pins.
 To enable this interrupt, set the ACIE bit of register ACSR.
 @ @<Initialize the inputs and capture mode...@>=
 {
- ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator (per 23.2)
- ADCSRA &= ~(1<<ADEN);  // Turn off ADC to use its MUX (per 23.2) 
- DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs (24.9.5)
- ACSR   |= (1<<ACBG);  // Connect the + input to the band-gap reference (23.3.2)
- ACSR   |= (1<<ACIC);  // Enable input capture mode (23.3.2)
- //ACSR   &= ~(1<<ACIS0);  // (23.3.2)
- //ACSR   |= (1<<ACIS1);  // (23.3.2)
- TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt (16.11.8) 
- TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling (16.11.2)  
- TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock (16.11.2)
- PRR  &= ~(1<<PRADC);  //  (10.11.3) 
+ // ADCSRA – ADC Control and Status Register A
+ ADCSRA &= ~(1<<ADEN); // Conn the MUX to (-) input of comparator (sec 23.2) 
+
+ // 23.3.1 ADCSRB – ADC Control and Status Register B 
+ ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator (sec 23.2)
+
+ // 24.9.5 DIDR0 – Digital Input Disable Register 0
+ DIDR0  |= ((1<<AIN1D)|(1<<AIN0D)); // Disable digital inputs (sec 24.9.5)
+
+ // 23.3.2 ACSR – Analog Comparator Control and Status Register
+ ACSR   |= (1<<ACBG);  // Connect + input to the band-gap ref (sec 23.3.2)
+ ACSR   |= (1<<ACIC);  // Enable input capture mode (sec 23.3.2)
+ ACSR   |= (1<<ACIS1); // Set for both rising and falling edge (sec 23.3.2)
+
+ // 16.11.8 TIMSK1 – Timer/Counter1 Interrupt Mask Register 
+ TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt (sec 16.11.8) 
+
+ // 16.11.2 TCCR1B – Timer/Counter1 Control Register B
+ TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling (sec 16.11.2)  
+ TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock (sec 16.11.2)
+ 
+ // 24.9.1 ADMUX – ADC Multiplexer Selection Register
+ ADMUX &= ~((1<<MUX2) | (1<<MUX1) | (1<<MUX0)); // Set to mux channel 0  
 }
 
 

@@ -27,7 +27,7 @@ CC       := avr-gcc
 TANGLE   := ctangle
 WEAVE    := cweave
 TEX      := pdftex
-CFLAGS   :=  -std=c99 -g -mmcu=$(MCU) -Wall -Os -pedantic
+CFLAGS   :=  -std=c11 -g -mmcu=$(MCU) -Wall -Os -pedantic
 CONV     :=avr-objcopy
 CONVFLAGS:= -j .text -j .data -O ihex
 LIBS     :=

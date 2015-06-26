@@ -103,7 +103,8 @@ Extensive use was made of the datasheet, Atmel
 
 \Y\B\X5:Include\X\6
 \X6:Types\X\6
-\X8:Prototypes\X\par
+\X8:Prototypes\X\6
+\X9:Global variables\X\par
 \fi
 
 \M{3}\PB{\.{"F\_CPU"}} is used to convey the Trinket Pro clock rate.
@@ -168,7 +169,9 @@ ${}\}{}$ \&{inputStruct};\par
 \fi
 
 \M{8}\B\X8:Prototypes\X${}\E{}$\6
-\&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\par
+\&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\6
+\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*},\39{}$\&{outputStruct} ${}{*});{}$\6
+\&{void} \\{edgeSelect}(\\{uint8\_t}\\{edge});\par
 \U2.\fi
 
 \M{9}
@@ -177,16 +180,19 @@ This could let me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the \PB{\.{"ISR()"}}
 function.
 
-
-\fi
+\Y\B\4\X9:Global variables\X${}\E{}$\6
+$\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*},\39{}$\&{outputStruct}
+${}{*})\K\NULL{}$;\par
+\U2.\fi
 
 \M{10}
 Here is \PB{\\{main}(\,)}.
 \Y\B\&{int} \\{main}(\&{void})\1\1 $\{{}$\7
 \&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch1rise}\K\T{0}$ $,$ $.$ $%
 \\{ch1fall}\K\T{0}$ $,$ $.$ $\\{ch2fall}\K\T{0}$ $,$ $.$ $\\{edge}\K\T{0}$ $\}$
- ; \X26:Initialize the inputs and capture mode\X\X23:Initialize pin outputs\X%
-\par
+ ;\7
+\&{outputStruct} \\{output\_s}; \X26:Initialize the inputs and capture mode\X%
+\X23:Initialize pin outputs\X\par
 \fi
 
 \M{11}
@@ -225,14 +231,46 @@ looking for that.
 This is the loop that does the work. It should spend most of its time in
 \PB{\\{sleep\_mode}}, comming out at each interrupt event caused by an edge.
 
-\Y\B\&{for} ( ;  ; \,)\SHC{ forever }\6
-$\{{}$\Y\par
+\Y\B\&{for} ( ;  ; \,) $\{{}$\Y\par
 \fi
 
 \M{15}
 Here we select what we are looking for, and from which receiver channel,
 based on ``.edge''.
-\Y\B\&{switch} ${}(\\{input\_s}.\\{edge}){}$\5
+\Y\B$\\{edgeSelect}(\\{input\_s}.\\{edge}){}$;\par
+\fi
+
+\M{16}
+Now we wait in ``idle'' for the edge on the channel selected.
+\Y\B\\{sleep\_mode}(\,);\par
+\fi
+
+\M{17}
+If execution arrives here, some interrupt has woken it from sleep and some
+vector has run.
+\Y\B\&{if} ${}(\\{handleIrq}\I\NULL{}$)\SHC{ not sure why it would be, but to
+be safe }\6
+${}\{{}$\1\7
+${}\\{handleIrq}({\AND}\\{input\_s},\39{\AND}\\{output\_s});{}$\6
+${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
+\4${}\}{}$\SHC{ end if handleirq }\2\7
+$\}{}$\SHC{ end for }\7
+\&{return} \T{0};\SHC{ it's the right thing to do! }\7
+$\}{}$\SHC{ end main() }\par
+\fi
+
+\M{18}
+Here are the ISRs.
+\Y\B\.{ISR}(\\{INT1\_vect})\1\1\2\2\6
+${}\{\,\}{}$\7
+\.{ISR}(\\{TIMER1\_CAPT\_vect})\1\1\2\2\6
+${}\{{}$\1\6
+${}\\{handleIrq}\K{\AND}\\{pwcCalc};{}$\6
+\4${}\}{}$\2\7
+\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s},\39{}$\&{outputStruct}
+${}{*}\\{output\_s}){}$\1\1\2\2\6
+${}\{\,\}$ \&{void} \\{edgeSelect}(\\{uint8\_t}\\{edge})\1\1 $\{$ \6
+\&{switch} (\\{edge})\5
 ${}\{{}$\1\6
 \4\&{case} \.{CH1RISE}:\SHC{ wait for rising edge on servo channel 1 }\6
 ${}\.{ADMUX}\MRL{\AND{\K}}\CM(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 0 }%
@@ -253,31 +291,10 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 \4${}\}{}$\2\par
 \fi
 
-\M{16}
+\M{19}
 Since the edge has been changed, the Input Capture Flag should probably be
 cleared. It's odd but clearing it involves writing a one to it.
-\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\par
-\fi
-
-\M{17}
-Now we wait in ``idle'' for the edge on the channel selected.
-\Y\B\\{sleep\_mode}(\,);\par
-\fi
-
-\M{18}
-If execution arrives here, some interrupt has woken it from sleep.
-There is only one possible interrupt at this time.
-\Y\B${}\}{}$\SHC{ end for }\7
-\&{return} \T{0};\SHC{ it's the right thing to do! }\7
-$\}{}$\SHC{ end main() }\par
-\fi
-
-\M{19}
-Here are the ISRs.
-\Y\B\.{ISR}(\\{INT1\_vect})\1\1\2\2\6
-${}\{\,\}{}$\7
-\.{ISR}(\\{TIMER1\_CAPT\_vect})\1\1\2\2\6
-${}\{\,\}{}$\par
+\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1});$ $\}{}$\par
 \fi
 
 \M{20}

@@ -58,14 +58,23 @@ uint8_t edge;
 #line 155 "./piruett.w"
 
 void ledcntl(uint8_t state);
+void pwcCalc(inputStruct*,outputStruct*);
+void edgeSelect(uint8_t edge);
 
 /*:8*/
 #line 103 "./piruett.w"
 
+/*9:*/
+#line 165 "./piruett.w"
+
+void(*handleIrq)(inputStruct*,outputStruct*)= NULL;
+
+/*:9*/
+#line 104 "./piruett.w"
 
 
 /*:2*//*10:*/
-#line 166 "./piruett.w"
+#line 170 "./piruett.w"
 
 
 int main(void)
@@ -78,8 +87,11 @@ inputStruct input_s= {
 .edge= 0
 };
 
+outputStruct output_s;
+
+
 /*26:*/
-#line 319 "./piruett.w"
+#line 342 "./piruett.w"
 
 {
 
@@ -108,10 +120,10 @@ ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 }
 
 /*:26*/
-#line 178 "./piruett.w"
+#line 185 "./piruett.w"
 
 /*23:*/
-#line 306 "./piruett.w"
+#line 329 "./piruett.w"
 
 {
 
@@ -119,11 +131,11 @@ DDRB|= (1<<DDB5);
 }
 
 /*:23*/
-#line 179 "./piruett.w"
+#line 186 "./piruett.w"
 
 
 /*:10*//*11:*/
-#line 184 "./piruett.w"
+#line 191 "./piruett.w"
 
 sei();
 
@@ -140,29 +152,29 @@ EIMSK|= (1<<INT1);
 }
 
 /*:11*//*12:*/
-#line 207 "./piruett.w"
+#line 214 "./piruett.w"
 
 
 /*24:*/
-#line 312 "./piruett.w"
+#line 335 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
 }
 
 /*:24*/
-#line 209 "./piruett.w"
+#line 216 "./piruett.w"
 
 ledcntl(OFF);
 
 /*:12*//*13:*/
-#line 215 "./piruett.w"
+#line 222 "./piruett.w"
 
 input_s.edge= CH1RISE;
 
 
 /*:13*//*14:*/
-#line 223 "./piruett.w"
+#line 230 "./piruett.w"
 
 
 
@@ -170,10 +182,60 @@ for(;;)
 {
 
 /*:14*//*15:*/
-#line 232 "./piruett.w"
+#line 239 "./piruett.w"
 
 
-switch(input_s.edge)
+edgeSelect(input_s.edge);
+
+
+/*:15*//*16:*/
+#line 246 "./piruett.w"
+
+
+sleep_mode();
+
+/*:16*//*17:*/
+#line 253 "./piruett.w"
+
+if(handleIrq!=NULL)
+{
+handleIrq(&input_s,&output_s);
+handleIrq= NULL;
+}
+
+
+
+}
+
+
+
+return 0;
+
+}
+
+/*:17*//*18:*/
+#line 272 "./piruett.w"
+
+
+ISR(INT1_vect)
+{
+}
+
+ISR(TIMER1_CAPT_vect)
+{
+handleIrq= &pwcCalc;
+}
+
+
+void pwcCalc(inputStruct*input_s,outputStruct*output_s)
+{
+
+
+}
+
+void edgeSelect(uint8_t edge)
+{
+switch(edge)
 {
 case CH1RISE:
 ADMUX&= ~(1<<MUX0);
@@ -187,50 +249,16 @@ case CH2FALL:
 ADMUX|= (1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
-
-/*:15*//*16:*/
-#line 252 "./piruett.w"
+/*:18*//*19:*/
+#line 309 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
-
-/*:16*//*17:*/
-#line 258 "./piruett.w"
-
-
-sleep_mode();
-
-/*:17*//*18:*/
-#line 265 "./piruett.w"
-
-
-
-
-
 }
-
-
-
-return 0;
-
-}
-
-/*:18*//*19:*/
-#line 280 "./piruett.w"
-
-
-ISR(INT1_vect)
-{
-}
-
-ISR(TIMER1_CAPT_vect)
-{
-}
-
 
 
 /*:19*//*20:*/
-#line 294 "./piruett.w"
+#line 317 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {

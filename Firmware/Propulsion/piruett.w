@@ -5,10 +5,10 @@
 \datethis % print date on listing
 
 @* Introduction. This is the firmware portion of the propulsion system,
-featuring piruett turning. 
+featuring piruett turning.
 
 This will facilitate motion by taking "thrust" and "radius" pulse-width inputs
-from the RC receiver by converting them to the appropriate motor actions. 
+from the RC receiver by converting them to the appropriate motor actions.
 These are from Channel 2 at A1 and channel 1 at A0, respectivily.
 The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
@@ -92,7 +92,7 @@ This will provide ample time to do math and set the motor PWMs.
 First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
 for falling edge, wait, grab the time-stamp, do modulus subtraction,
 switch the MUX, set for rising, reset the ICR, wait...
- 
+
 
 Extensive use was made of the datasheet, Atmel
 ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
@@ -101,7 +101,7 @@ Extensive use was made of the datasheet, Atmel
 @< Include @>@;
 @< Types @>@;
 @< Prototypes @>@;
-
+@< Global variables @>@;
 
 @ |"F_CPU"| is used to convey the Trinket Pro clock rate.
 @d F_CPU 16000000UL
@@ -130,11 +130,11 @@ like motor settings.
 
 @<Types@>=
 typedef struct {
-    uint8_t portOut;  
-    uint8_t starboardOut;  
-    uint16_t thrust;  
-    uint16_t radius;  
-    uint8_t failSafe; // safety relay 
+    uint8_t portOut;
+    uint8_t starboardOut;
+    uint16_t thrust;
+    uint16_t radius;
+    uint8_t failSafe; // safety relay
     } outputStruct;
 
 
@@ -143,23 +143,27 @@ like servo timing.
 
 @<Types@>=
 typedef struct {
-    uint16_t ch1rise;  
-    uint16_t ch1fall; 
+    uint16_t ch1rise;
+    uint16_t ch1fall;
     uint16_t ch2fall;
-    uint16_t ch1duration;  
-    uint16_t ch2duration;  
+    uint16_t ch1duration;
+    uint16_t ch2duration;
     uint8_t  edge;
     } inputStruct;
 
 
 @ @<Prototypes@>=
 void ledcntl(uint8_t state); // LED ON and LED OFF
+void pwcCalc(inputStruct *,outputStruct *);
+void edgeSelect(uint8_t edge);
 
 @
 My lone global variable may become a function pointer.
 This could let me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the |"ISR()"| function.
 
+@<Global var...@>=
+void (*handleIrq)(inputStruct *, outputStruct *) = NULL;
 
 @
 Here is |main()|.
@@ -168,12 +172,15 @@ Here is |main()|.
 int main(void)
 {@#
 
-inputStruct input_s = {                                                         
+inputStruct input_s = {
     .ch1rise = 0,
     .ch1fall = 0,
     .ch2fall = 0,
     .edge = 0
-    }; 
+    };
+
+outputStruct output_s;
+
 
 @<Initialize the inputs and capture mode...@>
 @<Initialize pin outputs...@>
@@ -183,7 +190,7 @@ Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 @c
   sei();
-  
+
  { // for test purposes
   DDRD &= ~(1 << DDD3);     // Clear the PD3 pin
   // PD3 (PCINT0 pin) is now an input
@@ -221,37 +228,18 @@ This is the loop that does the work. It should spend most of its time in
 |sleep_mode|, comming out at each interrupt event caused by an edge.
 
 @c
- 
 
- for (;;) // forever
+
+ for (;;)
   {@#
 
-@  
-Here we select what we are looking for, and from which receiver channel,
-based on ``.edge''.                                                                             
-@c 
-
-switch(input_s.edge)
-  {
-   case CH1RISE: // wait for rising edge on servo channel 1
-     ADMUX &= ~(1<<MUX0); // Set to mux channel 0 
-     TCCR1B |= (1<<ICES1);  // Rising edge (23.3.2)
-    break;
-   case CH1FALL:
-     ADMUX &= ~(1<<MUX0); // Set to mux channel 0  
-     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
-    break;
-   case CH2FALL:
-     ADMUX |= (1<<MUX0); // Set to mux channel 1  
-     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
-   }
-
 @
-Since the edge has been changed, the Input Capture Flag should probably be
-cleared. It's odd but clearing it involves writing a one to it.
+Here we select what we are looking for, and from which receiver channel,
+based on ``.edge''.
 @c
 
- TIFR1 |= (1<<ICF1); 
+edgeSelect(input_s.edge);
+
 
 @
 Now we wait in ``idle'' for the edge on the channel selected.
@@ -260,12 +248,14 @@ Now we wait in ``idle'' for the edge on the channel selected.
  sleep_mode();
 
 @
-If execution arrives here, some interrupt has woken it from sleep.
-There is only one possible interrupt at this time.
-
-
+If execution arrives here, some interrupt has woken it from sleep and some
+vector has run.
 @c
-
+if (handleIrq != NULL)  // not sure why it would be, but to be safe
+   {@#
+    handleIrq(&input_s, &output_s); 
+    handleIrq = NULL; // reset so that the action cannot be repeated
+    }// end if handleirq
 
 
 @#
@@ -278,7 +268,7 @@ return 0; // it's the right thing to do!
 } // end main()
 
 @
-Here are the ISRs. 
+Here are the ISRs.
 @c
 
 ISR (INT1_vect)
@@ -287,8 +277,39 @@ ISR (INT1_vect)
 
 ISR (TIMER1_CAPT_vect)
 {
+handleIrq = &pwcCalc;
 }
 
+
+void pwcCalc(inputStruct *input_s, outputStruct *output_s)
+{
+
+
+}
+
+void edgeSelect(uint8_t edge)
+{
+  switch(edge)
+     {
+   case CH1RISE: // wait for rising edge on servo channel 1
+     ADMUX &= ~(1<<MUX0); // Set to mux channel 0
+     TCCR1B |= (1<<ICES1);  // Rising edge (23.3.2)
+    break;
+   case CH1FALL:
+     ADMUX &= ~(1<<MUX0); // Set to mux channel 0
+     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+    break;
+   case CH2FALL:
+     ADMUX |= (1<<MUX0); // Set to mux channel 1
+     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+   }
+@
+Since the edge has been changed, the Input Capture Flag should probably be
+cleared. It's odd but clearing it involves writing a one to it.
+@c
+
+ TIFR1 |= (1<<ICF1);
+}
 
 
 @
@@ -321,9 +342,9 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 @ @<Initialize the inputs and capture mode...@>=
 {
  // ADCSRA – ADC Control and Status Register A
- ADCSRA &= ~(1<<ADEN); // Conn the MUX to (-) input of comparator (sec 23.2) 
+ ADCSRA &= ~(1<<ADEN); // Conn the MUX to (-) input of comparator (sec 23.2)
 
- // 23.3.1 ADCSRB – ADC Control and Status Register B 
+ // 23.3.1 ADCSRB – ADC Control and Status Register B
  ADCSRB |= (1<<ACME);  // Conn the MUX to (-) input of comparator (sec 23.2)
 
  // 24.9.5 DIDR0 – Digital Input Disable Register 0
@@ -334,15 +355,15 @@ To enable this interrupt, set the ACIE bit of register ACSR.
  ACSR   |= (1<<ACIC);  // Enable input capture mode (sec 23.3.2)
  ACSR   |= (1<<ACIS1); // Set for both rising and falling edge (sec 23.3.2)
 
- // 16.11.8 TIMSK1 – Timer/Counter1 Interrupt Mask Register 
- TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt (sec 16.11.8) 
+ // 16.11.8 TIMSK1 – Timer/Counter1 Interrupt Mask Register
+ TIMSK1 |= (1<<ICIE1); // Enable input capture interrupt (sec 16.11.8)
 
  // 16.11.2 TCCR1B – Timer/Counter1 Control Register B
- TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling (sec 16.11.2)  
+ TCCR1B |= (1<<ICNC1); // Enable input capture noise canceling (sec 16.11.2)
  TCCR1B |= (1<<CS10);  // No Prescale. Just count the main clock (sec 16.11.2)
- 
+
  // 24.9.1 ADMUX – ADC Multiplexer Selection Register
- ADMUX &= ~((1<<MUX2) | (1<<MUX1) | (1<<MUX0)); // Set to mux channel 0  
+ ADMUX &= ~((1<<MUX2) | (1<<MUX1) | (1<<MUX0)); // Set to mux channel 0
 }
 
 

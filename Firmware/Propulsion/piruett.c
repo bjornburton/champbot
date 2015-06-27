@@ -59,7 +59,7 @@ uint8_t edge;
 
 void ledcntl(uint8_t state);
 void pwcCalc(inputStruct*);
-void edgeSelect(uint8_t edge);
+void edgeSelect(inputStruct*);
 
 /*:8*/
 #line 103 "./piruett.w"
@@ -91,7 +91,7 @@ outputStruct output_s;
 
 
 /*29:*/
-#line 375 "./piruett.w"
+#line 374 "./piruett.w"
 
 {
 
@@ -123,7 +123,7 @@ ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 #line 185 "./piruett.w"
 
 /*26:*/
-#line 362 "./piruett.w"
+#line 361 "./piruett.w"
 
 {
 
@@ -156,7 +156,7 @@ EIMSK|= (1<<INT1);
 
 
 /*27:*/
-#line 368 "./piruett.w"
+#line 367 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
@@ -171,7 +171,7 @@ ledcntl(OFF);
 #line 222 "./piruett.w"
 
 input_s.edge= CH1RISE;
-
+edgeSelect(&input_s);
 
 /*:13*//*14:*/
 #line 230 "./piruett.w"
@@ -185,17 +185,16 @@ for(;;)
 #line 239 "./piruett.w"
 
 
-edgeSelect(input_s.edge);
 
 
 /*:15*//*16:*/
-#line 246 "./piruett.w"
+#line 245 "./piruett.w"
 
 
 sleep_mode();
 
 /*:16*//*17:*/
-#line 253 "./piruett.w"
+#line 252 "./piruett.w"
 
 if(handleIrq!=NULL)
 {
@@ -214,7 +213,7 @@ return 0;
 }
 
 /*:17*//*18:*/
-#line 272 "./piruett.w"
+#line 271 "./piruett.w"
 
 
 ISR(INT1_vect)
@@ -227,12 +226,12 @@ handleIrq= &pwcCalc;
 }
 
 /*:18*//*19:*/
-#line 286 "./piruett.w"
+#line 285 "./piruett.w"
 
 void pwcCalc(inputStruct*input_s)
 {
 /*:19*//*20:*/
-#line 292 "./piruett.w"
+#line 291 "./piruett.w"
 
 
 switch(input_s->edge)
@@ -252,18 +251,18 @@ input_s->ch2duration= input_s->ch2fall-input_s->ch1fall;
 input_s->edge= CH1RISE;
 }
 
-edgeSelect(input_s->edge);
+edgeSelect(input_s);
 
 }
 
 
 /*:20*//*21:*/
-#line 321 "./piruett.w"
+#line 320 "./piruett.w"
 
-void edgeSelect(uint8_t edge)
+void edgeSelect(inputStruct*input_s)
 {
 
-switch(edge)
+switch(input_s->edge)
 {
 case CH1RISE:
 ADMUX&= ~(1<<MUX0);
@@ -278,7 +277,7 @@ ADMUX|= (1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
 /*:21*//*22:*/
-#line 342 "./piruett.w"
+#line 341 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
@@ -286,7 +285,7 @@ TIFR1|= (1<<ICF1);
 
 
 /*:22*//*23:*/
-#line 350 "./piruett.w"
+#line 349 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {

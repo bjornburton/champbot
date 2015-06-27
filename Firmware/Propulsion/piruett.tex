@@ -173,7 +173,7 @@ ${}\}{}$ \&{inputStruct};\par
 \M{8}\B\X8:Prototypes\X${}\E{}$\6
 \&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\6
 \&{void} \\{pwcCalc}(\&{inputStruct} ${}{*});{}$\6
-\&{void} \\{edgeSelect}(\\{uint8\_t}\\{edge});\par
+\&{void} \\{edgeSelect}(\&{inputStruct} ${}{*}){}$;\par
 \U2.\fi
 
 \M{9}
@@ -225,7 +225,8 @@ past the sleep statement.
 \M{13}
 The Futaba receiver leads with channel one, rising edge, so we will start
 looking for that.
-\Y\B$\\{input\_s}.\\{edge}\K\.{CH1RISE}{}$;\par
+\Y\B$\\{input\_s}.\\{edge}\K\.{CH1RISE};{}$\6
+${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
 
 \M{14}
@@ -238,7 +239,7 @@ This is the loop that does the work. It should spend most of its time in
 \M{15}
 Here we select what we are looking for, and from which receiver channel,
 based on ``.edge''.
-\Y\B$\\{edgeSelect}(\\{input\_s}.\\{edge}){}$;\par
+\Y\B\par
 \fi
 
 \M{16}
@@ -296,7 +297,7 @@ ${}\\{input\_s}\MG\\{ch2duration}\K\\{input\_s}\MG\\{ch2fall}-\\{input\_s}\MG%
 \\{ch1fall};{}$\6
 ${}\\{input\_s}\MG\\{edge}\K\.{CH1RISE};{}$\6
 \4${}\}{}$\2\6
-${}\\{edgeSelect}(\\{input\_s}\MG\\{edge});$ $\}{}$\par
+\\{edgeSelect}(\\{input\_s}); $\}{}$\par
 \fi
 
 \M{21}
@@ -304,8 +305,8 @@ ${}\\{edgeSelect}(\\{input\_s}\MG\\{edge});$ $\}{}$\par
 The procedure edgeSelect configures the Input Capture unit to capture on the
 expected edge type.
 
-\Y\B\&{void} \\{edgeSelect}(\\{uint8\_t}\\{edge})\1\1 $\{{}$\7
-\&{switch} (\\{edge})\5
+\Y\B\&{void} \\{edgeSelect}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\7
+\&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
 ${}\{{}$\1\6
 \4\&{case} \.{CH1RISE}:\SHC{ wait for rising edge on servo channel 1 }\6
 ${}\.{ADMUX}\MRL{\AND{\K}}\CM(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 0 }%

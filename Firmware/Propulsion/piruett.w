@@ -155,7 +155,7 @@ typedef struct {
 @ @<Prototypes@>=
 void ledcntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
-void edgeSelect(uint8_t edge);
+void edgeSelect(inputStruct *);
 
 @
 My lone global variable may become a function pointer.
@@ -221,7 +221,7 @@ The Futaba receiver leads with channel one, rising edge, so we will start
 looking for that.
 @c
 input_s.edge = CH1RISE;
-
+edgeSelect(&input_s);
 
 @
 This is the loop that does the work. It should spend most of its time in
@@ -238,7 +238,6 @@ Here we select what we are looking for, and from which receiver channel,
 based on ``.edge''.
 @c
 
-edgeSelect(input_s.edge);
 
 
 @
@@ -308,7 +307,7 @@ and then increment the edge index.
          input_s->edge = CH1RISE;   
      }
 
-edgeSelect(input_s->edge);
+edgeSelect(input_s);
 
 }
 
@@ -319,10 +318,10 @@ The procedure edgeSelect configures the Input Capture unit to capture on the
 expected edge type. 
 
 @c
-void edgeSelect(uint8_t edge)
+void edgeSelect(inputStruct *input_s)
 {@#
 
-  switch(edge)
+  switch(input_s->edge)
      {
    case CH1RISE: // wait for rising edge on servo channel 1
       ADMUX &= ~(1<<MUX0); // Set to mux channel 0

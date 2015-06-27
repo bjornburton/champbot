@@ -280,7 +280,13 @@ handleIrq = &pwcCalc;
 }
 
 @
-This procedure computes the durations from the PWC signal edge captures. 
+This procedure computes the durations from the PWC signal edge capture values
+from the Input Capture Unit.
+With the levers centered the durations should be about 1.5~ms so at 16~ Mhz
+the count should be near 24000.
+The range should be 17600 to 30400 for 12800 counts, well within the range
+of the 64 kib of the 16 bit register..
+
 
 @c
 void pwcCalc(inputStruct *input_s)

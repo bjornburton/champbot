@@ -91,7 +91,7 @@ outputStruct output_s;
 
 
 /*29:*/
-#line 374 "./piruett.w"
+#line 380 "./piruett.w"
 
 {
 
@@ -123,7 +123,7 @@ ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 #line 185 "./piruett.w"
 
 /*26:*/
-#line 361 "./piruett.w"
+#line 367 "./piruett.w"
 
 {
 
@@ -156,7 +156,7 @@ EIMSK|= (1<<INT1);
 
 
 /*27:*/
-#line 367 "./piruett.w"
+#line 373 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
@@ -226,12 +226,12 @@ handleIrq= &pwcCalc;
 }
 
 /*:18*//*19:*/
-#line 285 "./piruett.w"
+#line 291 "./piruett.w"
 
 void pwcCalc(inputStruct*input_s)
 {
 /*:19*//*20:*/
-#line 291 "./piruett.w"
+#line 297 "./piruett.w"
 
 
 switch(input_s->edge)
@@ -257,7 +257,7 @@ edgeSelect(input_s);
 
 
 /*:20*//*21:*/
-#line 320 "./piruett.w"
+#line 326 "./piruett.w"
 
 void edgeSelect(inputStruct*input_s)
 {
@@ -277,7 +277,7 @@ ADMUX|= (1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
 /*:21*//*22:*/
-#line 341 "./piruett.w"
+#line 347 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
@@ -285,7 +285,7 @@ TIFR1|= (1<<ICF1);
 
 
 /*:22*//*23:*/
-#line 349 "./piruett.w"
+#line 355 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {

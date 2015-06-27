@@ -85,7 +85,7 @@ The channel one pulse is first, followed the channel two.
 In fact, channel one's fall is perfectly aligned with channel two's rise.
 This means that it will be possible to capture all of the pulses.
 
-After the two pulses are captured, their's an 18~ms dead-time before the next
+After the two pulses are captured, there's an 18~ms dead-time before the next
 round.
 This will provide ample time to do math and set the motor PWMs.
 
@@ -209,8 +209,9 @@ happen, the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
 In idle, execution stops but timers continue.
 Interrupts are used to wake it.
-It important to note that an ISR must be defined to allow the program to step
-past the sleep statement.
+
+It's important to note that an ISR procedure must be defined to allow the
+program to step past the sleep statement.
 @c
 
 @<Configure to idle on sleep...@>
@@ -248,7 +249,8 @@ Now we wait in ``idle'' for the edge on the channel selected.
 
 @
 If execution arrives here, some interrupt has woken it from sleep and some
-vector has run.
+vector has run. The pointer handleIrq will be assigned the value of the
+responsible function.  
 @c
 if (handleIrq != NULL)
    {@#
@@ -256,6 +258,12 @@ if (handleIrq != NULL)
     handleIrq = NULL; // reset so that the action cannot be repeated
     }// end if handleirq
 
+
+if(input_s.ch1duration > 25000)
+    ledcntl(ON);
+ else
+    ledcntl(OFF);
+ 
 
 @#
   } // end for
@@ -271,11 +279,11 @@ Here are the ISRs.
 @c
 
 ISR (INT1_vect)
-{
+{@#
 }
 
 ISR (TIMER1_CAPT_vect)
-{
+{@#
 handleIrq = &pwcCalc;
 }
 
@@ -314,7 +322,7 @@ and then increment the edge index.
      }
 
 edgeSelect(input_s);
-
+@#
 }
 
 
@@ -347,6 +355,7 @@ It's odd but clearing it involves writing a one to it.
 @c
 
  TIFR1 |= (1<<ICF1); // (per 16.6.3) 
+@#
 }
 
 
@@ -357,6 +366,7 @@ void ledcntl(uint8_t state)
 {
   PORTB = state ? PORTB | (1<<PORTB5) : PORTB & ~(1<<PORTB5);
 }
+
 
 @
 

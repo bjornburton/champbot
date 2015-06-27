@@ -91,7 +91,7 @@ outputStruct output_s;
 
 
 /*29:*/
-#line 380 "./piruett.w"
+#line 390 "./piruett.w"
 
 {
 
@@ -123,7 +123,7 @@ ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 #line 185 "./piruett.w"
 
 /*26:*/
-#line 367 "./piruett.w"
+#line 377 "./piruett.w"
 
 {
 
@@ -152,29 +152,29 @@ EIMSK|= (1<<INT1);
 }
 
 /*:11*//*12:*/
-#line 214 "./piruett.w"
+#line 215 "./piruett.w"
 
 
 /*27:*/
-#line 373 "./piruett.w"
+#line 383 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
 }
 
 /*:27*/
-#line 216 "./piruett.w"
+#line 217 "./piruett.w"
 
 ledcntl(OFF);
 
 /*:12*//*13:*/
-#line 222 "./piruett.w"
+#line 223 "./piruett.w"
 
 input_s.edge= CH1RISE;
 edgeSelect(&input_s);
 
 /*:13*//*14:*/
-#line 230 "./piruett.w"
+#line 231 "./piruett.w"
 
 
 
@@ -182,25 +182,31 @@ for(;;)
 {
 
 /*:14*//*15:*/
-#line 239 "./piruett.w"
+#line 240 "./piruett.w"
 
 
 
 
 /*:15*//*16:*/
-#line 245 "./piruett.w"
+#line 246 "./piruett.w"
 
 
 sleep_mode();
 
 /*:16*//*17:*/
-#line 252 "./piruett.w"
+#line 254 "./piruett.w"
 
 if(handleIrq!=NULL)
 {
 handleIrq(&input_s);
 handleIrq= NULL;
 }
+
+
+if(input_s.ch1duration> 25000)
+ledcntl(ON);
+else
+ledcntl(OFF);
 
 
 
@@ -213,7 +219,7 @@ return 0;
 }
 
 /*:17*//*18:*/
-#line 271 "./piruett.w"
+#line 279 "./piruett.w"
 
 
 ISR(INT1_vect)
@@ -226,12 +232,12 @@ handleIrq= &pwcCalc;
 }
 
 /*:18*//*19:*/
-#line 291 "./piruett.w"
+#line 299 "./piruett.w"
 
 void pwcCalc(inputStruct*input_s)
 {
 /*:19*//*20:*/
-#line 297 "./piruett.w"
+#line 305 "./piruett.w"
 
 
 switch(input_s->edge)
@@ -257,7 +263,7 @@ edgeSelect(input_s);
 
 
 /*:20*//*21:*/
-#line 326 "./piruett.w"
+#line 334 "./piruett.w"
 
 void edgeSelect(inputStruct*input_s)
 {
@@ -277,19 +283,21 @@ ADMUX|= (1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
 /*:21*//*22:*/
-#line 347 "./piruett.w"
+#line 355 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
+
 }
 
 
 /*:22*//*23:*/
-#line 355 "./piruett.w"
+#line 364 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {
 PORTB= state?PORTB|(1<<PORTB5):PORTB&~(1<<PORTB5);
 }
+
 
 /*:23*/

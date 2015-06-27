@@ -91,7 +91,7 @@ The channel one pulse is first, followed the channel two.
 In fact, channel one's fall is perfectly aligned with channel two's rise.
 This means that it will be possible to capture all of the pulses.
 
-After the two pulses are captured, their's an 18~ms dead-time before the next
+After the two pulses are captured, there's an 18~ms dead-time before the next
 round.
 This will provide ample time to do math and set the motor PWMs.
 
@@ -217,8 +217,9 @@ happen, the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
 In idle, execution stops but timers continue.
 Interrupts are used to wake it.
-It important to note that an ISR must be defined to allow the program to step
-past the sleep statement.
+
+It's important to note that an ISR procedure must be defined to allow the
+program to step past the sleep statement.
 \Y\B\X27:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\par
 \fi
 
@@ -249,12 +250,17 @@ Now we wait in ``idle'' for the edge on the channel selected.
 
 \M{17}
 If execution arrives here, some interrupt has woken it from sleep and some
-vector has run.
+vector has run. The pointer handleIrq will be assigned the value of the
+responsible function.
 \Y\B\&{if} ${}(\\{handleIrq}\I\NULL){}$\5
 ${}\{{}$\1\7
 ${}\\{handleIrq}({\AND}\\{input\_s});{}$\6
 ${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
-\4${}\}{}$\SHC{ end if handleirq }\2\7
+\4${}\}{}$\SHC{ end if handleirq }\2\6
+\&{if} ${}(\\{input\_s}.\\{ch1duration}>\T{25000}){}$\1\5
+\\{ledcntl}(\.{ON});\2\6
+\&{else}\1\5
+\\{ledcntl}(\.{OFF});\2\7
 $\}{}$\SHC{ end for }\7
 \&{return} \T{0};\SHC{ it's the right thing to do! }\7
 $\}{}$\SHC{ end main() }\par
@@ -263,9 +269,10 @@ $\}{}$\SHC{ end main() }\par
 \M{18}
 Here are the ISRs.
 \Y\B\.{ISR}(\\{INT1\_vect})\1\1\2\2\6
-${}\{\,\}{}$\7
+${}\{{}$\7
+\,${}\}{}$\7
 \.{ISR}(\\{TIMER1\_CAPT\_vect})\1\1\2\2\6
-${}\{{}$\1\6
+${}\{{}$\1\7
 ${}\\{handleIrq}\K{\AND}\\{pwcCalc};{}$\6
 \4${}\}{}$\2\par
 \fi
@@ -303,7 +310,8 @@ ${}\\{input\_s}\MG\\{ch2duration}\K\\{input\_s}\MG\\{ch2fall}-\\{input\_s}\MG%
 \\{ch1fall};{}$\6
 ${}\\{input\_s}\MG\\{edge}\K\.{CH1RISE};{}$\6
 \4${}\}{}$\2\6
-\\{edgeSelect}(\\{input\_s}); $\}{}$\par
+\\{edgeSelect}(\\{input\_s});\7
+$\}{}$\par
 \fi
 
 \M{21}
@@ -336,7 +344,7 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 \M{22}
 Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
-\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\6
+\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\7
 $\}{}$\par
 \fi
 

@@ -103,10 +103,10 @@ switch the MUX, set for rising, reset the ICR, wait...
 Extensive use was made of the datasheet, Atmel
 ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
 
-\Y\B\X5:Include\X\6
-\X6:Types\X\6
-\X8:Prototypes\X\6
-\X9:Global variables\X\par
+\Y\B\X6:Include\X\6
+\X7:Types\X\6
+\X9:Prototypes\X\6
+\X10:Global variables\X\par
 \fi
 
 \M{3}\PB{\.{"F\_CPU"}} is used to convey the Trinket Pro clock rate.
@@ -133,7 +133,14 @@ Extensive use was made of the datasheet, Atmel
 \T{2}\par
 \fi
 
-\M{5}\B\X5:Include\X${}\E{}$\6
+\M{5}Here are the calibration values.
+\Y\B\4\D$\.{GAINX100}$ \5
+\T{6157\$L}\par
+\B\4\D$\.{OFFSET}$ \5
+\T{218\$L}\par
+\fi
+
+\M{6}\B\X6:Include\X${}\E{}$\6
 \8\#\&{include} \.{<avr/io.h>}\SHC{ need some port access }\6
 \8\#\&{include} \.{<util/delay.h>}\SHC{ need to delay }\6
 \8\#\&{include} \.{<avr/interrupt.h>}\SHC{ have need of an interrupt }\6
@@ -142,24 +149,24 @@ Extensive use was made of the datasheet, Atmel
 \8\#\&{include} \.{<stdint.h>}\par
 \U2.\fi
 
-\M{6}Here is a structure to keep track of the state of output things,
+\M{7}Here is a structure to keep track of the state of output things,
 like motor settings.
 
-\Y\B\4\X6:Types\X${}\E{}$\6
+\Y\B\4\X7:Types\X${}\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
 \\{uint8\_t}\\{portOut};\6
 \\{uint8\_t}\\{starboardOut};\6
-\\{uint16\_t}\\{thrust};\6
-\\{uint16\_t}\\{radius};\6
+\\{int32\_t}\\{thrust};\6
+\\{int32\_t}\\{turn};\6
 \\{uint8\_t}\\{failSafe};\SHC{ safety relay }\2\6
 ${}\}{}$ \&{outputStruct};\par
-\A7.
+\A8.
 \U2.\fi
 
-\M{7}Here is a structure to keep track of the state of input things,
+\M{8}Here is a structure to keep track of the state of input things,
 like servo timing.
 
-\Y\B\4\X6:Types\X${}\mathrel+\E{}$\6
+\Y\B\4\X7:Types\X${}\mathrel+\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
 \\{uint16\_t}\\{ch2rise};\6
 \\{uint16\_t}\\{ch2fall};\6
@@ -170,38 +177,38 @@ like servo timing.
 ${}\}{}$ \&{inputStruct};\par
 \fi
 
-\M{8}\B\X8:Prototypes\X${}\E{}$\6
+\M{9}\B\X9:Prototypes\X${}\E{}$\6
 \&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\6
 \&{void} \\{pwcCalc}(\&{inputStruct} ${}{*});{}$\6
 \&{void} \\{edgeSelect}(\&{inputStruct} ${}{*}){}$;\par
 \U2.\fi
 
-\M{9}
+\M{10}
 My lone global variable may become a function pointer.
 This could let me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the \PB{\.{"ISR()"}}
 function.
 
-\Y\B\4\X9:Global variables\X${}\E{}$\6
+\Y\B\4\X10:Global variables\X${}\E{}$\6
 $\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*})\K\NULL{}$;\par
 \U2.\fi
 
-\M{10}
+\M{11}
 Here is \PB{\\{main}(\,)}.
 \Y\B\&{int} \\{main}(\&{void})\1\1 $\{{}$\Y\par
 \fi
 
-\M{11}
+\M{12}
 The Futaba receiver leads with channel two, rising edge, so we will start
 looking for that by setting \PB{\.{"edge"}} to look for a rise on channel 2.
 \Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch2rise}\K\T{0}$ $,$ $.$ $%
 \\{ch2fall}\K\T{0}$ $,$ $.$ $\\{ch1fall}\K\T{0}$ $,$ $.$ $\\{edge}\K%
 \.{CH2RISE}$ $\}$  ;\7
-\&{outputStruct} \\{output\_s}; \X29:Initialize the inputs and capture mode\X%
-\X26:Initialize pin outputs\X\par
+\&{outputStruct} \\{output\_s}; \X32:Initialize the inputs and capture mode\X%
+\X29:Initialize pin outputs\X\par
 \fi
 
-\M{12}
+\M{13}
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 \Y\B\\{sei}(\,);\6
@@ -216,7 +223,7 @@ ${}\.{EIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{INT1}){}$;\SHC{ Turns on INT1 }\6
 \4${}\}{}$\2\par
 \fi
 
-\M{13}
+\M{14}
 Rather than burning loops, waiting the ballance of 18~ms for something to
 happen, the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
@@ -225,29 +232,29 @@ Interrupts are used to wake it.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
-\Y\B\X27:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
+\Y\B\X30:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
 ${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
 
-\M{14}
+\M{15}
 This is the loop that does the work. It should spend most of its time in
 \PB{\\{sleep\_mode}}, comming out at each interrupt event caused by an edge.
 
 \Y\B\&{for} ( ;  ; \,) $\{{}$\Y\par
 \fi
 
-\M{15}
+\M{16}
 Here we select what we are looking for, and from which receiver channel,
 based on ``.edge''.
 \Y\B\par
 \fi
 
-\M{16}
+\M{17}
 Now we wait in ``idle'' for the edge on the channel selected.
 \Y\B\\{sleep\_mode}(\,);\par
 \fi
 
-\M{17}
+\M{18}
 If execution arrives here, some interrupt has woken it from sleep and some
 vector has run. The pointer handleIrq will be assigned the value of the
 responsible function.
@@ -255,9 +262,32 @@ responsible function.
 ${}\{{}$\1\7
 ${}\\{handleIrq}({\AND}\\{input\_s});{}$\6
 ${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
-\4${}\}{}$\SHC{ end if handleirq }\SHC{24200=ch1, center }\SHC{32000=ch1, hard
-left with full trim }\SHC{16200=ch1, hard right with full trim }\2\6
-\&{if} ${}(\\{input\_s}.\\{ch1duration}>\T{32200}){}$\1\5
+\4${}\}{}$\SHC{ end if handleirq }\2\par
+\fi
+
+\M{19}
+Center reports about 21250, hard left, or up, with trim reports about 29100
+and hard right, or down, with trim reports about 13400.
+With that, the gain is 1/61.569 and offset is offset is $$-$$218.14.
+\Y\B$\\{output\_s}.\\{turn}\K((\T{100\$L}*\\{input\_s}.\\{ch1duration})/%
+\.{GAINX100})-\.{OFFSET};{}$\6
+${}\\{output\_s}.\\{thrust}\K((\T{100\$L}*\\{input\_s}.\\{ch2duration})/%
+\.{GAINX100})-\.{OFFSET}{}$;\par
+\fi
+
+\M{20}
+Some protection may be a good idea, just in case it gets outside the range
+of an 8 bit register it will be clamped.
+
+\Y\B\&{if} ${}(\\{output\_s}.\\{turn}>\T{255}){}$\1\5
+${}\\{output\_s}.\\{turn}\K\T{255};{}$\2\6
+\&{else} \&{if} ${}(\\{output\_s}.\\{turn}<\T{0}){}$\1\5
+${}\\{output\_s}.\\{turn}\K\T{0};{}$\2\6
+\&{if} ${}(\\{output\_s}.\\{thrust}>\T{255}){}$\1\5
+${}\\{output\_s}.\\{thrust}\K\T{255};{}$\2\6
+\&{else} \&{if} ${}(\\{output\_s}.\\{thrust}<\T{0}){}$\1\5
+${}\\{output\_s}.\\{thrust}\K\T{0};{}$\2\6
+\&{if} ${}(\\{output\_s}.\\{turn}>\T{127\$L}){}$\1\5
 \\{ledcntl}(\.{ON});\2\6
 \&{else}\1\5
 \\{ledcntl}(\.{OFF});\2\7
@@ -266,7 +296,7 @@ $\}{}$\SHC{ end for }\7
 $\}{}$\SHC{ end main() }\par
 \fi
 
-\M{18}
+\M{21}
 Here are the ISRs.
 \Y\B\.{ISR}(\\{INT1\_vect})\1\1\2\2\6
 ${}\{{}$\7
@@ -277,7 +307,7 @@ ${}\\{handleIrq}\K{\AND}\\{pwcCalc};{}$\6
 \4${}\}{}$\2\par
 \fi
 
-\M{19}
+\M{22}
 This procedure computes the durations from the PWC signal edge capture values
 from the Input Capture Unit.
 With the levers centered the durations should be about 1.5~ms so at 16~ Mhz
@@ -289,7 +319,7 @@ of the 64 kib of the 16 bit register..
 \Y\B\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\Y\par
 \fi
 
-\M{20}
+\M{23}
 On the falling edges we can compute the durations using modulus subtraction
 and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
@@ -315,7 +345,7 @@ ${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE};{}$\6
 $\}{}$\par
 \fi
 
-\M{21}
+\M{24}
 
 The procedure edgeSelect configures the Input Capture unit to capture on the
 expected edge type.
@@ -341,14 +371,14 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 \4${}\}{}$\2\par
 \fi
 
-\M{22}
+\M{25}
 Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
 \Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\7
 $\}{}$\par
 \fi
 
-\M{23}
+\M{26}
 Here is a simple procedure to flip the LED on or off.
 \Y\B\&{void} \\{ledcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -357,35 +387,35 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{24}
+\M{27}
 
 \fi
 
-\N{1}{25}These are the supporting routines, procedures and configuration
+\N{1}{28}These are the supporting routines, procedures and configuration
 blocks.
 
 
 Here is the block that sets-up the digital I/O pins.
 \fi
 
-\M{26}\B\X26:Initialize pin outputs\X${}\E{}$\6
+\M{29}\B\X29:Initialize pin outputs\X${}\E{}$\6
 ${}\{{}$\C{ set the led port direction; This is pin \#17 }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5});{}$\6
 \4${}\}{}$\2\par
-\U11.\fi
+\U12.\fi
 
-\M{27}\B\X27:Configure to idle on sleep\X${}\E{}$\6
+\M{30}\B\X30:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
-\U13.\fi
+\U14.\fi
 
-\M{28}
+\M{31}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{29}\B\X29:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{32}\B\X32:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status
@@ -415,7 +445,7 @@ ${}\.{ADMUX}\MRL{\AND{\K}}\CM((\T{1}\LL\.{MUX2})\OR(\T{1}\LL\.{MUX1})\OR(\T{1}%
 \LL\.{MUX0})){}$;\SHC{ Set to mux channel 0 }\6
 \4${}\}{}$\2\par
 
-\U11.\fi
+\U12.\fi
 
 
 \inx

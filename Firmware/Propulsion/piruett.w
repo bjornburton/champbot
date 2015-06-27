@@ -117,6 +117,11 @@ Extensive use was made of the datasheet, Atmel
 @d CH1FALL 2
 
 
+@ Here are the calibration values. 
+@d GAINX100 6157L
+@d OFFSET 218L 
+
+
 @ @<Include...@>=
 # include <avr/io.h> // need some port access
 # include <util/delay.h> // need to delay
@@ -132,8 +137,8 @@ like motor settings.
 typedef struct {
     uint8_t portOut;
     uint8_t starboardOut;
-    uint16_t thrust;
-    uint16_t radius;
+    int32_t thrust;
+    int32_t turn;
     uint8_t failSafe; // safety relay
     } outputStruct;
 
@@ -259,12 +264,36 @@ if (handleIrq != NULL)
 
 
 
+@
+Center reports about 21250, hard left, or up, with trim reports about 29100
+and hard right, or down, with trim reports about 13400.
+With that, the gain is 1/61.569 and offset is offset is $$-$$218.14.
+@c
 
-//24200=ch1, center
-//32000=ch1, hard left with full trim
-//16200=ch1, hard right with full trim
+output_s.turn = ((100L * input_s.ch1duration)/GAINX100)-OFFSET;
+output_s.thrust = ((100L * input_s.ch2duration)/GAINX100)-OFFSET;
+
+@
+Some protection may be a good idea, just in case it gets outside the range
+of an 8 bit register it will be clamped.
+
+@c
+
+  if (output_s.turn > 255)
+       output_s.turn = 255;
+  else
+  if (output_s.turn < 0)
+       output_s.turn = 0;
+
+  if (output_s.thrust > 255)
+       output_s.thrust= 255;
+  else
+  if (output_s.thrust < 0)
+       output_s.thrust = 0;
  
-if(input_s.ch1duration > 32200)
+
+
+if(output_s.turn > 127L)
     ledcntl(ON);
  else
     ledcntl(OFF);

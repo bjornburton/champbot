@@ -10,11 +10,15 @@
 #define CH1FALL 2 \
  \
 
+#define GAINX100 6157L
+#define OFFSET 218L \
+ \
+
 /*2:*/
 #line 100 "./piruett.w"
 
-/*5:*/
-#line 120 "./piruett.w"
+/*6:*/
+#line 125 "./piruett.w"
 
 # include <avr/io.h>  
 # include <util/delay.h>  
@@ -23,23 +27,23 @@
 # include <stdlib.h> 
 # include <stdint.h> 
 
-/*:5*/
+/*:6*/
 #line 101 "./piruett.w"
 
-/*6:*/
-#line 131 "./piruett.w"
+/*7:*/
+#line 136 "./piruett.w"
 
 typedef struct{
 uint8_t portOut;
 uint8_t starboardOut;
-uint16_t thrust;
-uint16_t radius;
+int32_t thrust;
+int32_t turn;
 uint8_t failSafe;
 }outputStruct;
 
 
-/*:6*//*7:*/
-#line 144 "./piruett.w"
+/*:7*//*8:*/
+#line 149 "./piruett.w"
 
 typedef struct{
 uint16_t ch2rise;
@@ -51,36 +55,36 @@ uint8_t edge;
 }inputStruct;
 
 
-/*:7*/
+/*:8*/
 #line 102 "./piruett.w"
 
-/*8:*/
-#line 155 "./piruett.w"
+/*9:*/
+#line 160 "./piruett.w"
 
 void ledcntl(uint8_t state);
 void pwcCalc(inputStruct*);
 void edgeSelect(inputStruct*);
 
-/*:8*/
+/*:9*/
 #line 103 "./piruett.w"
 
-/*9:*/
-#line 165 "./piruett.w"
+/*10:*/
+#line 170 "./piruett.w"
 
 void(*handleIrq)(inputStruct*)= NULL;
 
-/*:9*/
+/*:10*/
 #line 104 "./piruett.w"
 
 
-/*:2*//*10:*/
-#line 170 "./piruett.w"
+/*:2*//*11:*/
+#line 175 "./piruett.w"
 
 
 int main(void)
 {
-/*:10*//*11:*/
-#line 177 "./piruett.w"
+/*:11*//*12:*/
+#line 182 "./piruett.w"
 
 
 inputStruct input_s= {
@@ -93,8 +97,8 @@ inputStruct input_s= {
 outputStruct output_s;
 
 
-/*29:*/
-#line 395 "./piruett.w"
+/*32:*/
+#line 424 "./piruett.w"
 
 {
 
@@ -122,23 +126,23 @@ TCCR1B|= (1<<CS10);
 ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 }
 
-/*:29*/
-#line 189 "./piruett.w"
+/*:32*/
+#line 194 "./piruett.w"
 
-/*26:*/
-#line 382 "./piruett.w"
+/*29:*/
+#line 411 "./piruett.w"
 
 {
 
 DDRB|= (1<<DDB5);
 }
 
-/*:26*/
-#line 190 "./piruett.w"
-
-
-/*:11*//*12:*/
+/*:29*/
 #line 195 "./piruett.w"
+
+
+/*:12*//*13:*/
+#line 200 "./piruett.w"
 
 sei();
 
@@ -154,46 +158,46 @@ EICRA|= (1<<ISC10);
 EIMSK|= (1<<INT1);
 }
 
-/*:12*//*13:*/
-#line 219 "./piruett.w"
+/*:13*//*14:*/
+#line 224 "./piruett.w"
 
 
-/*27:*/
-#line 388 "./piruett.w"
+/*30:*/
+#line 417 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
 }
 
-/*:27*/
-#line 221 "./piruett.w"
+/*:30*/
+#line 226 "./piruett.w"
 
 ledcntl(OFF);
 
 edgeSelect(&input_s);
 
-/*:13*//*14:*/
-#line 230 "./piruett.w"
+/*:14*//*15:*/
+#line 235 "./piruett.w"
 
 
 
 for(;;)
 {
 
-/*:14*//*15:*/
-#line 239 "./piruett.w"
-
-
-
-
 /*:15*//*16:*/
-#line 245 "./piruett.w"
+#line 244 "./piruett.w"
+
+
+
+
+/*:16*//*17:*/
+#line 250 "./piruett.w"
 
 
 sleep_mode();
 
-/*:16*//*17:*/
-#line 253 "./piruett.w"
+/*:17*//*18:*/
+#line 258 "./piruett.w"
 
 if(handleIrq!=NULL)
 {
@@ -203,12 +207,32 @@ handleIrq= NULL;
 
 
 
+/*:18*//*19:*/
+#line 271 "./piruett.w"
+
+
+output_s.turn= ((100L*input_s.ch1duration)/GAINX100)-OFFSET;
+output_s.thrust= ((100L*input_s.ch2duration)/GAINX100)-OFFSET;
+
+/*:19*//*20:*/
+#line 280 "./piruett.w"
+
+
+if(output_s.turn> 255)
+output_s.turn= 255;
+else
+if(output_s.turn<0)
+output_s.turn= 0;
+
+if(output_s.thrust> 255)
+output_s.thrust= 255;
+else
+if(output_s.thrust<0)
+output_s.thrust= 0;
 
 
 
-
-
-if(input_s.ch1duration> 32200)
+if(output_s.turn> 127L)
 ledcntl(ON);
 else
 ledcntl(OFF);
@@ -222,8 +246,8 @@ return 0;
 
 }
 
-/*:17*//*18:*/
-#line 283 "./piruett.w"
+/*:20*//*21:*/
+#line 312 "./piruett.w"
 
 
 ISR(INT1_vect)
@@ -235,13 +259,13 @@ ISR(TIMER1_CAPT_vect)
 handleIrq= &pwcCalc;
 }
 
-/*:18*//*19:*/
-#line 303 "./piruett.w"
+/*:21*//*22:*/
+#line 332 "./piruett.w"
 
 void pwcCalc(inputStruct*input_s)
 {
-/*:19*//*20:*/
-#line 310 "./piruett.w"
+/*:22*//*23:*/
+#line 339 "./piruett.w"
 
 
 switch(input_s->edge)
@@ -266,8 +290,8 @@ edgeSelect(input_s);
 }
 
 
-/*:20*//*21:*/
-#line 339 "./piruett.w"
+/*:23*//*24:*/
+#line 368 "./piruett.w"
 
 void edgeSelect(inputStruct*input_s)
 {
@@ -286,8 +310,8 @@ case CH1FALL:
 ADMUX&= ~(1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
-/*:21*//*22:*/
-#line 360 "./piruett.w"
+/*:24*//*25:*/
+#line 389 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
@@ -295,8 +319,8 @@ TIFR1|= (1<<ICF1);
 }
 
 
-/*:22*//*23:*/
-#line 369 "./piruett.w"
+/*:25*//*26:*/
+#line 398 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {
@@ -304,4 +328,4 @@ PORTB= state?PORTB|(1<<PORTB5):PORTB&~(1<<PORTB5);
 }
 
 
-/*:23*/
+/*:26*/

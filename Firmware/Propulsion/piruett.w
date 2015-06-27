@@ -281,26 +281,31 @@ handleIrq = &pwcCalc;
 }
 
 @
-This procedure computes the durations from the PWC signal interrupts. 
+This procedure computes the durations from the PWC signal edge captures. 
+
 @c
 void pwcCalc(inputStruct *input_s)
 {@#
 @
-On the falling edges we can compute the durations using modulus subtraction. 
+On the falling edges we can compute the durations using modulus subtraction
+and then increment the edge index.
 @c
 
   switch(input_s->edge)
      {
       case CH1RISE:
          input_s->ch1rise = ICR1;  
+         input_s->edge = CH1FALL;  
        break;
       case CH1FALL:
          input_s->ch1fall = ICR1;
          input_s->ch1duration = input_s->ch1fall - input_s->ch1rise;  
+         input_s->edge = CH2FALL;  
        break;
       case CH2FALL:
          input_s->ch2fall = ICR1;  
          input_s->ch2duration = input_s->ch2fall - input_s->ch1fall;
+         input_s->edge = CH1RISE;   
      }
 
 }

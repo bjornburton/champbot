@@ -270,26 +270,31 @@ ${}\\{handleIrq}\K{\AND}\\{pwcCalc};{}$\6
 \fi
 
 \M{19}
-This procedure computes the durations from the PWC signal interrupts.
+This procedure computes the durations from the PWC signal edge captures.
+
 \Y\B\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\Y\par
 \fi
 
 \M{20}
-On the falling edges we can compute the durations using modulus subtraction.
+On the falling edges we can compute the durations using modulus subtraction
+and then increment the edge index.
 \Y\B\&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
 ${}\{{}$\1\6
 \4\&{case} \.{CH1RISE}:\5
 ${}\\{input\_s}\MG\\{ch1rise}\K\.{ICR1};{}$\6
+${}\\{input\_s}\MG\\{edge}\K\.{CH1FALL};{}$\6
 \&{break};\6
 \4\&{case} \.{CH1FALL}:\5
 ${}\\{input\_s}\MG\\{ch1fall}\K\.{ICR1};{}$\6
 ${}\\{input\_s}\MG\\{ch1duration}\K\\{input\_s}\MG\\{ch1fall}-\\{input\_s}\MG%
 \\{ch1rise};{}$\6
+${}\\{input\_s}\MG\\{edge}\K\.{CH2FALL};{}$\6
 \&{break};\6
 \4\&{case} \.{CH2FALL}:\5
 ${}\\{input\_s}\MG\\{ch2fall}\K\.{ICR1};{}$\6
 ${}\\{input\_s}\MG\\{ch2duration}\K\\{input\_s}\MG\\{ch2fall}-\\{input\_s}\MG%
 \\{ch1fall};{}$\6
+${}\\{input\_s}\MG\\{edge}\K\.{CH1RISE};{}$\6
 \4${}\}{}$\2\6
 $\}{}$\par
 \fi

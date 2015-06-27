@@ -87,8 +87,8 @@ Capture Unit.
 
 An interesting thing about this Futaba receiver is that the pulses are in
 series.
-The channel one pulse is first, followed the channel two.
-In fact, channel one's fall is perfectly aligned with channel two's rise.
+The channel two's pulse is first, followed the channel one.
+In fact, channel two's fall is perfectly aligned with channel one's rise.
 This means that it will be possible to capture all of the pulses.
 
 After the two pulses are captured, there's an 18~ms dead-time before the next
@@ -125,11 +125,11 @@ Extensive use was made of the datasheet, Atmel
 \T{1}\par
 \B\4\D$\.{CLEAR}$ \5
 \T{0}\par
-\B\4\D$\.{CH1RISE}$ \5
+\B\4\D$\.{CH2RISE}$ \5
 \T{0}\par
-\B\4\D$\.{CH1FALL}$ \5
-\T{1}\par
 \B\4\D$\.{CH2FALL}$ \5
+\T{1}\par
+\B\4\D$\.{CH1FALL}$ \5
 \T{2}\par
 \fi
 
@@ -161,9 +161,9 @@ like servo timing.
 
 \Y\B\4\X6:Types\X${}\mathrel+\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
-\\{uint16\_t}\\{ch1rise};\6
-\\{uint16\_t}\\{ch1fall};\6
+\\{uint16\_t}\\{ch2rise};\6
 \\{uint16\_t}\\{ch2fall};\6
+\\{uint16\_t}\\{ch1fall};\6
 \\{uint16\_t}\\{ch1duration};\6
 \\{uint16\_t}\\{ch2duration};\6
 \\{uint8\_t}\\{edge};\2\6
@@ -188,15 +188,20 @@ $\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*})\K\NULL{}$;\par
 
 \M{10}
 Here is \PB{\\{main}(\,)}.
-\Y\B\&{int} \\{main}(\&{void})\1\1 $\{{}$\7
-\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch1rise}\K\T{0}$ $,$ $.$ $%
-\\{ch1fall}\K\T{0}$ $,$ $.$ $\\{ch2fall}\K\T{0}$ $,$ $.$ $\\{edge}\K\T{0}$ $\}$
- ;\7
+\Y\B\&{int} \\{main}(\&{void})\1\1 $\{{}$\Y\par
+\fi
+
+\M{11}
+The Futaba receiver leads with channel two, rising edge, so we will start
+looking for that by setting \PB{\.{"edge"}} to look for a rise on channel 2.
+\Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch2rise}\K\T{0}$ $,$ $.$ $%
+\\{ch2fall}\K\T{0}$ $,$ $.$ $\\{ch1fall}\K\T{0}$ $,$ $.$ $\\{edge}\K%
+\.{CH2RISE}$ $\}$  ;\7
 \&{outputStruct} \\{output\_s}; \X29:Initialize the inputs and capture mode\X%
 \X26:Initialize pin outputs\X\par
 \fi
 
-\M{11}
+\M{12}
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 \Y\B\\{sei}(\,);\6
@@ -211,7 +216,7 @@ ${}\.{EIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{INT1}){}$;\SHC{ Turns on INT1 }\6
 \4${}\}{}$\2\par
 \fi
 
-\M{12}
+\M{13}
 Rather than burning loops, waiting the ballance of 18~ms for something to
 happen, the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
@@ -220,13 +225,7 @@ Interrupts are used to wake it.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
-\Y\B\X27:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\par
-\fi
-
-\M{13}
-The Futaba receiver leads with channel one, rising edge, so we will start
-looking for that.
-\Y\B$\\{input\_s}.\\{edge}\K\.{CH1RISE};{}$\6
+\Y\B\X27:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
 ${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
 
@@ -256,8 +255,9 @@ responsible function.
 ${}\{{}$\1\7
 ${}\\{handleIrq}({\AND}\\{input\_s});{}$\6
 ${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
-\4${}\}{}$\SHC{ end if handleirq }\2\6
-\&{if} ${}(\\{input\_s}.\\{ch1duration}>\T{25000}){}$\1\5
+\4${}\}{}$\SHC{ end if handleirq }\SHC{24200=ch1, center }\SHC{32000=ch1, hard
+left with full trim }\SHC{16200=ch1, hard right with full trim }\2\6
+\&{if} ${}(\\{input\_s}.\\{ch1duration}>\T{32200}){}$\1\5
 \\{ledcntl}(\.{ON});\2\6
 \&{else}\1\5
 \\{ledcntl}(\.{OFF});\2\7
@@ -291,24 +291,25 @@ of the 64 kib of the 16 bit register..
 
 \M{20}
 On the falling edges we can compute the durations using modulus subtraction
-and then increment the edge index.
+and then set the edge index for the next edge.
+Channel 2 leads so that rise is first.
 \Y\B\&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
 ${}\{{}$\1\6
-\4\&{case} \.{CH1RISE}:\5
-${}\\{input\_s}\MG\\{ch1rise}\K\.{ICR1};{}$\6
-${}\\{input\_s}\MG\\{edge}\K\.{CH1FALL};{}$\6
-\&{break};\6
-\4\&{case} \.{CH1FALL}:\5
-${}\\{input\_s}\MG\\{ch1fall}\K\.{ICR1};{}$\6
-${}\\{input\_s}\MG\\{ch1duration}\K\\{input\_s}\MG\\{ch1fall}-\\{input\_s}\MG%
-\\{ch1rise};{}$\6
+\4\&{case} \.{CH2RISE}:\5
+${}\\{input\_s}\MG\\{ch2rise}\K\.{ICR1};{}$\6
 ${}\\{input\_s}\MG\\{edge}\K\.{CH2FALL};{}$\6
 \&{break};\6
 \4\&{case} \.{CH2FALL}:\5
 ${}\\{input\_s}\MG\\{ch2fall}\K\.{ICR1};{}$\6
 ${}\\{input\_s}\MG\\{ch2duration}\K\\{input\_s}\MG\\{ch2fall}-\\{input\_s}\MG%
-\\{ch1fall};{}$\6
-${}\\{input\_s}\MG\\{edge}\K\.{CH1RISE};{}$\6
+\\{ch2rise};{}$\6
+${}\\{input\_s}\MG\\{edge}\K\.{CH1FALL};{}$\6
+\&{break};\6
+\4\&{case} \.{CH1FALL}:\5
+${}\\{input\_s}\MG\\{ch1fall}\K\.{ICR1};{}$\6
+${}\\{input\_s}\MG\\{ch1duration}\K\\{input\_s}\MG\\{ch1fall}-\\{input\_s}\MG%
+\\{ch2fall};{}$\6
+${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE};{}$\6
 \4${}\}{}$\2\6
 \\{edgeSelect}(\\{input\_s});\7
 $\}{}$\par
@@ -322,20 +323,19 @@ expected edge type.
 \Y\B\&{void} \\{edgeSelect}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\7
 \&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
 ${}\{{}$\1\6
-\4\&{case} \.{CH1RISE}:\SHC{ wait for rising edge on servo channel 1 }\6
-${}\.{ADMUX}\MRL{\AND{\K}}\CM(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 0 }%
-\6
+\4\&{case} \.{CH2RISE}:\SHC{ wait for rising edge on servo channel 2 }\6
+${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 1 }\6
 ${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICES1}){}$;\SHC{ Rising edge (23.3.2) }%
 \6
+\&{break};\6
+\4\&{case} \.{CH2FALL}:\5
+${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 1 }\6
+${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
+(23.3.2) }\6
 \&{break};\6
 \4\&{case} \.{CH1FALL}:\5
 ${}\.{ADMUX}\MRL{\AND{\K}}\CM(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 0 }%
 \6
-${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
-(23.3.2) }\6
-\&{break};\6
-\4\&{case} \.{CH2FALL}:\5
-${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 1 }\6
 ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 (23.3.2) }\6
 \4${}\}{}$\2\par
@@ -372,14 +372,14 @@ Here is the block that sets-up the digital I/O pins.
 ${}\{{}$\C{ set the led port direction; This is pin \#17 }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5});{}$\6
 \4${}\}{}$\2\par
-\U10.\fi
+\U11.\fi
 
 \M{27}\B\X27:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
-\U12.\fi
+\U13.\fi
 
 \M{28}
 To enable this interrupt, set the ACIE bit of register ACSR.
@@ -415,7 +415,7 @@ ${}\.{ADMUX}\MRL{\AND{\K}}\CM((\T{1}\LL\.{MUX2})\OR(\T{1}\LL\.{MUX1})\OR(\T{1}%
 \LL\.{MUX0})){}$;\SHC{ Set to mux channel 0 }\6
 \4${}\}{}$\2\par
 
-\U10.\fi
+\U11.\fi
 
 
 \inx

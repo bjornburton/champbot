@@ -81,8 +81,8 @@ Capture Unit.
 
 An interesting thing about this Futaba receiver is that the pulses are in
 series.
-The channel one pulse is first, followed the channel two.
-In fact, channel one's fall is perfectly aligned with channel two's rise.
+The channel two's pulse is first, followed the channel one.
+In fact, channel two's fall is perfectly aligned with channel one's rise.
 This means that it will be possible to capture all of the pulses.
 
 After the two pulses are captured, there's an 18~ms dead-time before the next
@@ -112,9 +112,9 @@ Extensive use was made of the datasheet, Atmel
 @d OFF 0
 @d SET 1
 @d CLEAR 0
-@d CH1RISE 0
-@d CH1FALL 1
-@d CH2FALL 2
+@d CH2RISE 0
+@d CH2FALL 1
+@d CH1FALL 2
 
 
 @ @<Include...@>=
@@ -143,9 +143,9 @@ like servo timing.
 
 @<Types@>=
 typedef struct {
-    uint16_t ch1rise;
-    uint16_t ch1fall;
+    uint16_t ch2rise;
     uint16_t ch2fall;
+    uint16_t ch1fall;
     uint16_t ch1duration;
     uint16_t ch2duration;
     uint8_t  edge;
@@ -171,12 +171,16 @@ Here is |main()|.
 
 int main(void)
 {@#
+@
+The Futaba receiver leads with channel two, rising edge, so we will start
+looking for that by setting |"edge"| to look for a rise on channel 2.
+@c
 
 inputStruct input_s = {
-    .ch1rise = 0,
-    .ch1fall = 0,
+    .ch2rise = 0,
     .ch2fall = 0,
-    .edge = 0
+    .ch1fall = 0,
+    .edge = CH2RISE
     };
 
 outputStruct output_s;
@@ -217,11 +221,6 @@ program to step past the sleep statement.
 @<Configure to idle on sleep...@>
 ledcntl(OFF);
 
-@
-The Futaba receiver leads with channel one, rising edge, so we will start
-looking for that.
-@c
-input_s.edge = CH1RISE;
 edgeSelect(&input_s);
 
 @
@@ -259,11 +258,16 @@ if (handleIrq != NULL)
     }// end if handleirq
 
 
-if(input_s.ch1duration > 25000)
+
+
+//24200=ch1, center
+//32000=ch1, hard left with full trim
+//16200=ch1, hard right with full trim
+ 
+if(input_s.ch1duration > 32200)
     ledcntl(ON);
  else
     ledcntl(OFF);
- 
 
 @#
   } // end for
@@ -301,24 +305,25 @@ void pwcCalc(inputStruct *input_s)
 {@#
 @
 On the falling edges we can compute the durations using modulus subtraction
-and then increment the edge index.
+and then set the edge index for the next edge.
+Channel 2 leads so that rise is first.
 @c
 
   switch(input_s->edge)
      {
-      case CH1RISE:
-         input_s->ch1rise = ICR1;  
-         input_s->edge = CH1FALL;  
-       break;
-      case CH1FALL:
-         input_s->ch1fall = ICR1;
-         input_s->ch1duration = input_s->ch1fall - input_s->ch1rise;  
+      case CH2RISE:
+         input_s->ch2rise = ICR1;  
          input_s->edge = CH2FALL;  
        break;
       case CH2FALL:
-         input_s->ch2fall = ICR1;  
-         input_s->ch2duration = input_s->ch2fall - input_s->ch1fall;
-         input_s->edge = CH1RISE;   
+         input_s->ch2fall = ICR1;
+         input_s->ch2duration = input_s->ch2fall - input_s->ch2rise;  
+         input_s->edge = CH1FALL;  
+       break;
+      case CH1FALL:
+         input_s->ch1fall = ICR1;  
+         input_s->ch1duration = input_s->ch1fall - input_s->ch2fall;
+         input_s->edge = CH2RISE;   
      }
 
 edgeSelect(input_s);
@@ -337,16 +342,16 @@ void edgeSelect(inputStruct *input_s)
 
   switch(input_s->edge)
      {
-   case CH1RISE: // wait for rising edge on servo channel 1
-      ADMUX &= ~(1<<MUX0); // Set to mux channel 0
+   case CH2RISE: // wait for rising edge on servo channel 2
+      ADMUX |= (1<<MUX0); // Set to mux channel 1
       TCCR1B |= (1<<ICES1);  // Rising edge (23.3.2)
-    break;
-   case CH1FALL:
-      ADMUX &= ~(1<<MUX0); // Set to mux channel 0
-      TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
     break;
    case CH2FALL:
       ADMUX |= (1<<MUX0); // Set to mux channel 1
+      TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+    break;
+   case CH1FALL:
+      ADMUX &= ~(1<<MUX0); // Set to mux channel 0
       TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
    }
 @

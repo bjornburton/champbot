@@ -6,11 +6,14 @@
 \datethis % print date on listing
 
 
-\N{1}{1}Introduction. This is the firmware portion of the propulsion system,
-featuring piruett turning.
+\N{1}{1}Introduction. This is the firmware portion of the propulsion system for
+our
+Champbot.
+It features separate thrust and steering as well as piruett turning.
 
-This will facilitate motion by taking "thrust" and "radius" pulse-width inputs
-from the RC receiver by converting them to the appropriate motor actions.
+This will facilitate motion by taking "thrust" and "turn" pulse-width inputs
+from the Futaba RC receiver by converting them to the appropriate motor
+actions.
 These are from Channel 2 at A1 and channel 1 at A0, respectivily.
 The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
@@ -24,8 +27,7 @@ Both pulse-width inputs will have some dead-band to allow for full stop.
 The pulse-width from the receiver is at 20 ms intervals.
 The time ranges from 1000--2000 ms, including trim.
 1500~ ms is the width for stopped.
-The levers cover $\pm$0.4~ms and the trim
-covers the balance.
+The levers cover $\pm$0.4~ms and the trim covers the balance.
 
 Math for radius...I think this is right:
 
@@ -154,7 +156,7 @@ ${}\}{}$ \&{outputStruct};\par
 \A7.
 \U2.\fi
 
-\M{7}Here is a structure to keep track of the state of intput things,
+\M{7}Here is a structure to keep track of the state of input things,
 like servo timing.
 
 \Y\B\4\X6:Types\X${}\mathrel+\E{}$\6
@@ -170,7 +172,7 @@ ${}\}{}$ \&{inputStruct};\par
 
 \M{8}\B\X8:Prototypes\X${}\E{}$\6
 \&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\6
-\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*},\39{}$\&{outputStruct} ${}{*});{}$\6
+\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*});{}$\6
 \&{void} \\{edgeSelect}(\\{uint8\_t}\\{edge});\par
 \U2.\fi
 
@@ -181,8 +183,7 @@ This pointer gets the appropriate function attached by the \PB{\.{"ISR()"}}
 function.
 
 \Y\B\4\X9:Global variables\X${}\E{}$\6
-$\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*},\39{}$\&{outputStruct}
-${}{*})\K\NULL{}$;\par
+$\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*})\K\NULL{}$;\par
 \U2.\fi
 
 \M{10}
@@ -191,8 +192,8 @@ Here is \PB{\\{main}(\,)}.
 \&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch1rise}\K\T{0}$ $,$ $.$ $%
 \\{ch1fall}\K\T{0}$ $,$ $.$ $\\{ch2fall}\K\T{0}$ $,$ $.$ $\\{edge}\K\T{0}$ $\}$
  ;\7
-\&{outputStruct} \\{output\_s}; \X26:Initialize the inputs and capture mode\X%
-\X23:Initialize pin outputs\X\par
+\&{outputStruct} \\{output\_s}; \X29:Initialize the inputs and capture mode\X%
+\X26:Initialize pin outputs\X\par
 \fi
 
 \M{11}
@@ -218,7 +219,7 @@ In idle, execution stops but timers continue.
 Interrupts are used to wake it.
 It important to note that an ISR must be defined to allow the program to step
 past the sleep statement.
-\Y\B\X24:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\par
+\Y\B\X27:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\par
 \fi
 
 \M{13}
@@ -248,10 +249,9 @@ Now we wait in ``idle'' for the edge on the channel selected.
 \M{17}
 If execution arrives here, some interrupt has woken it from sleep and some
 vector has run.
-\Y\B\&{if} ${}(\\{handleIrq}\I\NULL{}$)\SHC{ not sure why it would be, but to
-be safe }\6
+\Y\B\&{if} ${}(\\{handleIrq}\I\NULL){}$\5
 ${}\{{}$\1\7
-${}\\{handleIrq}({\AND}\\{input\_s},\39{\AND}\\{output\_s});{}$\6
+${}\\{handleIrq}({\AND}\\{input\_s});{}$\6
 ${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
 \4${}\}{}$\SHC{ end if handleirq }\2\7
 $\}{}$\SHC{ end for }\7
@@ -266,10 +266,40 @@ ${}\{\,\}{}$\7
 \.{ISR}(\\{TIMER1\_CAPT\_vect})\1\1\2\2\6
 ${}\{{}$\1\6
 ${}\\{handleIrq}\K{\AND}\\{pwcCalc};{}$\6
-\4${}\}{}$\2\7
-\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s},\39{}$\&{outputStruct}
-${}{*}\\{output\_s}){}$\1\1\2\2\6
-${}\{\,\}$ \&{void} \\{edgeSelect}(\\{uint8\_t}\\{edge})\1\1 $\{$ \6
+\4${}\}{}$\2\par
+\fi
+
+\M{19}
+This procedure computes the durations from the PWC signal interrupts.
+\Y\B\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\Y\par
+\fi
+
+\M{20}
+On the falling edges we can compute the durations using modulus subtraction.
+\Y\B\&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
+${}\{{}$\1\6
+\4\&{case} \.{CH1RISE}:\5
+${}\\{input\_s}\MG\\{ch1rise}\K\.{ICR1};{}$\6
+\&{break};\6
+\4\&{case} \.{CH1FALL}:\5
+${}\\{input\_s}\MG\\{ch1fall}\K\.{ICR1};{}$\6
+${}\\{input\_s}\MG\\{ch1duration}\K\\{input\_s}\MG\\{ch1fall}-\\{input\_s}\MG%
+\\{ch1rise};{}$\6
+\&{break};\6
+\4\&{case} \.{CH2FALL}:\5
+${}\\{input\_s}\MG\\{ch2fall}\K\.{ICR1};{}$\6
+${}\\{input\_s}\MG\\{ch2duration}\K\\{input\_s}\MG\\{ch2fall}-\\{input\_s}\MG%
+\\{ch1fall};{}$\6
+\4${}\}{}$\2\6
+$\}{}$\par
+\fi
+
+\M{21}
+
+The procedure edgeSelect configures the Input Capture unit to capture on the
+expected edge type.
+
+\Y\B\&{void} \\{edgeSelect}(\\{uint8\_t}\\{edge})\1\1 $\{{}$\7
 \&{switch} (\\{edge})\5
 ${}\{{}$\1\6
 \4\&{case} \.{CH1RISE}:\SHC{ wait for rising edge on servo channel 1 }\6
@@ -291,14 +321,15 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 \4${}\}{}$\2\par
 \fi
 
-\M{19}
-Since the edge has been changed, the Input Capture Flag should probably be
-cleared. It's odd but clearing it involves writing a one to it.
-\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1});$ $\}{}$\par
+\M{22}
+Since the edge has been changed, the Input Capture Flag should be cleared.
+It's odd but clearing it involves writing a one to it.
+\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\6
+$\}{}$\par
 \fi
 
-\M{20}
-Here is a simple function to flip the LED on or off.
+\M{23}
+Here is a simple procedure to flip the LED on or off.
 \Y\B\&{void} \\{ledcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
 ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
@@ -306,35 +337,35 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{21}
+\M{24}
 
 \fi
 
-\N{1}{22}These are the supporting routines, procedures and configuration
+\N{1}{25}These are the supporting routines, procedures and configuration
 blocks.
 
 
 Here is the block that sets-up the digital I/O pins.
 \fi
 
-\M{23}\B\X23:Initialize pin outputs\X${}\E{}$\6
+\M{26}\B\X26:Initialize pin outputs\X${}\E{}$\6
 ${}\{{}$\C{ set the led port direction; This is pin \#17 }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5});{}$\6
 \4${}\}{}$\2\par
 \U10.\fi
 
-\M{24}\B\X24:Configure to idle on sleep\X${}\E{}$\6
+\M{27}\B\X27:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
 \U12.\fi
 
-\M{25}
+\M{28}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{26}\B\X26:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{29}\B\X29:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status

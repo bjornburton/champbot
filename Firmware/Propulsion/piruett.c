@@ -58,7 +58,7 @@ uint8_t edge;
 #line 155 "./piruett.w"
 
 void ledcntl(uint8_t state);
-void pwcCalc(inputStruct*,outputStruct*);
+void pwcCalc(inputStruct*);
 void edgeSelect(uint8_t edge);
 
 /*:8*/
@@ -67,7 +67,7 @@ void edgeSelect(uint8_t edge);
 /*9:*/
 #line 165 "./piruett.w"
 
-void(*handleIrq)(inputStruct*,outputStruct*)= NULL;
+void(*handleIrq)(inputStruct*)= NULL;
 
 /*:9*/
 #line 104 "./piruett.w"
@@ -90,8 +90,8 @@ inputStruct input_s= {
 outputStruct output_s;
 
 
-/*26:*/
-#line 342 "./piruett.w"
+/*29:*/
+#line 368 "./piruett.w"
 
 {
 
@@ -119,18 +119,18 @@ TCCR1B|= (1<<CS10);
 ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 }
 
-/*:26*/
+/*:29*/
 #line 185 "./piruett.w"
 
-/*23:*/
-#line 329 "./piruett.w"
+/*26:*/
+#line 355 "./piruett.w"
 
 {
 
 DDRB|= (1<<DDB5);
 }
 
-/*:23*/
+/*:26*/
 #line 186 "./piruett.w"
 
 
@@ -155,14 +155,14 @@ EIMSK|= (1<<INT1);
 #line 214 "./piruett.w"
 
 
-/*24:*/
-#line 335 "./piruett.w"
+/*27:*/
+#line 361 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
 }
 
-/*:24*/
+/*:27*/
 #line 216 "./piruett.w"
 
 ledcntl(OFF);
@@ -199,7 +199,7 @@ sleep_mode();
 
 if(handleIrq!=NULL)
 {
-handleIrq(&input_s,&output_s);
+handleIrq(&input_s);
 handleIrq= NULL;
 }
 
@@ -226,15 +226,38 @@ ISR(TIMER1_CAPT_vect)
 handleIrq= &pwcCalc;
 }
 
+/*:18*//*19:*/
+#line 285 "./piruett.w"
 
-void pwcCalc(inputStruct*input_s,outputStruct*output_s)
+void pwcCalc(inputStruct*input_s)
 {
+/*:19*//*20:*/
+#line 290 "./piruett.w"
 
+
+switch(input_s->edge)
+{
+case CH1RISE:
+input_s->ch1rise= ICR1;
+break;
+case CH1FALL:
+input_s->ch1fall= ICR1;
+input_s->ch1duration= input_s->ch1fall-input_s->ch1rise;
+break;
+case CH2FALL:
+input_s->ch2fall= ICR1;
+input_s->ch2duration= input_s->ch2fall-input_s->ch1fall;
+}
 
 }
 
+
+/*:20*//*21:*/
+#line 314 "./piruett.w"
+
 void edgeSelect(uint8_t edge)
 {
+
 switch(edge)
 {
 case CH1RISE:
@@ -249,20 +272,20 @@ case CH2FALL:
 ADMUX|= (1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
-/*:18*//*19:*/
-#line 309 "./piruett.w"
+/*:21*//*22:*/
+#line 335 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
 }
 
 
-/*:19*//*20:*/
-#line 317 "./piruett.w"
+/*:22*//*23:*/
+#line 343 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {
 PORTB= state?PORTB|(1<<PORTB5):PORTB&~(1<<PORTB5);
 }
 
-/*:20*/
+/*:23*/

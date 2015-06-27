@@ -138,7 +138,7 @@ typedef struct {
     } outputStruct;
 
 
-@ Here is a structure to keep track of the state of intput things,
+@ Here is a structure to keep track of the state of input things,
 like servo timing.
 
 @<Types@>=
@@ -154,7 +154,7 @@ typedef struct {
 
 @ @<Prototypes@>=
 void ledcntl(uint8_t state); // LED ON and LED OFF
-void pwcCalc(inputStruct *,outputStruct *);
+void pwcCalc(inputStruct *);
 void edgeSelect(uint8_t edge);
 
 @
@@ -163,7 +163,7 @@ This could let me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the |"ISR()"| function.
 
 @<Global var...@>=
-void (*handleIrq)(inputStruct *, outputStruct *) = NULL;
+void (*handleIrq)(inputStruct *) = NULL;
 
 @
 Here is |main()|.
@@ -253,7 +253,7 @@ vector has run.
 @c
 if (handleIrq != NULL)
    {@#
-    handleIrq(&input_s, &output_s); 
+    handleIrq(&input_s); 
     handleIrq = NULL; // reset so that the action cannot be repeated
     }// end if handleirq
 
@@ -281,12 +281,27 @@ handleIrq = &pwcCalc;
 }
 
 @
-This procedure computes the PWM settings for the motors from the interrupt
-from the PWC signal interrupts. 
+This procedure computes the durations from the PWC signal interrupts. 
 @c
-void pwcCalc(inputStruct *input_s, outputStruct *output_s)
-{
+void pwcCalc(inputStruct *input_s)
+{@#
+@
+On the falling edges we can compute the durations using modulus subtraction. 
+@c
 
+  switch(input_s->edge)
+     {
+      case CH1RISE:
+         input_s->ch1rise = ICR1;  
+       break;
+      case CH1FALL:
+         input_s->ch1fall = ICR1;
+         input_s->ch1duration = input_s->ch1fall - input_s->ch1rise;  
+       break;
+      case CH2FALL:
+         input_s->ch2fall = ICR1;  
+         input_s->ch2duration = input_s->ch2fall - input_s->ch1fall;
+     }
 
 }
 
@@ -298,27 +313,28 @@ expected edge type.
 
 @c
 void edgeSelect(uint8_t edge)
-{
+{@#
+
   switch(edge)
      {
    case CH1RISE: // wait for rising edge on servo channel 1
-     ADMUX &= ~(1<<MUX0); // Set to mux channel 0
-     TCCR1B |= (1<<ICES1);  // Rising edge (23.3.2)
+      ADMUX &= ~(1<<MUX0); // Set to mux channel 0
+      TCCR1B |= (1<<ICES1);  // Rising edge (23.3.2)
     break;
    case CH1FALL:
-     ADMUX &= ~(1<<MUX0); // Set to mux channel 0
-     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+      ADMUX &= ~(1<<MUX0); // Set to mux channel 0
+      TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
     break;
    case CH2FALL:
-     ADMUX |= (1<<MUX0); // Set to mux channel 1
-     TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+      ADMUX |= (1<<MUX0); // Set to mux channel 1
+      TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
    }
 @
-Since the edge has been changed, the Input Capture Flag should probably be
-cleared. It's odd but clearing it involves writing a one to it.
+Since the edge has been changed, the Input Capture Flag should be cleared.
+It's odd but clearing it involves writing a one to it.
 @c
 
- TIFR1 |= (1<<ICF1);
+ TIFR1 |= (1<<ICF1); // (per 16.6.3) 
 }
 
 

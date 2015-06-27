@@ -4,11 +4,12 @@
 \nocon % omit table of contents
 \datethis % print date on listing
 
-@* Introduction. This is the firmware portion of the propulsion system,
-featuring piruett turning.
+@* Introduction. This is the firmware portion of the propulsion system for our
+Champbot.
+It features separate thrust and steering as well as piruett turning.
 
-This will facilitate motion by taking "thrust" and "radius" pulse-width inputs
-from the RC receiver by converting them to the appropriate motor actions.
+This will facilitate motion by taking "thrust" and "turn" pulse-width inputs
+from the Futaba RC receiver by converting them to the appropriate motor actions.
 These are from Channel 2 at A1 and channel 1 at A0, respectivily.
 The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
@@ -20,8 +21,7 @@ Both pulse-width inputs will have some dead-band to allow for full stop.
 The pulse-width from the receiver is at 20 ms intervals.
 The time ranges from 1000--2000 ms, including trim.
 1500~ ms is the width for stopped.
-The levers cover $\pm$0.4~ms and the trim
-covers the balance.
+The levers cover $\pm$0.4~ms and the trim covers the balance.
 
 Math for radius...I think this is right:
 
@@ -251,7 +251,7 @@ Now we wait in ``idle'' for the edge on the channel selected.
 If execution arrives here, some interrupt has woken it from sleep and some
 vector has run.
 @c
-if (handleIrq != NULL)  // not sure why it would be, but to be safe
+if (handleIrq != NULL)
    {@#
     handleIrq(&input_s, &output_s); 
     handleIrq = NULL; // reset so that the action cannot be repeated
@@ -280,13 +280,23 @@ ISR (TIMER1_CAPT_vect)
 handleIrq = &pwcCalc;
 }
 
-
+@
+This procedure computes the PWM settings for the motors from the interrupt
+from the PWC signal interrupts. 
+@c
 void pwcCalc(inputStruct *input_s, outputStruct *output_s)
 {
 
 
 }
 
+
+@
+
+The procedure edgeSelect configures the Input Capture unit to capture on the
+expected edge type. 
+
+@c
 void edgeSelect(uint8_t edge)
 {
   switch(edge)
@@ -313,7 +323,7 @@ cleared. It's odd but clearing it involves writing a one to it.
 
 
 @
-Here is a simple function to flip the LED on or off.
+Here is a simple procedure to flip the LED on or off.
 @c
 void ledcntl(uint8_t state)
 {

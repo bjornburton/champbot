@@ -308,6 +308,8 @@ and then increment the edge index.
          input_s->edge = CH1RISE;   
      }
 
+edgeSelect(input_s->edge);
+
 }
 
 

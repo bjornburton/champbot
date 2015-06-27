@@ -32,11 +32,11 @@ Where:
  f is factor
 
 min r is 1
-max r is 127
+max r is 128
 
 get this value for v
 [1]
-[127]
+[128]
 [255]
 
 r=factor*abs(127-v)
@@ -161,6 +161,8 @@ typedef struct {
 void ledcntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
+int16_t scaler(uint16 gain, uint16 offset, uint16 input);
+uint8_t limiter(uint_t min, uint8_t max, int16_t input);
 
 @
 My lone global variable may become a function pointer.
@@ -268,15 +270,15 @@ output_s.thrust = ((100L * input_s.ch2duration)/GAINX100)-OFFSET;
 
 @
 Some protection may be a good idea, just in case it gets outside the range
-of an 8 bit register it will be clamped.
+of an 8 bit register it will be limited.
 
 @c
 
   if (output_s.turn > 255)
        output_s.turn = 255;
   else
-  if (output_s.turn < 0)
-       output_s.turn = 0;
+  if (output_s.turn < 1)
+       output_s.turn = 1;
 
   if (output_s.thrust > 255)
        output_s.thrust= 255;

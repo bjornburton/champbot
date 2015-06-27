@@ -204,8 +204,8 @@ looking for that by setting \PB{\.{"edge"}} to look for a rise on channel 2.
 \Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch2rise}\K\T{0}$ $,$ $.$ $%
 \\{ch2fall}\K\T{0}$ $,$ $.$ $\\{ch1fall}\K\T{0}$ $,$ $.$ $\\{edge}\K%
 \.{CH2RISE}$ $\}$  ;\7
-\&{outputStruct} \\{output\_s}; \X32:Initialize the inputs and capture mode\X%
-\X29:Initialize pin outputs\X\par
+\&{outputStruct} \\{output\_s}; \X31:Initialize the inputs and capture mode\X%
+\X28:Initialize pin outputs\X\par
 \fi
 
 \M{13}
@@ -232,7 +232,7 @@ Interrupts are used to wake it.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
-\Y\B\X30:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
+\Y\B\X29:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
 ${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
 
@@ -244,28 +244,24 @@ This is the loop that does the work. It should spend most of its time in
 \fi
 
 \M{16}
-Here we select what we are looking for, and from which receiver channel,
-based on ``.edge''.
-\Y\B\par
+Now that a loop is started, we wait in ``idle'' for the edge on the channel
+selected.
+\Y\B\\{sleep\_mode}(\,);\SHC{ idle }\par
 \fi
 
 \M{17}
-Now we wait in ``idle'' for the edge on the channel selected.
-\Y\B\\{sleep\_mode}(\,);\par
-\fi
-
-\M{18}
 If execution arrives here, some interrupt has woken it from sleep and some
-vector has run. The pointer handleIrq will be assigned the value of the
-responsible function.
-\Y\B\&{if} ${}(\\{handleIrq}\I\NULL){}$\5
+vector has possibly run.
+The pointer handleIrq will be assigned the value of the responsible function.
+\Y\B\&{if} ${}(\\{handleIrq}\I\NULL{}$)\SHC{ in case it woke for some other
+reason }\6
 ${}\{{}$\1\7
 ${}\\{handleIrq}({\AND}\\{input\_s});{}$\6
 ${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
 \4${}\}{}$\SHC{ end if handleirq }\2\par
 \fi
 
-\M{19}
+\M{18}
 Center reports about 21250, hard left, or up, with trim reports about 29100
 and hard right, or down, with trim reports about 13400.
 With that, the gain is 1/61.569 and offset is offset is $$-$$218.14.
@@ -275,7 +271,7 @@ ${}\\{output\_s}.\\{thrust}\K((\T{100\$L}*\\{input\_s}.\\{ch2duration})/%
 \.{GAINX100})-\.{OFFSET}{}$;\par
 \fi
 
-\M{20}
+\M{19}
 Some protection may be a good idea, just in case it gets outside the range
 of an 8 bit register it will be clamped.
 
@@ -296,7 +292,7 @@ $\}{}$\SHC{ end for }\7
 $\}{}$\SHC{ end main() }\par
 \fi
 
-\M{21}
+\M{20}
 Here are the ISRs.
 \Y\B\.{ISR}(\\{INT1\_vect})\1\1\2\2\6
 ${}\{{}$\7
@@ -307,7 +303,7 @@ ${}\\{handleIrq}\K{\AND}\\{pwcCalc};{}$\6
 \4${}\}{}$\2\par
 \fi
 
-\M{22}
+\M{21}
 This procedure computes the durations from the PWC signal edge capture values
 from the Input Capture Unit.
 With the levers centered the durations should be about 1.5~ms so at 16~ Mhz
@@ -319,7 +315,7 @@ of the 64 kib of the 16 bit register..
 \Y\B\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\Y\par
 \fi
 
-\M{23}
+\M{22}
 On the falling edges we can compute the durations using modulus subtraction
 and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
@@ -345,7 +341,7 @@ ${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE};{}$\6
 $\}{}$\par
 \fi
 
-\M{24}
+\M{23}
 
 The procedure edgeSelect configures the Input Capture unit to capture on the
 expected edge type.
@@ -371,14 +367,14 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 \4${}\}{}$\2\par
 \fi
 
-\M{25}
+\M{24}
 Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
 \Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\7
 $\}{}$\par
 \fi
 
-\M{26}
+\M{25}
 Here is a simple procedure to flip the LED on or off.
 \Y\B\&{void} \\{ledcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -387,35 +383,35 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{27}
+\M{26}
 
 \fi
 
-\N{1}{28}These are the supporting routines, procedures and configuration
+\N{1}{27}These are the supporting routines, procedures and configuration
 blocks.
 
 
 Here is the block that sets-up the digital I/O pins.
 \fi
 
-\M{29}\B\X29:Initialize pin outputs\X${}\E{}$\6
+\M{28}\B\X28:Initialize pin outputs\X${}\E{}$\6
 ${}\{{}$\C{ set the led port direction; This is pin \#17 }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5});{}$\6
 \4${}\}{}$\2\par
 \U12.\fi
 
-\M{30}\B\X30:Configure to idle on sleep\X${}\E{}$\6
+\M{29}\B\X29:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
 \U14.\fi
 
-\M{31}
+\M{30}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{32}\B\X32:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{31}\B\X31:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status

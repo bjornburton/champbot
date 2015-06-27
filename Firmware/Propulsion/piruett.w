@@ -239,24 +239,17 @@ This is the loop that does the work. It should spend most of its time in
   {@#
 
 @
-Here we select what we are looking for, and from which receiver channel,
-based on ``.edge''.
+Now that a loop is started, we wait in ``idle'' for the edge on the channel selected.
 @c
 
-
-
-@
-Now we wait in ``idle'' for the edge on the channel selected.
-@c
-
- sleep_mode();
+ sleep_mode(); // idle
 
 @
 If execution arrives here, some interrupt has woken it from sleep and some
-vector has run. The pointer handleIrq will be assigned the value of the
-responsible function.  
+vector has possibly run.
+The pointer handleIrq will be assigned the value of the responsible function.  
 @c
-if (handleIrq != NULL)
+if (handleIrq != NULL) // in case it woke for some other reason
    {@#
     handleIrq(&input_s); 
     handleIrq = NULL; // reset so that the action cannot be repeated

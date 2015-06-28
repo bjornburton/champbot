@@ -91,7 +91,7 @@ This will provide ample time to do math and set the motor PWMs.
 
 First pick the turn, set for a rising edge, wait, grab the time-stamp and set
 for falling edge, wait, grab the time-stamp, do modulus subtraction,
-switch the MUX, set for rising, reset the ICR, wait, grab the time-stamp, and 
+switch the MUX, set for rising, reset the ICR, wait, grab the time-stamp, and
 do modulus sutraction for the second duration.
 
 
@@ -156,12 +156,12 @@ typedef struct {
 function.
 
 
-@<Types@>=                                                                      
-typedef struct {                                                                
-    uint16_t minIn;                                                            
-    uint16_t maxIn;                                                       
-    uint16_t minOut;                                                            
-    uint16_t maxOut;                                                       
+@<Types@>=
+typedef struct {
+    uint16_t minIn;
+    uint16_t maxIn;
+    uint16_t minOut;
+    uint16_t maxOut;
     } scaleStruct;
 
 
@@ -217,9 +217,9 @@ but the numbers here were from trial and error.
 
 scaleStruct scale_s = {
     .minIn = 14970, // ticks for hard right or down
-    .maxIn = 27530, // ticks for hard left or up                        
-    .minOut = 1,                                                            
-    .maxOut = 255,                                                       
+    .maxIn = 27530, // ticks for hard left or up
+    .minOut = 1,
+    .maxOut = 255,
     };
 
 
@@ -279,11 +279,11 @@ Now that a loop is started, we wait in ``idle'' for the edge on the channel sele
 @
 If execution arrives here, some interrupt has woken it from sleep and some
 vector has possibly run.
-The pointer handleIrq will be assigned the value of the responsible function.  
+The pointer handleIrq will be assigned the value of the responsible function.
 @c
 if (handleIrq != NULL) // in case it woke for some other reason
    {@#
-    handleIrq(&input_s); 
+    handleIrq(&input_s);
     handleIrq = NULL; // reset so that the action cannot be repeated
     }// end if handleirq
 
@@ -341,18 +341,18 @@ Channel 2 leads so that rise is first.
   switch(input_s->edge)
      {
       case CH2RISE:
-         input_s->ch2rise = ICR1;  
-         input_s->edge = CH2FALL;  
+         input_s->ch2rise = ICR1;
+         input_s->edge = CH2FALL;
        break;
       case CH2FALL:
          input_s->ch2fall = ICR1;
-         input_s->ch2duration = input_s->ch2fall - input_s->ch2rise;  
-         input_s->edge = CH1FALL;  
+         input_s->ch2duration = input_s->ch2fall - input_s->ch2rise;
+         input_s->edge = CH1FALL;
        break;
       case CH1FALL:
-         input_s->ch1fall = ICR1;  
+         input_s->ch1fall = ICR1;
          input_s->ch1duration = input_s->ch1fall - input_s->ch2fall;
-         input_s->edge = CH2RISE;   
+         input_s->edge = CH2RISE;
      }
 
 edgeSelect(input_s);
@@ -363,7 +363,7 @@ edgeSelect(input_s);
 @
 
 The procedure edgeSelect configures the Input Capture unit to capture on the
-expected edge type. 
+expected edge type.
 
 @c
 void edgeSelect(inputStruct *input_s)
@@ -388,7 +388,7 @@ Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
 @c
 
- TIFR1 |= (1<<ICF1); // (per 16.6.3) 
+ TIFR1 |= (1<<ICF1); // (per 16.6.3)
 @#
 }
 
@@ -450,7 +450,7 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 
 @
 The scaler function takes an input, as in times from the Input Capture
-Register and returns a value scaled by the parameters in structure |"scale_s"|. 
+Register and returns a value scaled by the parameters in structure |"scale_s"|.
 @c
 uint16_t scaler(scaleStruct *scale_s, uint16_t input)
 {@#
@@ -474,7 +474,7 @@ one place.
 
 The constant  100 amplifies it so I can take advantage of the extra bits for
 precision.
-@c 
+@c
 
 
 int32_t gain = (100L*(int32_t)(scale_s->maxIn-scale_s->minIn))/

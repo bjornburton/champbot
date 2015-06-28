@@ -37,7 +37,7 @@ r is radius
 v is value
 f is factor
 
-min r is 1
+min r is 1 and 255
 max r is 128
 
 get this value for v
@@ -71,8 +71,8 @@ It has an ATmega328.
 The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
 This has an ``Input Capture Unit'' that may be used for PWC decoding.
 PWC being the type of signal from the RC receiver.
-That seems like as elegant a solution I will find and it is recommended by
-Atmel to use ICR ``Input Capture Register'' for this purpose.
+That seems like as elegant a solutioni as I will find and it is recommended by
+Atmel to use it for this purpose.
 
 One of the other timers will do more than fine for the two motors.
 
@@ -81,7 +81,7 @@ www.atmel.com/images/doc8014.pdf
 
 In the datasheet, this section is helpful: 16.6.3
 
-Since I have two signals, maybe the best way to use this nice feature is to
+The best way to use this nice feature is to
 take the PWC signals into the MUX, through the comparator and into the Input
 Capture Unit.
 
@@ -92,12 +92,13 @@ In fact, channel two's fall is perfectly aligned with channel one's rise.
 This means that it will be possible to capture all of the pulses.
 
 After the two pulses are captured, there's an 18~ms dead-time before the next
-round.
+round. That's over 250,000 clock cycles.
 This will provide ample time to do math and set the motor PWMs.
 
-First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
+First pick the turn, set for a rising edge, wait, grab the time-stamp and set
 for falling edge, wait, grab the time-stamp, do modulus subtraction,
-switch the MUX, set for rising, reset the ICR, wait...
+switch the MUX, set for rising, reset the ICR, wait, grab the time-stamp, and
+do modulus sutraction for the second duration.
 
 
 Extensive use was made of the datasheet, Atmel
@@ -176,10 +177,10 @@ function.
 
 \Y\B\4\X6:Types\X${}\mathrel+\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
-\\{uint16\_t}\\{minIn};\6
-\\{uint16\_t}\\{maxIn};\6
-\\{uint16\_t}\\{minOut};\6
-\\{uint16\_t}\\{maxOut};\2\6
+\&{const} \\{uint16\_t}\\{minIn};\6
+\&{const} \\{uint16\_t}\\{maxIn};\6
+\&{const} \\{uint16\_t}\\{minOut};\6
+\&{const} \\{uint16\_t}\\{maxOut};\2\6
 ${}\}{}$ \&{scaleStruct};\par
 \fi
 
@@ -218,6 +219,9 @@ looking for that by setting \PB{\.{"edge"}} to look for a rise on channel 2.
 \M{13}
 Center reports about 21250, hard left, or up, with trim reports about 29100
 and hard right, or down, with trim reports about 13400.
+
+About 4/5ths of that range are the full swing of the stick, without trim.
+This is from about 14970 and 27530 ticks.
 
 This \PB{\.{"scale\_s"}} structure holds the parameters used in the scaler
 function.
@@ -456,6 +460,7 @@ Register and returns a value scaled by the parameters in structure \PB{%
 
 \M{32}
 First, we can solve for the obvious cases in which the input exceeds the range.
+This can easily happen if the trim is shifted.
 \Y\B\&{if} ${}(\\{input}>\\{scale\_s}\MG\\{maxIn}){}$\1\5
 \&{return} \\{scale\_s}${}\MG\\{maxOut};{}$\2\6
 \&{else} \&{if} ${}(\\{input}<\\{scale\_s}\MG\\{minIn}){}$\1\5

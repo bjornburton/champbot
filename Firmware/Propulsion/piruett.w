@@ -31,7 +31,7 @@ Where:
  v is value
  f is factor
 
-min r is 1
+min r is 1 and 255
 max r is 128
 
 get this value for v
@@ -65,8 +65,8 @@ It has an ATmega328.
 The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
 This has an ``Input Capture Unit'' that may be used for PWC decoding.
 PWC being the type of signal from the RC receiver.
-That seems like as elegant a solution I will find and it is recommended by
-Atmel to use ICR ``Input Capture Register'' for this purpose.
+That seems like as elegant a solutioni as I will find and it is recommended by
+Atmel to use it for this purpose.
 
 One of the other timers will do more than fine for the two motors.
 
@@ -75,7 +75,7 @@ For the PWC measurement, this app note, AVR135, is helpful:
 
 In the datasheet, this section is helpful: 16.6.3
 
-Since I have two signals, maybe the best way to use this nice feature is to
+The best way to use this nice feature is to
 take the PWC signals into the MUX, through the comparator and into the Input
 Capture Unit.
 
@@ -86,12 +86,13 @@ In fact, channel two's fall is perfectly aligned with channel one's rise.
 This means that it will be possible to capture all of the pulses.
 
 After the two pulses are captured, there's an 18~ms dead-time before the next
-round.
+round. That's over 250,000 clock cycles.
 This will provide ample time to do math and set the motor PWMs.
 
-First pick the thrust, set for a rising edge, wait, grab the time-stamp and set
+First pick the turn, set for a rising edge, wait, grab the time-stamp and set
 for falling edge, wait, grab the time-stamp, do modulus subtraction,
-switch the MUX, set for rising, reset the ICR, wait...
+switch the MUX, set for rising, reset the ICR, wait, grab the time-stamp, and 
+do modulus sutraction for the second duration.
 
 
 Extensive use was made of the datasheet, Atmel
@@ -117,11 +118,6 @@ Extensive use was made of the datasheet, Atmel
 @d CH1FALL 2
 
 
-@ Here are the calibration values. 
-@d GAINX100 6157L
-@d OFFSET 218L 
-
-
 @ @<Include...@>=
 # include <avr/io.h> // need some port access
 # include <util/delay.h> // need to delay
@@ -130,7 +126,7 @@ Extensive use was made of the datasheet, Atmel
 # include <stdlib.h>
 # include <stdint.h>
 
-@ Here is a structure to keep track of the state of output things,
+@ Here is a structure type to keep track of the state of output things,
 like motor settings.
 
 @<Types@>=
@@ -143,7 +139,7 @@ typedef struct {
     } outputStruct;
 
 
-@ Here is a structure to keep track of the state of input things,
+@ Here is a structure type to keep track of the state of input things,
 like servo timing.
 
 @<Types@>=
@@ -156,13 +152,25 @@ typedef struct {
     uint8_t  edge;
     } inputStruct;
 
+@ Here is a structure type to contain the scaling parameters for the scaler
+function.
+
+
+@<Types@>=                                                                      
+typedef struct {                                                                
+    uint16_t minIn;                                                            
+    uint16_t maxIn;                                                       
+    uint16_t minOut;                                                            
+    uint16_t maxOut;                                                       
+    } scaleStruct;
+
+
 
 @ @<Prototypes@>=
 void ledcntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
-int16_t scaler(uint16 gain, uint16 offset, uint16 input);
-uint8_t limiter(uint_t min, uint8_t max, int16_t input);
+uint16_t scaler(scaleStruct *, uint16_t input);
 
 @
 My lone global variable may become a function pointer.
@@ -191,6 +199,28 @@ inputStruct input_s = {
     };
 
 outputStruct output_s;
+
+
+@
+Center reports about 21250, hard left, or up, with trim reports about 29100
+and hard right, or down, with trim reports about 13400.
+
+About 4/5ths of that range are the full swing of the stick, without trim.
+This is from about 14970 and 27530 ticks.
+
+This |"scale_s"| structure holds the parameters used in the scaler function.
+The |"In"| numbers are raw from the Input Capture Register.
+
+At some point a calibration feature could be added which could populate these
+but the numbers here were from trial and error.
+@c
+
+scaleStruct scale_s = {
+    .minIn = 14970, // ticks for hard right or down
+    .maxIn = 27530, // ticks for hard left or up                        
+    .minOut = 1,                                                            
+    .maxOut = 255,                                                       
+    };
 
 
 @<Initialize the inputs and capture mode...@>
@@ -259,36 +289,11 @@ if (handleIrq != NULL) // in case it woke for some other reason
 
 
 
-@
-Center reports about 21250, hard left, or up, with trim reports about 29100
-and hard right, or down, with trim reports about 13400.
-With that, the gain is 1/61.569 and offset is offset is $$-$$218.14.
-@c
-
-output_s.turn = ((100L * input_s.ch1duration)/GAINX100)-OFFSET;
-output_s.thrust = ((100L * input_s.ch2duration)/GAINX100)-OFFSET;
-
-@
-Some protection may be a good idea, just in case it gets outside the range
-of an 8 bit register it will be limited.
-
-@c
-
-  if (output_s.turn > 255)
-       output_s.turn = 255;
-  else
-  if (output_s.turn < 1)
-       output_s.turn = 1;
-
-  if (output_s.thrust > 255)
-       output_s.thrust= 255;
-  else
-  if (output_s.thrust < 0)
-       output_s.thrust = 0;
- 
+output_s.turn =   scaler(&scale_s, input_s.ch1duration);
+output_s.thrust = scaler(&scale_s, input_s.ch2duration);
 
 
-if(output_s.turn > 127L)
+if(output_s.turn >=255 )
     ledcntl(ON);
  else
     ledcntl(OFF);
@@ -443,4 +448,41 @@ To enable this interrupt, set the ACIE bit of register ACSR.
  ADMUX &= ~((1<<MUX2) | (1<<MUX1) | (1<<MUX0)); // Set to mux channel 0
 }
 
+@
+The scaler function takes an input, as in times from the Input Capture
+Register and returns a value scaled by the parameters in structure |"scale_s"|. 
+@c
+uint16_t scaler(scaleStruct *scale_s, uint16_t input)
+{@#
 
+@
+First, we can solve for the obvious cases in which the input exceeds the range.
+This can easily happen if the trim is shifted.
+@c
+  if (input > scale_s->maxIn)
+     return scale_s->maxOut;
+  else
+  if (input < scale_s->minIn)
+     return scale_s->minOut;
+
+@
+If it's not that simple, then compute the gain and offset then continue in the usual way.
+This is not really an effecient method, recomputing gain and offset every time
+but we are not in a rush and it makes it easier since, if something changes,
+I don't have to manualy compute and enter these values and the code is all in
+one place.
+
+The constant  100 amplifies it so I can take advantage of the extra bits for
+precision.
+@c 
+
+
+int32_t gain = (100L*(int32_t)(scale_s->maxIn-scale_s->minIn))/
+                    (int32_t)(scale_s->maxOut-scale_s->minOut);
+
+int32_t offset = ((100L*(int32_t)scale_s->minIn)/gain)-(int32_t)scale_s->minOut;
+
+
+return (100L*(int32_t)input/gain)-offset;
+
+}

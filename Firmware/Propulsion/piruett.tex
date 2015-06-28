@@ -38,11 +38,11 @@ v is value
 f is factor
 
 min r is 1
-max r is 127
+max r is 128
 
 get this value for v
 [1]
-[127]
+[128]
 [255]
 
 r=factor*abs(127-v)
@@ -103,8 +103,8 @@ switch the MUX, set for rising, reset the ICR, wait...
 Extensive use was made of the datasheet, Atmel
 ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
 
-\Y\B\X6:Include\X\6
-\X7:Types\X\6
+\Y\B\X5:Include\X\6
+\X6:Types\X\6
 \X9:Prototypes\X\6
 \X10:Global variables\X\par
 \fi
@@ -133,14 +133,7 @@ Extensive use was made of the datasheet, Atmel
 \T{2}\par
 \fi
 
-\M{5}Here are the calibration values.
-\Y\B\4\D$\.{GAINX100}$ \5
-\T{6157\$L}\par
-\B\4\D$\.{OFFSET}$ \5
-\T{218\$L}\par
-\fi
-
-\M{6}\B\X6:Include\X${}\E{}$\6
+\M{5}\B\X5:Include\X${}\E{}$\6
 \8\#\&{include} \.{<avr/io.h>}\SHC{ need some port access }\6
 \8\#\&{include} \.{<util/delay.h>}\SHC{ need to delay }\6
 \8\#\&{include} \.{<avr/interrupt.h>}\SHC{ have need of an interrupt }\6
@@ -149,10 +142,10 @@ Extensive use was made of the datasheet, Atmel
 \8\#\&{include} \.{<stdint.h>}\par
 \U2.\fi
 
-\M{7}Here is a structure to keep track of the state of output things,
+\M{6}Here is a structure type to keep track of the state of output things,
 like motor settings.
 
-\Y\B\4\X7:Types\X${}\E{}$\6
+\Y\B\4\X6:Types\X${}\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
 \\{uint8\_t}\\{portOut};\6
 \\{uint8\_t}\\{starboardOut};\6
@@ -160,13 +153,13 @@ like motor settings.
 \\{int32\_t}\\{turn};\6
 \\{uint8\_t}\\{failSafe};\SHC{ safety relay }\2\6
 ${}\}{}$ \&{outputStruct};\par
-\A8.
+\As7\ET8.
 \U2.\fi
 
-\M{8}Here is a structure to keep track of the state of input things,
+\M{7}Here is a structure type to keep track of the state of input things,
 like servo timing.
 
-\Y\B\4\X7:Types\X${}\mathrel+\E{}$\6
+\Y\B\4\X6:Types\X${}\mathrel+\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
 \\{uint16\_t}\\{ch2rise};\6
 \\{uint16\_t}\\{ch2fall};\6
@@ -177,10 +170,25 @@ like servo timing.
 ${}\}{}$ \&{inputStruct};\par
 \fi
 
+\M{8}Here is a structure type to contain the scaling parameters for the scaler
+function.
+
+
+\Y\B\4\X6:Types\X${}\mathrel+\E{}$\6
+\&{typedef} \&{struct} ${}\{{}$\1\6
+\\{uint16\_t}\\{minIn};\6
+\\{uint16\_t}\\{maxIn};\6
+\\{uint16\_t}\\{minOut};\6
+\\{uint16\_t}\\{maxOut};\2\6
+${}\}{}$ \&{scaleStruct};\par
+\fi
+
 \M{9}\B\X9:Prototypes\X${}\E{}$\6
 \&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\6
 \&{void} \\{pwcCalc}(\&{inputStruct} ${}{*});{}$\6
-\&{void} \\{edgeSelect}(\&{inputStruct} ${}{*}){}$;\par
+\&{void} \\{edgeSelect}(\&{inputStruct} ${}{*});{}$\7
+\\{uint16\_t}\\{scaler}(\&{scaleStruct} ${}{*},\39\\{uint16\_t}\\{input}){}$;%
+\par
 \U2.\fi
 
 \M{10}
@@ -204,11 +212,27 @@ looking for that by setting \PB{\.{"edge"}} to look for a rise on channel 2.
 \Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch2rise}\K\T{0}$ $,$ $.$ $%
 \\{ch2fall}\K\T{0}$ $,$ $.$ $\\{ch1fall}\K\T{0}$ $,$ $.$ $\\{edge}\K%
 \.{CH2RISE}$ $\}$  ;\7
-\&{outputStruct} \\{output\_s}; \X31:Initialize the inputs and capture mode\X%
-\X28:Initialize pin outputs\X\par
+\&{outputStruct} \\{output\_s};\par
 \fi
 
 \M{13}
+Center reports about 21250, hard left, or up, with trim reports about 29100
+and hard right, or down, with trim reports about 13400.
+
+This \PB{\.{"scale\_s"}} structure holds the parameters used in the scaler
+function.
+The \PB{\.{"In"}} numbers are raw from the Input Capture Register.
+
+At some point a calibration feature could be added which could populate these
+but the numbers here were from trial and error.
+\Y\B\&{scaleStruct} \\{scale\_s} $\K$ $\{$ $.$ $\\{minIn}\K\T{14970}$ $,{}$%
+\SHC{ ticks for hard right or down }\6
+$.$ $\\{maxIn}\K\T{27530}$ $,{}$\SHC{ ticks for hard left or up }\6
+$.$ $\\{minOut}\K\T{1}$ $,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $\}$  ; %
+\X30:Initialize the inputs and capture mode\X\X27:Initialize pin outputs\X\par
+\fi
+
+\M{14}
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 \Y\B\\{sei}(\,);\6
@@ -223,7 +247,7 @@ ${}\.{EIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{INT1}){}$;\SHC{ Turns on INT1 }\6
 \4${}\}{}$\2\par
 \fi
 
-\M{14}
+\M{15}
 Rather than burning loops, waiting the ballance of 18~ms for something to
 happen, the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
@@ -232,24 +256,24 @@ Interrupts are used to wake it.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
-\Y\B\X29:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
+\Y\B\X28:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
 ${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
 
-\M{15}
+\M{16}
 This is the loop that does the work. It should spend most of its time in
 \PB{\\{sleep\_mode}}, comming out at each interrupt event caused by an edge.
 
 \Y\B\&{for} ( ;  ; \,) $\{{}$\Y\par
 \fi
 
-\M{16}
+\M{17}
 Now that a loop is started, we wait in ``idle'' for the edge on the channel
 selected.
 \Y\B\\{sleep\_mode}(\,);\SHC{ idle }\par
 \fi
 
-\M{17}
+\M{18}
 If execution arrives here, some interrupt has woken it from sleep and some
 vector has possibly run.
 The pointer handleIrq will be assigned the value of the responsible function.
@@ -258,32 +282,12 @@ reason }\6
 ${}\{{}$\1\7
 ${}\\{handleIrq}({\AND}\\{input\_s});{}$\6
 ${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
-\4${}\}{}$\SHC{ end if handleirq }\2\par
-\fi
-
-\M{18}
-Center reports about 21250, hard left, or up, with trim reports about 29100
-and hard right, or down, with trim reports about 13400.
-With that, the gain is 1/61.569 and offset is offset is $$-$$218.14.
-\Y\B$\\{output\_s}.\\{turn}\K((\T{100\$L}*\\{input\_s}.\\{ch1duration})/%
-\.{GAINX100})-\.{OFFSET};{}$\6
-${}\\{output\_s}.\\{thrust}\K((\T{100\$L}*\\{input\_s}.\\{ch2duration})/%
-\.{GAINX100})-\.{OFFSET}{}$;\par
-\fi
-
-\M{19}
-Some protection may be a good idea, just in case it gets outside the range
-of an 8 bit register it will be clamped.
-
-\Y\B\&{if} ${}(\\{output\_s}.\\{turn}>\T{255}){}$\1\5
-${}\\{output\_s}.\\{turn}\K\T{255};{}$\2\6
-\&{else} \&{if} ${}(\\{output\_s}.\\{turn}<\T{0}){}$\1\5
-${}\\{output\_s}.\\{turn}\K\T{0};{}$\2\6
-\&{if} ${}(\\{output\_s}.\\{thrust}>\T{255}){}$\1\5
-${}\\{output\_s}.\\{thrust}\K\T{255};{}$\2\6
-\&{else} \&{if} ${}(\\{output\_s}.\\{thrust}<\T{0}){}$\1\5
-${}\\{output\_s}.\\{thrust}\K\T{0};{}$\2\6
-\&{if} ${}(\\{output\_s}.\\{turn}>\T{127\$L}){}$\1\5
+\4${}\}{}$\SHC{ end if handleirq }\2\6
+${}\\{output\_s}.\\{turn}\K\\{scaler}({\AND}\\{scale\_s},\39\\{input\_s}.%
+\\{ch1duration});{}$\6
+${}\\{output\_s}.\\{thrust}\K\\{scaler}({\AND}\\{scale\_s},\39\\{input\_s}.%
+\\{ch2duration});{}$\6
+\&{if} ${}(\\{output\_s}.\\{turn}\G\T{255}){}$\1\5
 \\{ledcntl}(\.{ON});\2\6
 \&{else}\1\5
 \\{ledcntl}(\.{OFF});\2\7
@@ -292,7 +296,7 @@ $\}{}$\SHC{ end for }\7
 $\}{}$\SHC{ end main() }\par
 \fi
 
-\M{20}
+\M{19}
 Here are the ISRs.
 \Y\B\.{ISR}(\\{INT1\_vect})\1\1\2\2\6
 ${}\{{}$\7
@@ -303,7 +307,7 @@ ${}\\{handleIrq}\K{\AND}\\{pwcCalc};{}$\6
 \4${}\}{}$\2\par
 \fi
 
-\M{21}
+\M{20}
 This procedure computes the durations from the PWC signal edge capture values
 from the Input Capture Unit.
 With the levers centered the durations should be about 1.5~ms so at 16~ Mhz
@@ -315,7 +319,7 @@ of the 64 kib of the 16 bit register..
 \Y\B\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\Y\par
 \fi
 
-\M{22}
+\M{21}
 On the falling edges we can compute the durations using modulus subtraction
 and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
@@ -341,7 +345,7 @@ ${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE};{}$\6
 $\}{}$\par
 \fi
 
-\M{23}
+\M{22}
 
 The procedure edgeSelect configures the Input Capture unit to capture on the
 expected edge type.
@@ -367,14 +371,14 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 \4${}\}{}$\2\par
 \fi
 
-\M{24}
+\M{23}
 Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
 \Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\7
 $\}{}$\par
 \fi
 
-\M{25}
+\M{24}
 Here is a simple procedure to flip the LED on or off.
 \Y\B\&{void} \\{ledcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -383,35 +387,35 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{26}
+\M{25}
 
 \fi
 
-\N{1}{27}These are the supporting routines, procedures and configuration
+\N{1}{26}These are the supporting routines, procedures and configuration
 blocks.
 
 
 Here is the block that sets-up the digital I/O pins.
 \fi
 
-\M{28}\B\X28:Initialize pin outputs\X${}\E{}$\6
+\M{27}\B\X27:Initialize pin outputs\X${}\E{}$\6
 ${}\{{}$\C{ set the led port direction; This is pin \#17 }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5});{}$\6
 \4${}\}{}$\2\par
-\U12.\fi
+\U13.\fi
 
-\M{29}\B\X29:Configure to idle on sleep\X${}\E{}$\6
+\M{28}\B\X28:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
-\U14.\fi
+\U15.\fi
 
-\M{30}
+\M{29}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{31}\B\X31:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{30}\B\X30:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status
@@ -440,9 +444,42 @@ Register }\6
 ${}\.{ADMUX}\MRL{\AND{\K}}\CM((\T{1}\LL\.{MUX2})\OR(\T{1}\LL\.{MUX1})\OR(\T{1}%
 \LL\.{MUX0})){}$;\SHC{ Set to mux channel 0 }\6
 \4${}\}{}$\2\par
+\U13.\fi
 
-\U12.\fi
+\M{31}
+The scaler function takes an input, as in times from the Input Capture
+Register and returns a value scaled by the parameters in structure \PB{%
+\.{"scale\_s"}}.
+\Y\B\\{uint16\_t}\\{scaler}(\&{scaleStruct} ${}{*}\\{scale\_s},\39\\{uint16\_t}%
+\\{input}){}$\1\1 $\{{}$\Y\par
+\fi
 
+\M{32}
+First, we can solve for the obvious cases in which the input exceeds the range.
+\Y\B\&{if} ${}(\\{input}>\\{scale\_s}\MG\\{maxIn}){}$\1\5
+\&{return} \\{scale\_s}${}\MG\\{maxOut};{}$\2\6
+\&{else} \&{if} ${}(\\{input}<\\{scale\_s}\MG\\{minIn}){}$\1\5
+\&{return} \\{scale\_s}${}\MG\\{minOut}{}$;\2\par
+\fi
+
+\M{33}
+If it's not that simple, then compute the gain and offset then continue in the
+usual way.
+This is not really an effecient method, recomputing gain and offset every time
+but we are not in a rush and it makes it easier since, if something changes,
+I don't have to manualy compute and enter these values and the code is all in
+one place.
+
+The constant  100 amplifies it so I can take advantage of the extra bits for
+precision.
+\Y\B$\\{int32\_t}\\{gain}\K(\T{100\$L}*(\\{int32\_t})(\\{scale\_s}\MG\\{maxIn}-%
+\\{scale\_s}\MG\\{minIn}))/(\\{int32\_t})(\\{scale\_s}\MG\\{maxOut}-\\{scale%
+\_s}\MG\\{minOut});{}$\6
+${}\\{int32\_t}\\{offset}\K((\T{100\$L}*(\\{int32\_t})\\{scale\_s}\MG%
+\\{minIn})/\\{gain})-(\\{int32\_t})\\{scale\_s}\MG\\{minOut};{}$\6
+\&{return} ${}(\T{100\$L}*(\\{int32\_t})\\{input}/\\{gain})-\\{offset};$ $\}{}$%
+\par
+\fi
 
 \inx
 \fin

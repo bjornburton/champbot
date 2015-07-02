@@ -177,10 +177,10 @@ function.
 
 \Y\B\4\X6:Types\X${}\mathrel+\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
-\&{const} \\{uint16\_t}\\{minIn};\6
-\&{const} \\{uint16\_t}\\{maxIn};\6
-\&{const} \\{uint16\_t}\\{minOut};\6
-\&{const} \\{uint16\_t}\\{maxOut};\2\6
+\\{uint16\_t}\\{minIn};\6
+\\{uint16\_t}\\{maxIn};\6
+\\{uint16\_t}\\{minOut};\6
+\\{uint16\_t}\\{maxOut};\2\6
 ${}\}{}$ \&{scaleStruct};\par
 \fi
 
@@ -210,9 +210,7 @@ Here is \PB{\\{main}(\,)}.
 \M{12}
 The Futaba receiver leads with channel two, rising edge, so we will start
 looking for that by setting \PB{\.{"edge"}} to look for a rise on channel 2.
-\Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{ch2rise}\K\T{0}$ $,$ $.$ $%
-\\{ch2fall}\K\T{0}$ $,$ $.$ $\\{ch1fall}\K\T{0}$ $,$ $.$ $\\{edge}\K%
-\.{CH2RISE}$ $\}$  ;\7
+\Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{edge}\K\.{CH2RISE}$ $\}$  ;\7
 \&{outputStruct} \\{output\_s};\par
 \fi
 
@@ -232,14 +230,14 @@ but the numbers here were from trial and error.
 \Y\B\&{scaleStruct} \\{scale\_s} $\K$ $\{$ $.$ $\\{minIn}\K\T{14970}$ $,{}$%
 \SHC{ ticks for hard right or down }\6
 $.$ $\\{maxIn}\K\T{27530}$ $,{}$\SHC{ ticks for hard left or up }\6
-$.$ $\\{minOut}\K\T{1}$ $,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $\}$  ; %
-\X30:Initialize the inputs and capture mode\X\X27:Initialize pin outputs\X\par
+$.$ $\\{minOut}\K\T{1}$ $,$ $.$ $\\{maxOut}\K\T{255}$ $\}$  ;\7
+\X30:Initialize the inputs and capture mode\X\X27:Initialize pin outputs\X\Y\par
 \fi
 
 \M{14}
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
-\Y\B\\{sei}(\,);\6
+\Y\B\\{sei}(\,);\7
 ${}\{{}$\SHC{ for test purposes }\1\6
 ${}\.{DDRD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{DDD3}){}$;\SHC{ Clear the PD3 pin }%
 \SHC{ PD3 (PCINT0 pin) is now an input }\6
@@ -260,7 +258,8 @@ Interrupts are used to wake it.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
-\Y\B\X28:Configure to idle on sleep\X\\{ledcntl}(\.{OFF});\6
+\Y\B\X28:Configure to idle on sleep\X\7
+\\{ledcntl}(\.{OFF});\6
 ${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
 

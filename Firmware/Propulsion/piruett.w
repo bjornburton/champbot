@@ -162,6 +162,7 @@ typedef struct {
     uint16_t maxIn;
     uint16_t minOut;
     uint16_t maxOut;
+    uint8_t  deadBand;
     } scaleStruct;
 
 
@@ -171,10 +172,12 @@ void ledcntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
 uint16_t scaler(scaleStruct *, uint16_t input);
+void translate();
+void setPwm();
 
 @
-My lone global variable may become a function pointer.
-This could let me pass arguments to the actual interrupt handlers.
+My lone global variable is a function pointer.
+This lets me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the |"ISR()"| function.
 
 @<Global var...@>=
@@ -192,9 +195,6 @@ looking for that by setting |"edge"| to look for a rise on channel 2.
 @c
 
 inputStruct input_s = {
-    .ch2rise = 0,
-    .ch2fall = 0,
-    .ch1fall = 0,
     .edge = CH2RISE
     };
 
@@ -220,18 +220,19 @@ scaleStruct scale_s = {
     .maxIn = 27530, // ticks for hard left or up
     .minOut = 1,
     .maxOut = 255,
+    .deadband = 5
     };
 
-
+@#
 @<Initialize the inputs and capture mode...@>
 @<Initialize pin outputs...@>
-
+@#
 @
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling sei().
 @c
   sei();
-
+@#
  { // for test purposes
   DDRD &= ~(1 << DDD3);     // Clear the PD3 pin
   // PD3 (PCINT0 pin) is now an input
@@ -256,6 +257,7 @@ program to step past the sleep statement.
 @c
 
 @<Configure to idle on sleep...@>
+@#
 ledcntl(OFF);
 
 edgeSelect(&input_s);
@@ -484,5 +486,32 @@ int32_t offset = ((100L*(int32_t)scale_s->minIn)/gain)-(int32_t)scale_s->minOut;
 
 
 return (100L*(int32_t)input/gain)-offset;
+
+}
+
+
+void translate()
+{
+
+//psudocode placeholder
+int16_t thrust, radius, star, port;
+const int16_t max = (UINT8_MAX*98)/100;
+
+
+ if((thrust-radius) >= max)
+    port=max;
+  else if((thrust-radius) <= -max)
+    port=-max;
+  else
+    port=thrust-radius;
+
+
+ if(abs(thrust+radius) >= max)
+   star=max;
+  else if ((thrust+radius) <= -max)
+   star = -max;
+  else
+   star=thrust+radius;
+
 
 }

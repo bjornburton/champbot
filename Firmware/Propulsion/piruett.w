@@ -489,29 +489,39 @@ return (100L*(int32_t)input/gain)-offset;
 
 }
 
+@
+We need a way to translate |"thrust"| and |"radius"| in order to carve a
+ |"turn"|. This function should do this.
+It's not going to be perfect, since thrust isn't speed, but it should be close.
+@c
 
-void translate()
-{
-
+int translate(int16_t thrust, int16_t radius)                                   
+{                                                                               
 //psudocode placeholder
-int16_t thrust, radius, star, port;
-const int16_t max = (UINT8_MAX*98)/100;
-
-
- if((thrust-radius) >= max)
-    port=max;
-  else if((thrust-radius) <= -max)
-    port=-max;
-  else
-    port=thrust-radius;
-
-
- if(abs(thrust+radius) >= max)
-   star=max;
-  else if ((thrust+radius) <= -max)
-   star = -max;
-  else
-   star=thrust+radius;
+int16_t track = (int16_t)rand()%256;  //    1 to 255                            
+int16_t rotation;     // -255 to 255                                            
+int16_t star;         // -255 to 255                                            
+int16_t port;         // -255 to 255                                            
+const int16_t max = (98*UINT8_MAX)/100; // max is 98\%                          
+const int16_t ampFact = INT8_MAX; // factor for precision                       
+                                                                                
+rotation = (track * ((thrust*((ampFact*radius)/UINT8_MAX))/ampFact))/INT8_MAX;  
+                                                                                
+                                                                                
+if((thrust-rotation) >= max)                                                    
+   port=max;                                                                    
+else if((thrust-rotation) <= -max)                                              
+   port=-max;                                                                   
+else                                                                            
+   port=thrust-rotation;                                                        
+                                                                                
+                                                                                
+if((thrust+rotation) >= max)                                                    
+   star=max;                                                                    
+else if ((thrust+rotation) <= -max)                                             
+   star = -max;                                                                 
+else                                                                            
+   star=thrust+rotation; 
 
 
 }

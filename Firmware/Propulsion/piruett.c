@@ -4,17 +4,19 @@
 #define ON 1
 #define OFF 0
 #define SET 1
-#define CLEAR 0
+#define CLEAR 0 \
+
 #define CH2RISE 0
 #define CH2FALL 1
-#define CH1FALL 2 \
+#define CH1FALL 2
+#define MAX_DUTYCYCLE 98 \
  \
 
 /*2:*/
-#line 101 "./piruett.w"
+#line 74 "./piruett.w"
 
-/*5:*/
-#line 121 "./piruett.w"
+/*6:*/
+#line 97 "./piruett.w"
 
 # include <avr/io.h>  
 # include <util/delay.h>  
@@ -23,23 +25,11 @@
 # include <stdlib.h> 
 # include <stdint.h> 
 
-/*:5*/
-#line 102 "./piruett.w"
+/*:6*/
+#line 75 "./piruett.w"
 
-/*6:*/
-#line 132 "./piruett.w"
-
-typedef struct{
-uint8_t portOut;
-uint8_t starboardOut;
-int32_t thrust;
-int32_t turn;
-uint8_t failSafe;
-}outputStruct;
-
-
-/*:6*//*7:*/
-#line 145 "./piruett.w"
+/*7:*/
+#line 108 "./piruett.w"
 
 typedef struct{
 uint16_t ch2rise;
@@ -51,71 +41,88 @@ uint8_t edge;
 }inputStruct;
 
 /*:7*//*8:*/
-#line 159 "./piruett.w"
+#line 119 "./piruett.w"
 
 typedef struct{
-uint16_t minIn;
-uint16_t maxIn;
-uint16_t minOut;
-uint16_t maxOut;
+int16_t thrust;
+int16_t radius;
+int16_t track;
+int16_t starboardOut;
+int16_t portOut;
+}transStruct;
+
+
+/*:8*//*9:*/
+#line 130 "./piruett.w"
+
+typedef struct{
+int16_t minIn;
+int16_t maxIn;
+int16_t minOut;
+int16_t maxOut;
+int8_t deadBand;
 }scaleStruct;
 
 
+/*:9*/
+#line 76 "./piruett.w"
 
-/*:8*/
-#line 103 "./piruett.w"
-
-/*9:*/
-#line 169 "./piruett.w"
+/*10:*/
+#line 140 "./piruett.w"
 
 void ledcntl(uint8_t state);
 void pwcCalc(inputStruct*);
 void edgeSelect(inputStruct*);
 uint16_t scaler(scaleStruct*,uint16_t input);
+void translate();
+void setPwm();
 
-/*:9*/
-#line 104 "./piruett.w"
+/*:10*/
+#line 77 "./piruett.w"
 
-/*10:*/
-#line 180 "./piruett.w"
+/*11:*/
+#line 153 "./piruett.w"
 
 void(*handleIrq)(inputStruct*)= NULL;
 
-/*:10*/
-#line 105 "./piruett.w"
+/*:11*/
+#line 78 "./piruett.w"
 
 
-/*:2*//*11:*/
-#line 185 "./piruett.w"
+/*:2*//*12:*/
+#line 158 "./piruett.w"
 
 
 int main(void)
 {
-/*:11*//*12:*/
-#line 192 "./piruett.w"
+/*:12*//*13:*/
+#line 165 "./piruett.w"
 
 
 inputStruct input_s= {
 .edge= CH2RISE
 };
 
-outputStruct output_s;
+
+/*:13*//*14:*/
+#line 186 "./piruett.w"
 
 
-/*:12*//*13:*/
-#line 213 "./piruett.w"
-
-
-scaleStruct scale_s= {
+scaleStruct inputScale_s= {
 .minIn= 14970,
 .maxIn= 27530,
-.minOut= 1,
-.maxOut= 255
+.minOut= -255,
+.maxOut= 255,
+.deadBand= 5
 };
 
 
-/*30:*/
-#line 422 "./piruett.w"
+transStruct translation_s;
+
+
+
+/*32:*/
+#line 408 "./piruett.w"
 
 {
 
@@ -143,23 +150,23 @@ TCCR1B|= (1<<CS10);
 ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 }
 
-/*:30*/
-#line 223 "./piruett.w"
+/*:32*/
+#line 201 "./piruett.w"
 
-/*27:*/
-#line 409 "./piruett.w"
+/*29:*/
+#line 395 "./piruett.w"
 
 {
 
 DDRB|= (1<<DDB5);
 }
 
-/*:27*/
-#line 224 "./piruett.w"
+/*:29*/
+#line 202 "./piruett.w"
 
 
-/*:13*//*14:*/
-#line 229 "./piruett.w"
+/*:14*//*15:*/
+#line 207 "./piruett.w"
 
 sei();
 
@@ -175,41 +182,41 @@ EICRA|= (1<<ISC10);
 EIMSK|= (1<<INT1);
 }
 
-/*:14*//*15:*/
-#line 253 "./piruett.w"
+/*:15*//*16:*/
+#line 231 "./piruett.w"
 
 
-/*28:*/
-#line 415 "./piruett.w"
+/*30:*/
+#line 401 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
 }
 
-/*:28*/
-#line 255 "./piruett.w"
+/*:30*/
+#line 233 "./piruett.w"
 
 
 ledcntl(OFF);
 
 edgeSelect(&input_s);
 
-/*:15*//*16:*/
-#line 265 "./piruett.w"
+/*:16*//*17:*/
+#line 244 "./piruett.w"
 
 
 
 for(;;)
 {
 
-/*:16*//*17:*/
-#line 273 "./piruett.w"
+/*:17*//*18:*/
+#line 253 "./piruett.w"
 
 
 sleep_mode();
 
-/*:17*//*18:*/
-#line 281 "./piruett.w"
+/*:18*//*19:*/
+#line 262 "./piruett.w"
 
 if(handleIrq!=NULL)
 {
@@ -219,11 +226,16 @@ handleIrq= NULL;
 
 
 
-output_s.turn= scaler(&scale_s,input_s.ch1duration);
-output_s.thrust= scaler(&scale_s,input_s.ch2duration);
+translation_s.radius= scaler(&inputScale_s,input_s.ch1duration);
+translation_s.thrust= scaler(&inputScale_s,input_s.ch2duration);
+translation_s.track= 100;
 
+translate(&translation_s);
 
-if(output_s.turn>=255)
+/*:19*//*20:*/
+#line 279 "./piruett.w"
+
+if(translation_s.radius>=255)
 ledcntl(ON);
 else
 ledcntl(OFF);
@@ -237,8 +249,8 @@ return 0;
 
 }
 
-/*:18*//*19:*/
-#line 310 "./piruett.w"
+/*:20*//*21:*/
+#line 296 "./piruett.w"
 
 
 ISR(INT1_vect)
@@ -250,13 +262,13 @@ ISR(TIMER1_CAPT_vect)
 handleIrq= &pwcCalc;
 }
 
-/*:19*//*20:*/
-#line 330 "./piruett.w"
+/*:21*//*22:*/
+#line 316 "./piruett.w"
 
 void pwcCalc(inputStruct*input_s)
 {
-/*:20*//*21:*/
-#line 337 "./piruett.w"
+/*:22*//*23:*/
+#line 323 "./piruett.w"
 
 
 switch(input_s->edge)
@@ -281,8 +293,8 @@ edgeSelect(input_s);
 }
 
 
-/*:21*//*22:*/
-#line 366 "./piruett.w"
+/*:23*//*24:*/
+#line 352 "./piruett.w"
 
 void edgeSelect(inputStruct*input_s)
 {
@@ -301,8 +313,8 @@ case CH1FALL:
 ADMUX&= ~(1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
-/*:22*//*23:*/
-#line 387 "./piruett.w"
+/*:24*//*25:*/
+#line 373 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
@@ -310,8 +322,8 @@ TIFR1|= (1<<ICF1);
 }
 
 
-/*:23*//*24:*/
-#line 396 "./piruett.w"
+/*:25*//*26:*/
+#line 382 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {
@@ -319,32 +331,76 @@ PORTB= state?PORTB|(1<<PORTB5):PORTB&~(1<<PORTB5);
 }
 
 
-/*:24*//*31:*/
-#line 452 "./piruett.w"
+/*:26*//*33:*/
+#line 439 "./piruett.w"
 
-uint16_t scaler(scaleStruct*scale_s,uint16_t input)
+uint16_t scaler(scaleStruct*inputScale_s,uint16_t input)
 {
+const int32_t ampFact= 128L;
 
-/*:31*//*32:*/
-#line 459 "./piruett.w"
+/*:33*//*34:*/
+#line 447 "./piruett.w"
 
-if(input> scale_s->maxIn)
-return scale_s->maxOut;
+if(input> inputScale_s->maxIn)
+return inputScale_s->maxOut;
 else
-if(input<scale_s->minIn)
-return scale_s->minOut;
+if(input<inputScale_s->minIn)
+return inputScale_s->minOut;
 
-/*:32*//*33:*/
-#line 475 "./piruett.w"
-
-
-
-int32_t gain= (100L*(int32_t)(scale_s->maxIn-scale_s->minIn))/
-(int32_t)(scale_s->maxOut-scale_s->minOut);
-
-int32_t offset= ((100L*(int32_t)scale_s->minIn)/gain)-(int32_t)scale_s->minOut;
+/*:34*//*35:*/
+#line 464 "./piruett.w"
 
 
-return(100L*(int32_t)input/gain)-offset;
 
-}/*:33*/
+int32_t gain= (ampFact*(int32_t)(inputScale_s->maxIn-inputScale_s->minIn))/
+(int32_t)(inputScale_s->maxOut-inputScale_s->minOut);
+
+int32_t offset= ((ampFact*(int32_t)inputScale_s->minIn)/gain)
+-(int32_t)inputScale_s->minOut;
+
+
+return(ampFact*(int32_t)input/gain)-offset;
+
+}
+
+/*:35*//*36:*/
+#line 486 "./piruett.w"
+
+
+void translate(transStruct*trans_s)
+{
+int16_t speed;
+int16_t rotation;
+int16_t difference;
+const int16_t max= (MAX_DUTYCYCLE*UINT8_MAX)/100;
+const int16_t ampFact= 128;
+
+speed= trans_s->thrust;
+
+
+/*:36*//*37:*/
+#line 503 "./piruett.w"
+
+difference= (speed*((ampFact*trans_s->radius)/UINT8_MAX))/ampFact;
+rotation= (trans_s->track*((ampFact*difference)/UINT8_MAX))/ampFact;
+
+/*:37*//*38:*/
+#line 512 "./piruett.w"
+
+if((speed-rotation)>=max)
+trans_s->portOut= max;
+else if((speed-rotation)<=-max)
+trans_s->portOut= -max;
+else
+trans_s->portOut= speed-rotation;
+
+
+if((speed+rotation)>=max)
+trans_s->starboardOut= max;
+else if((speed+rotation)<=-max)
+trans_s->starboardOut= -max;
+else
+trans_s->starboardOut= speed+rotation;
+
+
+}/*:38*/

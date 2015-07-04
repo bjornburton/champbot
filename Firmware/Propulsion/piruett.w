@@ -8,44 +8,22 @@
 Champbot.
 It features separate thrust and steering as well as piruett turning.
 
-This will facilitate motion by taking "thrust" and "turn" pulse-width inputs
-from the Futaba RC receiver by converting them to the appropriate motor actions.
-These are from Channel 2 at A1 and channel 1 at A0, respectivily.
+This will facilitate motion by taking ``thrust'' and ``radius'' pulse-width
+inputs from the Futaba RC receiver by converting them to the appropriate motor
+ actions.
+These are from Channel 2 at analog input A1 and channel 1 at A0, respectivily.
 The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
 @* Implementation.
-Both pulse-width inputs will have some dead-band to allow for full stop.
-
+The Futaba receiver has two PWC channels.
 The pulse-width from the receiver is at 20 ms intervals.
-The time ranges from 1000--2000 ms, including trim.
-1500~ ms is the width for stopped.
+The on-time ranges from 1000--2000 ms, including trim.
+1500~ ms is the pulse-width for stopped.
 The levers cover $\pm$0.4~ms and the trim covers the balance.
 
-Math for radius...I think this is right:
-
-Where:
- t is track
- r is radius
- v is value
- f is factor
-
-min r is 1 and 255
-max r is 128
-
-get this value for v
-[1]
-[128]
-[255]
-
-r=factor*abs(127-v)
-
-
-For non-zero r
-Inside=(2r-t)/2r
-Outside=(2r+t)/2r
-
+Both pulse-width inputs will need some dead-band to allow for full stop.
 
 Port motor pulse will be applied to ???, starboard will be at ???.
 The median time will be subtracted from them for a pair of signed values
@@ -58,9 +36,9 @@ Each motor need direction and power so that's 4 signals of output.
 
 The radius control will also be the rotate control, if thrust is zero.
 
-Adding the two signal of input, I need more I/O than the trinket has.
-So---I now have a \$10 Pro Trinket with far more capability.
-It has an ATmega328.
+Adding the two signals of input, I need more I/O than the original trinket has.
+So---I now have moved to a \$10 Pro Trinket with far more capability.
+It has an ATmega328, just like and Arduino.
 
 The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
 This has an ``Input Capture Unit'' that may be used for PWC decoding.
@@ -68,16 +46,16 @@ PWC being the type of signal from the RC receiver.
 That seems like as elegant a solutioni as I will find and it is recommended by
 Atmel to use it for this purpose.
 
+The best way to use this nice feature is to
+take the PWC signals into the MUX, through the comparator and into the Input
+Capture Unit.
+
 One of the other timers will do more than fine for the two motors.
 
 For the PWC measurement, this app note, AVR135, is helpful:
  www.atmel.com/images/doc8014.pdf
 
 In the datasheet, this section is helpful: 16.6.3
-
-The best way to use this nice feature is to
-take the PWC signals into the MUX, through the comparator and into the Input
-Capture Unit.
 
 An interesting thing about this Futaba receiver is that the pulses are in
 series.
@@ -88,11 +66,6 @@ This means that it will be possible to capture all of the pulses.
 After the two pulses are captured, there's an 18~ms dead-time before the next
 round. That's over 250,000 clock cycles.
 This will provide ample time to do math and set the motor PWMs.
-
-First pick the turn, set for a rising edge, wait, grab the time-stamp and set
-for falling edge, wait, grab the time-stamp, do modulus subtraction,
-switch the MUX, set for rising, reset the ICR, wait, grab the time-stamp, and
-do modulus sutraction for the second duration.
 
 
 Extensive use was made of the datasheet, Atmel
@@ -113,9 +86,12 @@ Extensive use was made of the datasheet, Atmel
 @d OFF 0
 @d SET 1
 @d CLEAR 0
+
+@ Here are some other definitions.
 @d CH2RISE 0
 @d CH2FALL 1
 @d CH1FALL 2
+@d MAX_DUTYCYCLE 98 // 98\% to support charge pump of bridge-driver
 
 
 @ @<Include...@>=
@@ -126,21 +102,8 @@ Extensive use was made of the datasheet, Atmel
 # include <stdlib.h>
 # include <stdint.h>
 
-@ Here is a structure type to keep track of the state of output things,
-like motor settings.
-
-@<Types@>=
-typedef struct {
-    uint8_t portOut;
-    uint8_t starboardOut;
-    int32_t thrust;
-    int32_t turn;
-    uint8_t failSafe; // safety relay
-    } outputStruct;
-
-
-@ Here is a structure type to keep track of the state of input things,
-like servo timing.
+@ Here is a structure type to keep track of the state of remote-control
+input, e.g. servo timing.
 
 @<Types@>=
 typedef struct {
@@ -152,19 +115,26 @@ typedef struct {
     uint8_t  edge;
     } inputStruct;
 
-@ Here is a structure type to contain the scaling parameters for the scaler
-function.
-
-
+@ Here is a structure type to keep track of the state of translation items.
 @<Types@>=
 typedef struct {
-    uint16_t minIn;
-    uint16_t maxIn;
-    uint16_t minOut;
-    uint16_t maxOut;
-    uint8_t  deadBand;
-    } scaleStruct;
+    int16_t thrust;       // -255 to 255
+    int16_t radius;       // -255 to 255
+    int16_t track;        //    1 to 255
+    int16_t starboardOut; // -255 to 255
+    int16_t portOut;       // -255 to 255
+   } transStruct;
 
+
+@ Here is a structure type to contain the scaling parameters for the scaler.
+@<Types@>=
+typedef struct {
+    int16_t minIn;
+    int16_t maxIn;
+    int16_t minOut;
+    int16_t maxOut;
+    int8_t  deadBand;
+    } scaleStruct;
 
 
 @ @<Prototypes@>=
@@ -198,30 +168,34 @@ inputStruct input_s = {
     .edge = CH2RISE
     };
 
-outputStruct output_s;
-
 
 @
-Center reports about 21250, hard left, or up, with trim reports about 29100
-and hard right, or down, with trim reports about 13400.
+Center position of the controller results in a count of  about 21250,
+hard left, or up, with trim reports about 29100 and hard right, or down,
+ with trim reports about 13400.
 
 About 4/5ths of that range are the full swing of the stick, without trim.
 This is from about 14970 and 27530 ticks.
 
-This |"scale_s"| structure holds the parameters used in the scaler function.
+This |"inputScale_s"| structure holds the parameters used in the scaler
+function.
 The |"In"| numbers are raw from the Input Capture Register.
 
 At some point a calibration feature could be added which could populate these
-but the numbers here were from trial and error.
+but the numbers here were from trial and error and seem good.
 @c
 
-scaleStruct scale_s = {
+scaleStruct inputScale_s = {
     .minIn = 14970, // ticks for hard right or down
     .maxIn = 27530, // ticks for hard left or up
-    .minOut = 1,
+    .minOut = -255,
     .maxOut = 255,
-    .deadband = 5
+    .deadBand = 5
     };
+
+
+transStruct translation_s;
+
 
 @#
 @<Initialize the inputs and capture mode...@>
@@ -229,7 +203,7 @@ scaleStruct scale_s = {
 @#
 @
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
-is set; usually done through calling sei().
+is set; usually done through calling |"sei()"|.
 @c
   sei();
 @#
@@ -247,10 +221,10 @@ is set; usually done through calling sei().
 
 @
 Rather than burning loops, waiting the ballance of 18~ms for something to
-happen, the ``sleep'' mode is used.
-The specific type of sleep is `idle'.
+happen, the |"sleep"| mode is used.
+The specific type of sleep is |"idle"|.
 In idle, execution stops but timers continue.
-Interrupts are used to wake it.
+Interrupts are used to wake it up.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
@@ -263,8 +237,9 @@ ledcntl(OFF);
 edgeSelect(&input_s);
 
 @
-This is the loop that does the work. It should spend most of its time in
-|sleep_mode|, comming out at each interrupt event caused by an edge.
+This is the loop that does the work.
+It should spend most of its time in ``sleep\_mode'', comming out at each
+interrupt event caused by an edge.
 
 @c
 
@@ -273,7 +248,8 @@ This is the loop that does the work. It should spend most of its time in
   {@#
 
 @
-Now that a loop is started, we wait in ``idle'' for the edge on the channel selected.
+Now that a loop is started, we wait in |"idle"| for the edge on the channel
+selected.
 @c
 
  sleep_mode(); // idle
@@ -281,7 +257,8 @@ Now that a loop is started, we wait in ``idle'' for the edge on the channel sele
 @
 If execution arrives here, some interrupt has woken it from sleep and some
 vector has possibly run.
-The pointer handleIrq will be assigned the value of the responsible function.
+The pointer |"handleIrq"| will be assigned the value of the responsible
+function.
 @c
 if (handleIrq != NULL) // in case it woke for some other reason
    {@#
@@ -291,11 +268,16 @@ if (handleIrq != NULL) // in case it woke for some other reason
 
 
 
-output_s.turn =   scaler(&scale_s, input_s.ch1duration);
-output_s.thrust = scaler(&scale_s, input_s.ch2duration);
+translation_s.radius = scaler(&inputScale_s, input_s.ch1duration);
+translation_s.thrust = scaler(&inputScale_s, input_s.ch2duration);
+translation_s.track = 100; // represent unitless prop-prop distance
 
+translate(&translation_s);
 
-if(output_s.turn >=255 )
+@
+Some temporary test code here.
+@c
+if(translation_s.radius >=255 )
     ledcntl(ON);
  else
     ledcntl(OFF);
@@ -452,76 +434,96 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 
 @
 The scaler function takes an input, as in times from the Input Capture
-Register and returns a value scaled by the parameters in structure |"scale_s"|.
+Register and returns a value scaled by the parameters in structure
+|"inputScale_s"|.
 @c
-uint16_t scaler(scaleStruct *scale_s, uint16_t input)
+uint16_t scaler(scaleStruct *inputScale_s, uint16_t input)
 {@#
+const int32_t ampFact = 128L; // factor for precision
 
 @
 First, we can solve for the obvious cases in which the input exceeds the range.
 This can easily happen if the trim is shifted.
 @c
-  if (input > scale_s->maxIn)
-     return scale_s->maxOut;
+  if (input > inputScale_s->maxIn)
+     return inputScale_s->maxOut;
   else
-  if (input < scale_s->minIn)
-     return scale_s->minOut;
+  if (input < inputScale_s->minIn)
+     return inputScale_s->minOut;
 
 @
-If it's not that simple, then compute the gain and offset then continue in the usual way.
+If it's not that simple, then compute the gain and offset and then continue in
+ the usual way.
 This is not really an effecient method, recomputing gain and offset every time
 but we are not in a rush and it makes it easier since, if something changes,
-I don't have to manualy compute and enter these values and the code is all in
+I don't have to manualy compute and enter these values, also the code is all in
 one place.
 
-The constant  100 amplifies it so I can take advantage of the extra bits for
-precision.
+The constant |"ampFact"| amplifies it so I can take advantage of the extra
+bits for precision.
 @c
 
 
-int32_t gain = (100L*(int32_t)(scale_s->maxIn-scale_s->minIn))/
-                    (int32_t)(scale_s->maxOut-scale_s->minOut);
+int32_t gain = (ampFact*(int32_t)(inputScale_s->maxIn-inputScale_s->minIn))/
+                    (int32_t)(inputScale_s->maxOut-inputScale_s->minOut);
 
-int32_t offset = ((100L*(int32_t)scale_s->minIn)/gain)-(int32_t)scale_s->minOut;
+int32_t offset = ((ampFact*(int32_t)inputScale_s->minIn)/gain)
+                 -(int32_t)inputScale_s->minOut;
 
 
-return (100L*(int32_t)input/gain)-offset;
+return (ampFact*(int32_t)input/gain)-offset;
 
 }
 
 @
 We need a way to translate |"thrust"| and |"radius"| in order to carve a
- |"turn"|. This function should do this.
-It's not going to be perfect, since thrust isn't speed, but it should be close.
+ |"turn"|. This procedure should do this but it's not going to be perfect.
+Drag and slippage make thrust increase progressivly more than speed.
+It should steer OK as long as the speed is constant and small changes in speed
+should not be too disruptive.
+
+This procedure works with values from -255 to 255.
 @c
 
-int translate(int16_t thrust, int16_t radius)                                   
-{                                                                               
-//psudocode placeholder
-int16_t track = (int16_t)rand()%256;  //    1 to 255                            
-int16_t rotation;     // -255 to 255                                            
-int16_t star;         // -255 to 255                                            
-int16_t port;         // -255 to 255                                            
-const int16_t max = (98*UINT8_MAX)/100; // max is 98\%                          
-const int16_t ampFact = INT8_MAX; // factor for precision                       
-                                                                                
-rotation = (track * ((thrust*((ampFact*radius)/UINT8_MAX))/ampFact))/INT8_MAX;  
-                                                                                
-                                                                                
-if((thrust-rotation) >= max)                                                    
-   port=max;                                                                    
-else if((thrust-rotation) <= -max)                                              
-   port=-max;                                                                   
-else                                                                            
-   port=thrust-rotation;                                                        
-                                                                                
-                                                                                
-if((thrust+rotation) >= max)                                                    
-   star=max;                                                                    
-else if ((thrust+rotation) <= -max)                                             
-   star = -max;                                                                 
-else                                                                            
-   star=thrust+rotation; 
+void translate(transStruct *trans_s)
+{
+int16_t speed;
+int16_t rotation;
+int16_t difference;
+const int16_t max = (MAX_DUTYCYCLE * UINT8_MAX)/100;
+const int16_t ampFact = 128; // factor for precision
+
+ speed = trans_s->thrust; // cheating a bit here
+
+
+@
+Here we convert desired radius to thrust-difference by scaling to speed.
+Then that difference is converted to rotation by scaling it with |"track"|.
+The radius sensitivity is adjusted by changing the value of |"track"|.
+@c
+ difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
+ rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
+
+@
+Any rotation involves one motor turning faster than the other.
+At some point, faster is not possible and so the requiered clipping is here.
+
+|"max"| is set at to support the limit of the bridge-driver's charge-pump.
+@c
+ if((speed-rotation) >= max)
+    trans_s->portOut = max;
+ else if((speed-rotation) <= -max)
+    trans_s->portOut = -max;
+ else
+    trans_s->portOut = speed-rotation;
+
+
+ if((speed+rotation) >= max)
+    trans_s->starboardOut = max;
+ else if ((speed+rotation) <= -max)
+    trans_s->starboardOut = -max;
+ else
+   trans_s->starboardOut = speed+rotation;
 
 
 }

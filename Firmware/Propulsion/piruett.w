@@ -122,18 +122,18 @@ typedef struct {
     int16_t radius;       // -255 to 255
     int16_t track;        //    1 to 255
     int16_t starboardOut; // -255 to 255
-    int16_t portOut;       // -255 to 255
+    int16_t portOut;      // -255 to 255
    } transStruct;
 
 
 @ Here is a structure type to contain the scaling parameters for the scaler.
 @<Types@>=
 typedef struct {
-    int16_t minIn;
-    int16_t maxIn;
-    int16_t minOut;
-    int16_t maxOut;
-    int8_t  deadBand;
+    int16_t minIn;    // input, minimum
+    int16_t maxIn;    // input, maximum
+    int16_t minOut;   // output, minimum
+    int16_t maxOut;   // output, maximum
+    int8_t  deadBand; // width of zero in terms of output units
     } scaleStruct;
 
 
@@ -142,8 +142,8 @@ void ledcntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
 uint16_t scaler(scaleStruct *, uint16_t input);
-void translate();
-void setPwm();
+void translate(transStruct *);
+void setPwm(transStruct *);
 
 @
 My lone global variable is a function pointer.
@@ -220,6 +220,14 @@ is set; usually done through calling |"sei()"|.
  }
 
 @
+
+The PWM is used to control port and starboard motors through OC0A (D5) and
+OC0B (D6), respectivly.
+@c
+@<Initialize the Timer Counter 0 for PWM...@>
+
+
+@
 Rather than burning loops, waiting the ballance of 18~ms for something to
 happen, the |"sleep"| mode is used.
 The specific type of sleep is |"idle"|.
@@ -248,9 +256,11 @@ interrupt event caused by an edge.
   {@#
 
 @
-Now that a loop is started, we wait in |"idle"| for the edge on the channel
-selected.
+Now that a loop is started, the PWM is given an initial value and we wait in
+|"idle"| for the edge on the channel selected. Each sucessive loop will finish
+in the same way.
 @c
+ setPwm(&translation_s);
 
  sleep_mode(); // idle
 
@@ -277,7 +287,7 @@ translate(&translation_s);
 @
 Some temporary test code here.
 @c
-if(translation_s.radius >=255 )
+if(translation_s.portOut >= 127 )
     ledcntl(ON);
  else
     ledcntl(OFF);
@@ -388,14 +398,17 @@ void ledcntl(uint8_t state)
 
 @
 
-@* These are the supporting routines, procedures and configuration blocks.
+@* Supporting routines, functions, procedures and configuration
+blocks.
 
 
-Here is the block that sets-up the digital I/O pins.
 @ @<Initialize pin outputs...@>=
 {
  /* set the led port direction; This is pin \#17 */
   DDRB |= (1<<DDB5);
+ 
+ // 14.4.9 DDRD – The Port D Data Direction Register 
+  DDRD |= ((1<<DDD5)|(1<<DDD6)); // Data direction to output (sec 14.3.3)  
 }
 
 @ @<Configure to idle on sleep...@>=
@@ -433,13 +446,31 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 }
 
 @
+PWM setup isn't too scary.
+Timer Count 0 is configured for ``Phase Correct'' PWM which, according to the
+datasheet, is preferred for motor control.
+OC0A (port) and OC0B (starboard) are set to clear on a match which creates a
+non-inverting PWM.
+The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
+@ @<Initialize the Timer Counter 0 for PWM...@>=
+{
+ // 15.9.1 TCCR0A – Timer/Counter Control Register A
+ TCCR0A |= (1<<WGM00);  // Phase correct mode of PWM (table 15-9)
+ TCCR0A |= (1<<COM0A1); // Clear on Comparator A match (table 15-4)
+ TCCR0A |= (1<<COM0B1); // Clear on Comparator B match (table 15-7)
+
+ // 15.9.2 TCCR0B – Timer/Counter Control Register B
+ TCCR0B |= (1<<CS01);   // Prescaler set to clk/8 (table 15-9)
+}
+
+
+@
 The scaler function takes an input, as in times from the Input Capture
 Register and returns a value scaled by the parameters in structure
 |"inputScale_s"|.
 @c
 uint16_t scaler(scaleStruct *inputScale_s, uint16_t input)
 {@#
-const int32_t ampFact = 128L; // factor for precision
 
 @
 First, we can solve for the obvious cases in which the input exceeds the range.
@@ -462,7 +493,7 @@ one place.
 The constant |"ampFact"| amplifies it so I can take advantage of the extra
 bits for precision.
 @c
-
+const int32_t ampFact = 128L; // factor for precision
 
 int32_t gain = (ampFact*(int32_t)(inputScale_s->maxIn-inputScale_s->minIn))/
                     (int32_t)(inputScale_s->maxOut-inputScale_s->minOut);
@@ -477,12 +508,12 @@ return (ampFact*(int32_t)input/gain)-offset;
 
 @
 We need a way to translate |"thrust"| and |"radius"| in order to carve a
- |"turn"|. This procedure should do this but it's not going to be perfect.
-Drag and slippage make thrust increase progressivly more than speed.
+ |"turn"|. This procedure should do this but it's not going to be perfect as
+drag and slippage make thrust increase progressivly more than speed.
 It should steer OK as long as the speed is constant and small changes in speed
 should not be too disruptive.
 
-This procedure works with values from -255 to 255.
+This procedure is intended for  values from -255 to 255.
 @c
 
 void translate(transStruct *trans_s)
@@ -524,6 +555,16 @@ At some point, faster is not possible and so the requiered clipping is here.
     trans_s->starboardOut = -max;
  else
    trans_s->starboardOut = speed+rotation;
+
+}
+
+
+void setPwm(transStruct *trans_s)
+{
+OCR0A = (uint8_t)(trans_s->portOut>0?
+                 trans_s->portOut:-trans_s->portOut);
+OCR0B = (uint8_t)(trans_s->starboardOut>0?
+                 trans_s->starboardOut:-trans_s->starboardOut);
 
 
 }

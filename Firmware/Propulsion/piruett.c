@@ -121,8 +121,8 @@ transStruct translation_s;
 
 
 
-/*33:*/
-#line 421 "./piruett.w"
+/*35:*/
+#line 413 "./piruett.w"
 
 {
 
@@ -150,21 +150,24 @@ TCCR1B|= (1<<CS10);
 ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 }
 
-/*:33*/
+/*:35*/
 #line 201 "./piruett.w"
 
-/*30:*/
-#line 405 "./piruett.w"
+/*32:*/
+#line 394 "./piruett.w"
 
 {
 
 DDRB|= (1<<DDB5);
 
 
+
 DDRD|= ((1<<DDD5)|(1<<DDD6));
+
+DDRD|= ((1<<DDD3)|(1<<DDD4));
 }
 
-/*:30*/
+/*:32*/
 #line 202 "./piruett.w"
 
 
@@ -173,23 +176,12 @@ DDRD|= ((1<<DDD5)|(1<<DDD6));
 
 sei();
 
-{
-DDRD&= ~(1<<DDD3);
-
-
-PORTD|= (1<<PORTD3);
-
-
-
-EICRA|= (1<<ISC10);
-EIMSK|= (1<<INT1);
-}
 
 /*:15*//*16:*/
-#line 226 "./piruett.w"
+#line 215 "./piruett.w"
 
-/*35:*/
-#line 455 "./piruett.w"
+/*37:*/
+#line 447 "./piruett.w"
 
 {
 
@@ -202,24 +194,24 @@ TCCR0B|= (1<<CS01);
 }
 
 
-/*:35*/
-#line 227 "./piruett.w"
+/*:37*/
+#line 216 "./piruett.w"
 
 
 
 /*:16*//*17:*/
-#line 239 "./piruett.w"
+#line 228 "./piruett.w"
 
 
-/*31:*/
-#line 414 "./piruett.w"
+/*33:*/
+#line 406 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
 }
 
-/*:31*/
-#line 241 "./piruett.w"
+/*:33*/
+#line 230 "./piruett.w"
 
 
 ledcntl(OFF);
@@ -227,7 +219,7 @@ ledcntl(OFF);
 edgeSelect(&input_s);
 
 /*:17*//*18:*/
-#line 252 "./piruett.w"
+#line 241 "./piruett.w"
 
 
 
@@ -235,14 +227,14 @@ for(;;)
 {
 
 /*:18*//*19:*/
-#line 262 "./piruett.w"
+#line 251 "./piruett.w"
 
 setPwm(&translation_s);
 
 sleep_mode();
 
 /*:19*//*20:*/
-#line 272 "./piruett.w"
+#line 261 "./piruett.w"
 
 if(handleIrq!=NULL)
 {
@@ -259,7 +251,7 @@ translation_s.track= 100;
 translate(&translation_s);
 
 /*:20*//*21:*/
-#line 289 "./piruett.w"
+#line 278 "./piruett.w"
 
 if(translation_s.portOut>=127)
 ledcntl(ON);
@@ -276,7 +268,7 @@ return 0;
 }
 
 /*:21*//*22:*/
-#line 306 "./piruett.w"
+#line 295 "./piruett.w"
 
 
 ISR(INT1_vect)
@@ -289,12 +281,12 @@ handleIrq= &pwcCalc;
 }
 
 /*:22*//*23:*/
-#line 326 "./piruett.w"
+#line 315 "./piruett.w"
 
 void pwcCalc(inputStruct*input_s)
 {
 /*:23*//*24:*/
-#line 333 "./piruett.w"
+#line 322 "./piruett.w"
 
 
 switch(input_s->edge)
@@ -320,7 +312,7 @@ edgeSelect(input_s);
 
 
 /*:24*//*25:*/
-#line 362 "./piruett.w"
+#line 351 "./piruett.w"
 
 void edgeSelect(inputStruct*input_s)
 {
@@ -340,7 +332,7 @@ ADMUX&= ~(1<<MUX0);
 TCCR1B&= ~(1<<ICES1);
 }
 /*:25*//*26:*/
-#line 383 "./piruett.w"
+#line 372 "./piruett.w"
 
 
 TIFR1|= (1<<ICF1);
@@ -349,7 +341,7 @@ TIFR1|= (1<<ICF1);
 
 
 /*:26*//*27:*/
-#line 392 "./piruett.w"
+#line 381 "./piruett.w"
 
 void ledcntl(uint8_t state)
 {
@@ -357,14 +349,14 @@ PORTB= state?PORTB|(1<<PORTB5):PORTB&~(1<<PORTB5);
 }
 
 
-/*:27*//*36:*/
-#line 471 "./piruett.w"
+/*:27*//*38:*/
+#line 463 "./piruett.w"
 
 uint16_t scaler(scaleStruct*inputScale_s,uint16_t input)
 {
 
-/*:36*//*37:*/
-#line 478 "./piruett.w"
+/*:38*//*39:*/
+#line 470 "./piruett.w"
 
 if(input> inputScale_s->maxIn)
 return inputScale_s->maxOut;
@@ -372,8 +364,8 @@ else
 if(input<inputScale_s->minIn)
 return inputScale_s->minOut;
 
-/*:37*//*38:*/
-#line 495 "./piruett.w"
+/*:39*//*40:*/
+#line 487 "./piruett.w"
 
 const int32_t ampFact= 128L;
 
@@ -388,8 +380,8 @@ return(ampFact*(int32_t)input/gain)-offset;
 
 }
 
-/*:38*//*39:*/
-#line 517 "./piruett.w"
+/*:40*//*41:*/
+#line 509 "./piruett.w"
 
 
 void translate(transStruct*trans_s)
@@ -403,14 +395,14 @@ const int16_t ampFact= 128;
 speed= trans_s->thrust;
 
 
-/*:39*//*40:*/
-#line 534 "./piruett.w"
+/*:41*//*42:*/
+#line 526 "./piruett.w"
 
 difference= (speed*((ampFact*trans_s->radius)/UINT8_MAX))/ampFact;
 rotation= (trans_s->track*((ampFact*difference)/UINT8_MAX))/ampFact;
 
-/*:40*//*41:*/
-#line 543 "./piruett.w"
+/*:42*//*43:*/
+#line 535 "./piruett.w"
 
 if((speed-rotation)>=max)
 trans_s->portOut= max;
@@ -429,13 +421,30 @@ trans_s->starboardOut= speed+rotation;
 
 }
 
-
 void setPwm(transStruct*trans_s)
 {
-OCR0A= (uint8_t)(trans_s->portOut> 0?
-trans_s->portOut:-trans_s->portOut);
-OCR0B= (uint8_t)(trans_s->starboardOut> 0?
-trans_s->starboardOut:-trans_s->starboardOut);
+
+if(trans_s->portOut> 0)
+{
+OCR0A= (uint8_t)trans_s->portOut;
+PORTD|= (1<<PORTD3);
+}
+else
+{
+OCR0A= (uint8_t)-trans_s->portOut;
+PORTD&= ~(1<<PORTD3);
+}
 
 
-}/*:41*/
+if(trans_s->starboardOut> 0)
+{
+OCR0B= (uint8_t)trans_s->starboardOut;
+PORTD|= (1<<PORTD4);
+}
+else
+{
+OCR0B= (uint8_t)-trans_s->starboardOut;
+PORTD&= ~(1<<PORTD4);
+}
+
+}/*:43*/

@@ -207,17 +207,6 @@ is set; usually done through calling |"sei()"|.
 @c
   sei();
 @#
- { // for test purposes
-  DDRD &= ~(1 << DDD3);     // Clear the PD3 pin
-  // PD3 (PCINT0 pin) is now an input
-
-  PORTD |= (1 << PORTD3);    // turn On the Pull-up
-  // PD3 is now an input with pull-up enabled
-
-
-  EICRA |= (1 << ISC10);    // set INT1 to trigger on ANY logic change
-  EIMSK |= (1 << INT1);     // Turns on INT1
- }
 
 @
 
@@ -400,7 +389,7 @@ void ledcntl(uint8_t state)
 
 @* Supporting routines, functions, procedures and configuration
 blocks.
-
+@ @
 
 @ @<Initialize pin outputs...@>=
 {
@@ -408,7 +397,10 @@ blocks.
   DDRB |= (1<<DDB5);
  
  // 14.4.9 DDRD – The Port D Data Direction Register 
+ // port and starboard pwm outputs
   DDRD |= ((1<<DDD5)|(1<<DDD6)); // Data direction to output (sec 14.3.3)  
+ // port and starboard direction outputs 
+  DDRD |= ((1<<DDD3)|(1<<DDD4)); // Data direction to output (sec 14.3.3)  
 }
 
 @ @<Configure to idle on sleep...@>=
@@ -558,13 +550,30 @@ At some point, faster is not possible and so the requiered clipping is here.
 
 }
 
-
 void setPwm(transStruct *trans_s)
 {
-OCR0A = (uint8_t)(trans_s->portOut>0?
-                 trans_s->portOut:-trans_s->portOut);
-OCR0B = (uint8_t)(trans_s->starboardOut>0?
-                 trans_s->starboardOut:-trans_s->starboardOut);
 
+ if (trans_s->portOut > 0)
+    {
+     OCR0A = (uint8_t)trans_s->portOut;
+     PORTD |= (1<<PORTD3);
+     }
+  else
+    {
+     OCR0A = (uint8_t)-trans_s->portOut;
+     PORTD &= ~(1<<PORTD3);
+     }
+
+
+ if (trans_s->starboardOut > 0)
+    {
+     OCR0B = (uint8_t)trans_s->starboardOut;
+     PORTD |= (1<<PORTD4);
+     }
+  else
+    {
+     OCR0B = (uint8_t)-trans_s->starboardOut;
+     PORTD &= ~(1<<PORTD4);
+     }
 
 }

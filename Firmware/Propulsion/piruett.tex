@@ -208,29 +208,20 @@ $.$ $\\{maxIn}\K\T{27530}$ $,{}$\SHC{ ticks for hard left or up }\6
 $.$ $\\{minOut}\K{-}\T{255}$ $,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $%
 \\{deadBand}\K\T{5}$ $\}$  ;\7
 \&{transStruct} \\{translation\_s};\7
-\X33:Initialize the inputs and capture mode\X\X30:Initialize pin outputs\X\Y\par
+\X35:Initialize the inputs and capture mode\X\X32:Initialize pin outputs\X\Y\par
 \fi
 
 \M{15}
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
 is set; usually done through calling \PB{\.{"sei()"}}.
-\Y\B\\{sei}(\,);\7
-${}\{{}$\SHC{ for test purposes }\1\6
-${}\.{DDRD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{DDD3}){}$;\SHC{ Clear the PD3 pin }%
-\SHC{ PD3 (PCINT0 pin) is now an input }\6
-${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3}){}$;\SHC{ turn On the Pull-up }%
-\SHC{ PD3 is now an input with pull-up enabled }\6
-${}\.{EICRA}\MRL{{\OR}{\K}}(\T{1}\LL\.{ISC10}){}$;\SHC{ set INT1 to trigger on
-ANY logic change }\6
-${}\.{EIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{INT1}){}$;\SHC{ Turns on INT1 }\6
-\4${}\}{}$\2\par
+\Y\B\\{sei}(\,);\Y\par
 \fi
 
 \M{16}
 
 The PWM is used to control port and starboard motors through OC0A (D5) and
 OC0B (D6), respectivly.
-\Y\B\X35:Initialize the Timer Counter 0 for PWM\X\par
+\Y\B\X37:Initialize the Timer Counter 0 for PWM\X\par
 \fi
 
 \M{17}
@@ -242,7 +233,7 @@ Interrupts are used to wake it up.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
-\Y\B\X31:Configure to idle on sleep\X\7
+\Y\B\X33:Configure to idle on sleep\X\7
 \\{ledcntl}(\.{OFF});\6
 ${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
@@ -392,31 +383,38 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
 
 \N{1}{29}Supporting routines, functions, procedures and configuration
 blocks.
+\fi
 
+\M{30}\fi
+
+\M{31}
 
 \fi
 
-\M{30}\B\X30:Initialize pin outputs\X${}\E{}$\6
+\M{32}\B\X32:Initialize pin outputs\X${}\E{}$\6
 ${}\{{}$\C{ set the led port direction; This is pin \#17 }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5}){}$;\SHC{ 14.4.9 DDRD – The Port
-D Data Direction Register }\6
+D Data Direction Register }\SHC{ port and starboard pwm outputs }\6
 ${}\.{DDRD}\MRL{{\OR}{\K}}((\T{1}\LL\.{DDD5})\OR(\T{1}\LL\.{DDD6})){}$;\SHC{
+Data direction to output (sec 14.3.3) }\SHC{ port and starboard direction
+outputs }\6
+${}\.{DDRD}\MRL{{\OR}{\K}}((\T{1}\LL\.{DDD3})\OR(\T{1}\LL\.{DDD4})){}$;\SHC{
 Data direction to output (sec 14.3.3) }\6
 \4${}\}{}$\2\par
 \U14.\fi
 
-\M{31}\B\X31:Configure to idle on sleep\X${}\E{}$\6
+\M{33}\B\X33:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
 \U17.\fi
 
-\M{32}
+\M{34}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{33}\B\X33:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{35}\B\X35:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status
@@ -447,7 +445,7 @@ ${}\.{ADMUX}\MRL{\AND{\K}}\CM((\T{1}\LL\.{MUX2})\OR(\T{1}\LL\.{MUX1})\OR(\T{1}%
 \4${}\}{}$\2\par
 \U14.\fi
 
-\M{34}
+\M{36}
 PWM setup isn't too scary.
 Timer Count 0 is configured for ``Phase Correct'' PWM which, according to the
 datasheet, is preferred for motor control.
@@ -456,7 +454,7 @@ non-inverting PWM.
 The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
 \fi
 
-\M{35}\B\X35:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
+\M{37}\B\X37:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
 ${}\{{}$\SHC{ 15.9.1 TCCR0A – Timer/Counter Control Register A }\1\6
 ${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{WGM00}){}$;\SHC{ Phase correct mode of
 PWM (table 15-9) }\6
@@ -469,7 +467,7 @@ ${}\.{TCCR0B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS01}){}$;\SHC{ Prescaler set to clk/8
 \4${}\}{}$\2\par
 \U16.\fi
 
-\M{36}
+\M{38}
 The scaler function takes an input, as in times from the Input Capture
 Register and returns a value scaled by the parameters in structure
 \PB{\.{"inputScale\_s"}}.
@@ -477,7 +475,7 @@ Register and returns a value scaled by the parameters in structure
 \\{uint16\_t}\\{input}){}$\1\1 $\{{}$\Y\par
 \fi
 
-\M{37}
+\M{39}
 First, we can solve for the obvious cases in which the input exceeds the range.
 This can easily happen if the trim is shifted.
 \Y\B\&{if} ${}(\\{input}>\\{inputScale\_s}\MG\\{maxIn}){}$\1\5
@@ -486,7 +484,7 @@ This can easily happen if the trim is shifted.
 \&{return} \\{inputScale\_s}${}\MG\\{minOut}{}$;\2\par
 \fi
 
-\M{38}
+\M{40}
 If it's not that simple, then compute the gain and offset and then continue in
 the usual way.
 This is not really an effecient method, recomputing gain and offset every time
@@ -508,7 +506,7 @@ ${}\\{int32\_t}\\{offset}\K((\\{ampFact}*(\\{int32\_t})\\{inputScale\_s}\MG%
 \}{}$\par
 \fi
 
-\M{39}
+\M{41}
 We need a way to translate \PB{\.{"thrust"}} and \PB{\.{"radius"}} in order to
 carve a
 \PB{\.{"turn"}}. This procedure should do this but it's not going to be perfect
@@ -528,7 +526,7 @@ This procedure is intended for  values from -255 to 255.
 ${}\\{speed}\K\\{trans\_s}\MG\\{thrust}{}$;\SHC{ cheating a bit here }\par
 \fi
 
-\M{40}
+\M{42}
 Here we convert desired radius to thrust-difference by scaling to speed.
 Then that difference is converted to rotation by scaling it with \PB{%
 \.{"track"}}.
@@ -539,7 +537,7 @@ ${}\\{rotation}\K(\\{trans\_s}\MG\\{track}*((\\{ampFact}*\\{difference})/%
 \.{UINT8\_MAX}))/\\{ampFact}{}$;\par
 \fi
 
-\M{41}
+\M{43}
 Any rotation involves one motor turning faster than the other.
 At some point, faster is not possible and so the requiered clipping is here.
 
@@ -559,10 +557,26 @@ ${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{max};{}$\2\6
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{speed}+\\{rotation};{}$\2\6
 $\}$ \&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}){}$\1\1\2\2\6
 ${}\{{}$\1\6
-${}\.{OCR0A}\K(\\{uint8\_t})(\\{trans\_s}\MG\\{portOut}>\T{0}\?\\{trans\_s}\MG%
-\\{portOut}:{-}\\{trans\_s}\MG\\{portOut});{}$\6
-${}\.{OCR0B}\K(\\{uint8\_t})(\\{trans\_s}\MG\\{starboardOut}>\T{0}\?\\{trans%
-\_s}\MG\\{starboardOut}:{-}\\{trans\_s}\MG\\{starboardOut});{}$\6
+\&{if} ${}(\\{trans\_s}\MG\\{portOut}>\T{0}){}$\5
+${}\{{}$\1\6
+${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{portOut};{}$\6
+${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3});{}$\6
+\4${}\}{}$\2\6
+\&{else}\5
+${}\{{}$\1\6
+${}\.{OCR0A}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{portOut};{}$\6
+${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD3});{}$\6
+\4${}\}{}$\2\6
+\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}>\T{0}){}$\5
+${}\{{}$\1\6
+${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut};{}$\6
+${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD4});{}$\6
+\4${}\}{}$\2\6
+\&{else}\5
+${}\{{}$\1\6
+${}\.{OCR0B}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{starboardOut};{}$\6
+${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD4});{}$\6
+\4${}\}{}$\2\6
 \4${}\}{}$\2\par
 \fi
 

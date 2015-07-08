@@ -86,6 +86,8 @@ Extensive use was made of the datasheet, Atmel
 @d OFF 0
 @d SET 1
 @d CLEAR 0
+@d TRUE  1
+@d FALSE 0
 
 @ Here are some other definitions.
 @d CH2RISE 0
@@ -99,6 +101,7 @@ Extensive use was made of the datasheet, Atmel
 # include <util/delay.h> // need to delay
 # include <avr/interrupt.h> // have need of an interrupt
 # include <avr/sleep.h> // have need of sleep
+# include <avr/wdt.h> // have need of watchdog
 # include <stdlib.h>
 # include <stdint.h>
 
@@ -112,6 +115,8 @@ typedef struct {
     uint16_t ch1fall;
     uint16_t ch1duration;
     uint16_t ch2duration;
+    uint16_t minIn;    // input, minimum
+    uint16_t maxIn;    // input, maximum
     uint8_t  edge;
     } inputStruct;
 
@@ -123,27 +128,21 @@ typedef struct {
     int16_t track;        //    1 to 255
     int16_t starboardOut; // -255 to 255
     int16_t portOut;      // -255 to 255
-   } transStruct;
-
-
-@ Here is a structure type to contain the scaling parameters for the scaler.
-@<Types@>=
-typedef struct {
-    int16_t minIn;    // input, minimum
-    int16_t maxIn;    // input, maximum
     int16_t minOut;   // output, minimum
     int16_t maxOut;   // output, maximum
     int8_t  deadBand; // width of zero in terms of output units
-    } scaleStruct;
+   } transStruct;
+
 
 
 @ @<Prototypes@>=
 void ledcntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
-uint16_t scaler(scaleStruct *, uint16_t input);
+uint16_t scaler(inputStruct *, transStruct *,  uint16_t input);
 void translate(transStruct *);
 void setPwm(transStruct *);
+void lostSignal(inputStruct *);
 
 @
 My lone global variable is a function pointer.
@@ -165,7 +164,9 @@ looking for that by setting |"edge"| to look for a rise on channel 2.
 @c
 
 inputStruct input_s = {
-    .edge = CH2RISE
+    .edge = CH2RISE,
+    .minIn = 14970, // ticks for hard right or down
+    .maxIn = 27530 // ticks for hard left or up
     };
 
 
@@ -184,22 +185,21 @@ The |"In"| numbers are raw from the Input Capture Register.
 At some point a calibration feature could be added which could populate these
 but the numbers here were from trial and error and seem good.
 @c
-
-scaleStruct inputScale_s = {
-    .minIn = 14970, // ticks for hard right or down
-    .maxIn = 27530, // ticks for hard left or up
+transStruct translation_s = {
     .minOut = -255,
     .maxOut = 255,
     .deadBand = 5
     };
 
 
-transStruct translation_s;
 
 
+ cli(); //disable interrupts during setup
 @#
 @<Initialize the inputs and capture mode...@>
 @<Initialize pin outputs...@>
+cli(); // disable interrupts  
+@<Initialize watchdog timer...@>
 @#
 @
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
@@ -267,16 +267,16 @@ if (handleIrq != NULL) // in case it woke for some other reason
 
 
 
-translation_s.radius = scaler(&inputScale_s, input_s.ch1duration);
-translation_s.thrust = scaler(&inputScale_s, input_s.ch2duration);
-translation_s.track = 100; // represent unitless prop-prop distance
+translation_s.radius = scaler(&input_s, &translation_s, input_s.ch1duration);
+translation_s.thrust = scaler(&input_s, &translation_s, input_s.ch2duration);
+translation_s.track = 100; // represent unit-less prop-to-prop distance
 
 translate(&translation_s);
 
 @
 Some temporary test code here.
 @c
-if(translation_s.portOut >= 127 )
+if(translation_s.portOut <= 200)
     ledcntl(ON);
  else
     ledcntl(OFF);
@@ -291,16 +291,18 @@ return 0; // it's the right thing to do!
 } // end main()
 
 @
-Here are the ISRs.
+Here is the ISR that fires at each captured edge.
 @c
-
-ISR (INT1_vect)
-{@#
-}
 
 ISR (TIMER1_CAPT_vect)
 {@#
-handleIrq = &pwcCalc;
+ wdt_reset(); // watchdog timer is reset at each edge capture
+ handleIrq = &pwcCalc;
+}
+
+ISR (WDT_vect)
+{@#
+ handleIrq = &lostSignal;
 }
 
 @
@@ -319,9 +321,13 @@ void pwcCalc(inputStruct *input_s)
 On the falling edges we can compute the durations using modulus subtraction
 and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
+
+Arrival at the last case establishes that there was a signal and clears
+the flag.
 @c
 
-  switch(input_s->edge)
+ 
+ switch(input_s->edge)
      {
       case CH2RISE:
          input_s->ch2rise = ICR1;
@@ -342,6 +348,20 @@ edgeSelect(input_s);
 @#
 }
 
+@
+This procedure sets output to zero in the event of a lost signal.
+@c
+void lostSignal(inputStruct *input_s)
+{@#
+         input_s->ch2duration = 0;
+         input_s->ch1duration = 0;
+         input_s->ch2rise = 0;
+         input_s->ch2fall = 0;
+         input_s->ch1fall = 0;
+         input_s->edge = CH2RISE; // first step
+
+ edgeSelect(input_s);
+}
 
 @
 
@@ -438,6 +458,16 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 }
 
 @
+See section 11.8 in the datasheet for details on the Watchdog Timer.
+This is in the ``Interrupt Mode''. 
+@ @<Initialize watchdog timer...@>=
+{
+
+ WDTCSR |= (1<<WDCE) | (1<<WDE);
+ WDTCSR = (1<<WDIE) | (1<<WDP2); // reset after about 0.25 seconds
+}
+
+@
 PWM setup isn't too scary.
 Timer Count 0 is configured for ``Phase Correct'' PWM which, according to the
 datasheet, is preferred for motor control.
@@ -461,18 +491,22 @@ The scaler function takes an input, as in times from the Input Capture
 Register and returns a value scaled by the parameters in structure
 |"inputScale_s"|.
 @c
-uint16_t scaler(scaleStruct *inputScale_s, uint16_t input)
+uint16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
 {@#
 
 @
 First, we can solve for the obvious cases in which the input exceeds the range.
 This can easily happen if the trim is shifted.
 @c
-  if (input > inputScale_s->maxIn)
-     return inputScale_s->maxOut;
+  if (input > input_s->maxIn)
+     return trans_s->maxOut;
   else
-  if (input < inputScale_s->minIn)
-     return inputScale_s->minOut;
+  if (input < input_s->minIn)
+     return trans_s->minOut;
+  else
+  if (input == 0) // no valid signal
+     return 0;
+
 
 @
 If it's not that simple, then compute the gain and offset and then continue in
@@ -487,11 +521,11 @@ bits for precision.
 @c
 const int32_t ampFact = 128L; // factor for precision
 
-int32_t gain = (ampFact*(int32_t)(inputScale_s->maxIn-inputScale_s->minIn))/
-                    (int32_t)(inputScale_s->maxOut-inputScale_s->minOut);
+int32_t gain = (ampFact*(int32_t)(input_s->maxIn-input_s->minIn))/
+                    (int32_t)(trans_s->maxOut-trans_s->minOut);
 
-int32_t offset = ((ampFact*(int32_t)inputScale_s->minIn)/gain)
-                 -(int32_t)inputScale_s->minOut;
+int32_t offset = ((ampFact*(int32_t)input_s->minIn)/gain)
+                 -(int32_t)trans_s->minOut;
 
 
 return (ampFact*(int32_t)input/gain)-offset;
@@ -505,18 +539,16 @@ drag and slippage make thrust increase progressivly more than speed.
 It should steer OK as long as the speed is constant and small changes in speed
 should not be too disruptive.
 
-This procedure is intended for  values from -255 to 255.
+This procedure is intended for values from -255 to 255.
 @c
 
 void translate(transStruct *trans_s)
 {
-int16_t speed;
+int16_t speed = trans_s->thrust; // this is not true, just assuming
 int16_t rotation;
 int16_t difference;
 const int16_t max = (MAX_DUTYCYCLE * UINT8_MAX)/100;
 const int16_t ampFact = 128; // factor for precision
-
- speed = trans_s->thrust; // cheating a bit here
 
 
 @
@@ -526,7 +558,6 @@ The radius sensitivity is adjusted by changing the value of |"track"|.
 @c
  difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
  rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
-
 @
 Any rotation involves one motor turning faster than the other.
 At some point, faster is not possible and so the requiered clipping is here.
@@ -553,7 +584,7 @@ At some point, faster is not possible and so the requiered clipping is here.
 void setPwm(transStruct *trans_s)
 {
 
- if (trans_s->portOut > 0)
+ if (trans_s->portOut >= 0)
     {
      OCR0A = (uint8_t)trans_s->portOut;
      PORTD |= (1<<PORTD3);
@@ -575,5 +606,8 @@ void setPwm(transStruct *trans_s)
      OCR0B = (uint8_t)-trans_s->starboardOut;
      PORTD &= ~(1<<PORTD4);
      }
+
+
+
 
 }

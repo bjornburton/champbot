@@ -110,14 +110,15 @@ input, e.g. servo timing.
 
 @<Types@>=
 typedef struct {
-    uint16_t ch2rise;
-    uint16_t ch2fall;
-    uint16_t ch1fall;
+    uint16_t ch2rise; // pwc edge
+    uint16_t ch2fall; // pwc edge
+    uint16_t ch1fall; // pwc edge
     uint16_t ch1duration;
     uint16_t ch2duration;
     uint16_t minIn;    // input, minimum
     uint16_t maxIn;    // input, maximum
     uint8_t  edge;
+    uint8_t  lostSignal;
     } inputStruct;
 
 @ Here is a structure type to keep track of the state of translation items.
@@ -139,7 +140,7 @@ typedef struct {
 void ledcntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
-uint16_t scaler(inputStruct *, transStruct *,  uint16_t input);
+uint16_t scaler(inputStruct *, transStruct *, uint16_t input);
 void translate(transStruct *);
 void setPwm(transStruct *);
 void lostSignal(inputStruct *);
@@ -148,6 +149,8 @@ void lostSignal(inputStruct *);
 My lone global variable is a function pointer.
 This lets me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the |"ISR()"| function.
+
+The input structure is to contain all of the external inputs.
 
 @<Global var...@>=
 void (*handleIrq)(inputStruct *) = NULL;
@@ -161,12 +164,15 @@ int main(void)
 @
 The Futaba receiver leads with channel two, rising edge, so we will start
 looking for that by setting |"edge"| to look for a rise on channel 2.
+
+Until we have collected the edges we will assume there is no signal.
 @c
 
 inputStruct input_s = {
     .edge = CH2RISE,
     .minIn = 14970, // ticks for hard right or down
-    .maxIn = 27530 // ticks for hard left or up
+    .maxIn = 27530, // ticks for hard left or up
+    .lostSignal = TRUE // we need to wait for edges before we know
     };
 
 
@@ -276,7 +282,7 @@ translate(&translation_s);
 @
 Some temporary test code here.
 @c
-if(translation_s.portOut <= 200)
+if(translation_s.portOut == 0)
     ledcntl(ON);
  else
     ledcntl(OFF);
@@ -296,7 +302,6 @@ Here is the ISR that fires at each captured edge.
 
 ISR (TIMER1_CAPT_vect)
 {@#
- wdt_reset(); // watchdog timer is reset at each edge capture
  handleIrq = &pwcCalc;
 }
 
@@ -323,7 +328,7 @@ and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
 
 Arrival at the last case establishes that there was a signal and clears
-the flag.
+the flag and resets the watchdog timer.
 @c
 
  
@@ -342,6 +347,8 @@ the flag.
          input_s->ch1fall = ICR1;
          input_s->ch1duration = input_s->ch1fall - input_s->ch2fall;
          input_s->edge = CH2RISE;
+         input_s->lostSignal = FALSE; // signal seems OK now
+         wdt_reset(); // watchdog timer is reset at each edge capture
      }
 
 edgeSelect(input_s);
@@ -353,12 +360,8 @@ This procedure sets output to zero in the event of a lost signal.
 @c
 void lostSignal(inputStruct *input_s)
 {@#
-         input_s->ch2duration = 0;
-         input_s->ch1duration = 0;
-         input_s->ch2rise = 0;
-         input_s->ch2fall = 0;
-         input_s->ch1fall = 0;
-         input_s->edge = CH2RISE; // first step
+ input_s->lostSignal = TRUE;
+ input_s->edge = CH2RISE; // Back to first step
 
  edgeSelect(input_s);
 }
@@ -495,17 +498,20 @@ uint16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
 {@#
 
 @
-First, we can solve for the obvious cases in which the input exceeds the range.
+First, we can solve for the obvious cases.
+One is where there is no signal.
+The other is where the input exceeds the range.
 This can easily happen if the trim is shifted.
 @c
+  if (input_s->lostSignal == TRUE) // no valid signal
+     return 0;
+
   if (input > input_s->maxIn)
      return trans_s->maxOut;
-  else
+  
   if (input < input_s->minIn)
      return trans_s->minOut;
-  else
-  if (input == 0) // no valid signal
-     return 0;
+  
 
 
 @
@@ -596,7 +602,7 @@ void setPwm(transStruct *trans_s)
      }
 
 
- if (trans_s->starboardOut > 0)
+ if (trans_s->starboardOut >= 0)
     {
      OCR0B = (uint8_t)trans_s->starboardOut;
      PORTD |= (1<<PORTD4);

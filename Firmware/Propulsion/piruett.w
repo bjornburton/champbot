@@ -88,13 +88,17 @@ Extensive use was made of the datasheet, Atmel
 @d CLEAR 0
 @d TRUE  1
 @d FALSE 0
+@d FORWARD 1
+@d REVERSE 0
+@d CLOSED 1
+@d OPEN 0
+
 
 @ Here are some other definitions.
 @d CH2RISE 0
 @d CH2FALL 1
 @d CH1FALL 2
 @d MAX_DUTYCYCLE 98 // 98\% to support charge pump of bridge-driver
-
 
 @ @<Include...@>=
 # include <avr/io.h> // need some port access
@@ -135,9 +139,11 @@ typedef struct {
    } transStruct;
 
 
-
 @ @<Prototypes@>=
-void ledCntl(uint8_t state); // LED ON and LED OFF
+void relayCntl(int8_t state);
+void ledCntl(int8_t state);
+void portDirection(int8_t state);
+void starboardDirection(int8_t state);
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
 uint16_t scaler(inputStruct *, transStruct *, uint16_t input);
@@ -161,6 +167,7 @@ Here is |main()|.
 
 int main(void)
 {@#
+
 @
 The Futaba receiver leads with channel two, rising edge, so we will start
 looking for that by setting |"edge"| to look for a rise on channel 2.
@@ -198,13 +205,11 @@ transStruct translation_s = {
     };
 
 
-
-
  cli(); //disable interrupts during setup
 @#
 @<Initialize the inputs and capture mode...@>
 @<Initialize pin outputs...@>
-cli(); // disable interrupts  
+cli(); // disable interrupts
 @<Initialize watchdog timer...@>
 @#
 @
@@ -235,8 +240,12 @@ program to step past the sleep statement.
 
 @<Configure to idle on sleep...@>
 @#
+
 ledCntl(OFF);
 
+@
+Calling edgeSelect will get it ready for the first rising edge of channel 2.
+@c
 edgeSelect(&input_s);
 
 @
@@ -331,7 +340,7 @@ Arrival at the last case establishes that there was a signal and clears
 the flag and resets the watchdog timer.
 @c
 
- 
+
  switch(input_s->edge)
      {
       case CH2RISE:
@@ -402,29 +411,55 @@ It's odd but clearing it involves writing a one to it.
 @
 Here is a simple procedure to flip the LED on or off.
 @c
-void ledCntl(uint8_t state)
+void ledCntl(int8_t state)
 {
   PORTB = state ? PORTB | (1<<PORTB5) : PORTB & ~(1<<PORTB5);
 }
 
+@
+Here is a simple procedure to flip the Relay Closed or Open from pin \#8.
+@c
+void relayCntl(int8_t state)
+{
+ PORTB = state ? PORTB | (1<<PORTB0):PORTB & ~(1<<PORTB0);
+}
+
+@
+Here is a simple procedure to reverse thrust on the port motor.
+@c
+void portDirection(int8_t state)
+{
+ PORTD = state ? PORTD | (1<<PORTD3):PORTD & ~(1<<PORTD3);
+}
+
+@
+Here is a simple procedure to reverse thrust on the starboard motor.
+@c
+void starboardDirection(int8_t state)
+{
+ PORTD = state ? PORTD | (1<<PORTD4):PORTD & ~(1<<PORTD4);
+}
 
 @
 
 @* Supporting routines, functions, procedures and configuration
 blocks.
-@ @
 
 @ @<Initialize pin outputs...@>=
-{
- /* set the led port direction; This is pin \#17 */
+ // set the led port direction; This is pin \#17
   DDRB |= (1<<DDB5);
- 
- // 14.4.9 DDRD – The Port D Data Direction Register 
+
+
+ // set the relay port direction; This is pin \#8
+  DDRB |= (1<<DDB0);
+
+
+ // 14.4.9 DDRD – The Port D Data Direction Register
  // port and starboard pwm outputs
-  DDRD |= ((1<<DDD5)|(1<<DDD6)); // Data direction to output (sec 14.3.3)  
- // port and starboard direction outputs 
-  DDRD |= ((1<<DDD3)|(1<<DDD4)); // Data direction to output (sec 14.3.3)  
-}
+  DDRD |= ((1<<DDD5)|(1<<DDD6)); // Data direction to output (sec 14.3.3)
+
+ // port and starboard direction outputs
+  DDRD |= ((1<<DDD3)|(1<<DDD4)); // Data direction to output (sec 14.3.3)
 
 @ @<Configure to idle on sleep...@>=
 {
@@ -462,7 +497,7 @@ To enable this interrupt, set the ACIE bit of register ACSR.
 
 @
 See section 11.8 in the datasheet for details on the Watchdog Timer.
-This is in the ``Interrupt Mode''. 
+This is in the ``Interrupt Mode''.
 @ @<Initialize watchdog timer...@>=
 {
 
@@ -508,10 +543,9 @@ This can easily happen if the trim is shifted.
 
   if (input > input_s->maxIn)
      return trans_s->maxOut;
-  
+
   if (input < input_s->minIn)
      return trans_s->minOut;
-  
 
 
 @
@@ -593,27 +627,31 @@ void setPwm(transStruct *trans_s)
  if (trans_s->portOut >= 0)
     {
      OCR0A = (uint8_t)trans_s->portOut;
-     PORTD |= (1<<PORTD3);
+     portDirection(FORWARD);
      }
   else
     {
      OCR0A = (uint8_t)-trans_s->portOut;
-     PORTD &= ~(1<<PORTD3);
+     portDirection(REVERSE);
      }
 
 
  if (trans_s->starboardOut >= 0)
     {
      OCR0B = (uint8_t)trans_s->starboardOut;
-     PORTD |= (1<<PORTD4);
+     starboardDirection(FORWARD);
      }
   else
     {
      OCR0B = (uint8_t)-trans_s->starboardOut;
-     PORTD &= ~(1<<PORTD4);
+     starboardDirection(REVERSE);
      }
 
 
+ if (trans_s->portOut || trans_s->starboardOut)
+    relayCntl(CLOSED);
+  else
+    relayCntl(OPEN);
 
 
 }

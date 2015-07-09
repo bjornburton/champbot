@@ -102,6 +102,14 @@ Extensive use was made of the datasheet, Atmel
 \T{1}\par
 \B\4\D$\.{FALSE}$ \5
 \T{0}\par
+\B\4\D$\.{FORWARD}$ \5
+\T{1}\par
+\B\4\D$\.{REVERSE}$ \5
+\T{0}\par
+\B\4\D$\.{CLOSED}$ \5
+\T{1}\par
+\B\4\D$\.{OPEN}$ \5
+\T{0}\par
 \fi
 
 \M{5}Here are some other definitions.
@@ -130,9 +138,9 @@ input, e.g. servo timing.
 
 \Y\B\4\X7:Types\X${}\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
-\\{uint16\_t}\\{ch2rise};\6
-\\{uint16\_t}\\{ch2fall};\6
-\\{uint16\_t}\\{ch1fall};\6
+\\{uint16\_t}\\{ch2rise};\SHC{ pwc edge }\6
+\\{uint16\_t}\\{ch2fall};\SHC{ pwc edge }\6
+\\{uint16\_t}\\{ch1fall};\SHC{ pwc edge }\6
 \\{uint16\_t}\\{ch1duration};\6
 \\{uint16\_t}\\{ch2duration};\6
 \\{uint16\_t}\\{minIn};\SHC{ input, minimum }\6
@@ -158,7 +166,10 @@ ${}\}{}$ \&{transStruct};\par
 \fi
 
 \M{9}\B\X9:Prototypes\X${}\E{}$\6
-\&{void} \\{ledcntl}(\\{uint8\_t}\\{state});\SHC{ LED ON and LED OFF }\6
+\&{void} \\{relayCntl}(\\{int8\_t}\\{state});\6
+\&{void} \\{ledCntl}(\\{int8\_t}\\{state});\6
+\&{void} \\{portDirection}(\\{int8\_t}\\{state});\6
+\&{void} \\{starboardDirection}(\\{int8\_t}\\{state});\6
 \&{void} \\{pwcCalc}(\&{inputStruct} ${}{*});{}$\6
 \&{void} \\{edgeSelect}(\&{inputStruct} ${}{*});{}$\7
 \\{uint16\_t}\\{scaler}(\&{inputStruct} ${}{*},\39{}$\&{transStruct} ${}{*},\39%
@@ -173,6 +184,8 @@ My lone global variable is a function pointer.
 This lets me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the \PB{\.{"ISR()"}}
 function.
+
+The input structure is to contain all of the external inputs.
 
 \Y\B\4\X10:Global variables\X${}\E{}$\6
 $\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*})\K\NULL{}$;\par
@@ -213,9 +226,9 @@ but the numbers here were from trial and error and seem good.
 \Y\B\&{transStruct} \\{translation\_s} $\K$ $\{$ $.$ $\\{minOut}\K{-}\T{255}$
 $,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $\\{deadBand}\K\T{5}$ $\}$  ;\6
 \\{cli}(\,);\SHC{disable interrupts during setup }\7
-\X35:Initialize the inputs and capture mode\X\X32:Initialize pin outputs\X%
+\X37:Initialize the inputs and capture mode\X\X34:Initialize pin outputs\X%
 \\{cli}(\,);\SHC{ disable interrupts }\6
-\X37:Initialize watchdog timer\X\Y\par
+\X39:Initialize watchdog timer\X\Y\par
 \fi
 
 \M{14}
@@ -228,7 +241,7 @@ is set; usually done through calling \PB{\.{"sei()"}}.
 
 The PWM is used to control port and starboard motors through OC0A (D5) and
 OC0B (D6), respectivly.
-\Y\B\X39:Initialize the Timer Counter 0 for PWM\X\par
+\Y\B\X41:Initialize the Timer Counter 0 for PWM\X\par
 \fi
 
 \M{16}
@@ -240,12 +253,16 @@ Interrupts are used to wake it up.
 
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement.
-\Y\B\X33:Configure to idle on sleep\X\7
-\\{ledcntl}(\.{OFF});\6
-${}\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
+\Y\B\X35:Configure to idle on sleep\X\7
+\\{ledCntl}(\.{OFF});\par
 \fi
 
 \M{17}
+Calling edgeSelect will get it ready for the first rising edge of channel 2.
+\Y\B$\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
+\fi
+
+\M{18}
 This is the loop that does the work.
 It should spend most of its time in ``sleep\_mode'', comming out at each
 interrupt event caused by an edge.
@@ -253,7 +270,7 @@ interrupt event caused by an edge.
 \Y\B\&{for} ( ;  ; \,) $\{{}$\Y\par
 \fi
 
-\M{18}
+\M{19}
 Now that a loop is started, the PWM is given an initial value and we wait in
 \PB{\.{"idle"}} for the edge on the channel selected. Each sucessive loop will
 finish
@@ -262,7 +279,7 @@ in the same way.
 \\{sleep\_mode}(\,);\SHC{ idle }\par
 \fi
 
-\M{19}
+\M{20}
 If execution arrives here, some interrupt has woken it from sleep and some
 vector has possibly run.
 The pointer \PB{\.{"handleIrq"}} will be assigned the value of the responsible
@@ -282,18 +299,18 @@ prop-to-prop distance }\6
 ${}\\{translate}({\AND}\\{translation\_s}){}$;\par
 \fi
 
-\M{20}
+\M{21}
 Some temporary test code here.
 \Y\B\&{if} ${}(\\{translation\_s}.\\{portOut}\E\T{0}){}$\1\5
-\\{ledcntl}(\.{ON});\2\6
+\\{ledCntl}(\.{ON});\2\6
 \&{else}\1\5
-\\{ledcntl}(\.{OFF});\2\7
+\\{ledCntl}(\.{OFF});\2\7
 $\}{}$\SHC{ end for }\7
 \&{return} \T{0};\SHC{ it's the right thing to do! }\7
 $\}{}$\SHC{ end main() }\par
 \fi
 
-\M{21}
+\M{22}
 Here is the ISR that fires at each captured edge.
 \Y\B\.{ISR}(\\{TIMER1\_CAPT\_vect})\1\1\2\2\6
 ${}\{{}$\1\7
@@ -305,7 +322,7 @@ ${}\\{handleIrq}\K{\AND}\\{lostSignal};{}$\6
 \4${}\}{}$\2\par
 \fi
 
-\M{22}
+\M{23}
 This procedure computes the durations from the PWC signal edge capture values
 from the Input Capture Unit.
 With the levers centered the durations should be about 1.5~ms so at 16~ Mhz
@@ -317,13 +334,13 @@ of the 64 kib of the 16 bit register..
 \Y\B\&{void} \\{pwcCalc}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1 $\{{}$\Y\par
 \fi
 
-\M{23}
+\M{24}
 On the falling edges we can compute the durations using modulus subtraction
 and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
 
 Arrival at the last case establishes that there was a signal and clears
-the flag and resets the watchdog timer..
+the flag and resets the watchdog timer.
 \Y\B\&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
 ${}\{{}$\1\6
 \4\&{case} \.{CH2RISE}:\5
@@ -348,7 +365,7 @@ ${}\\{input\_s}\MG\\{lostSignal}\K\.{FALSE}{}$;\SHC{ signal seems OK now }\6
 $\}{}$\par
 \fi
 
-\M{24}
+\M{25}
 This procedure sets output to zero in the event of a lost signal.
 \Y\B\&{void} \\{lostSignal}(\&{inputStruct} ${}{*}\\{input\_s}){}$\1\1\2\2\6
 ${}\{{}$\1\7
@@ -358,7 +375,7 @@ ${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE}{}$;\SHC{ Back to first step }\6
 \4${}\}{}$\2\par
 \fi
 
-\M{25}
+\M{26}
 
 The procedure edgeSelect configures the Input Capture unit to capture on the
 expected edge type.
@@ -384,60 +401,83 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
 \4${}\}{}$\2\par
 \fi
 
-\M{26}
+\M{27}
 Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
 \Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\7
 $\}{}$\par
 \fi
 
-\M{27}
+\M{28}
 Here is a simple procedure to flip the LED on or off.
-\Y\B\&{void} \\{ledcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
+\Y\B\&{void} \\{ledCntl}(\\{int8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
 ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB5}):\.{PORTB}\AND\CM(%
 \T{1}\LL\.{PORTB5});{}$\6
 \4${}\}{}$\2\par
 \fi
 
-\M{28}
-
+\M{29}
+Here is a simple procedure to flip the Relay Closed or Open from pin \#8.
+\Y\B\&{void} \\{relayCntl}(\\{int8\_t}\\{state})\1\1\2\2\6
+${}\{{}$\1\6
+${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
+\T{1}\LL\.{PORTB0});{}$\6
+\4${}\}{}$\2\par
 \fi
 
-\N{1}{29}Supporting routines, functions, procedures and configuration
-blocks.
+\M{30}
+Here is a simple procedure to reverse thrust on the port motor.
+\Y\B\&{void} \\{portDirection}(\\{int8\_t}\\{state})\1\1\2\2\6
+${}\{{}$\1\6
+${}\.{PORTD}\K\\{state}\?\.{PORTD}\OR(\T{1}\LL\.{PORTD3}):\.{PORTD}\AND\CM(%
+\T{1}\LL\.{PORTD3});{}$\6
+\4${}\}{}$\2\par
 \fi
-
-\M{30}\fi
 
 \M{31}
+Here is a simple procedure to reverse thrust on the starboard motor.
+\Y\B\&{void} \\{starboardDirection}(\\{int8\_t}\\{state})\1\1\2\2\6
+${}\{{}$\1\6
+${}\.{PORTD}\K\\{state}\?\.{PORTD}\OR(\T{1}\LL\.{PORTD4}):\.{PORTD}\AND\CM(%
+\T{1}\LL\.{PORTD4});{}$\6
+\4${}\}{}$\2\par
+\fi
+
+\M{32}
 
 \fi
 
-\M{32}\B\X32:Initialize pin outputs\X${}\E{}$\6
-${}\{{}$\C{ set the led port direction; This is pin \#17 }\1\6
-${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5}){}$;\SHC{ 14.4.9 DDRD – The Port
+\N{1}{33}Supporting routines, functions, procedures and configuration
+blocks.
+
+\fi
+
+\M{34}\B\X34:Initialize pin outputs\X${}\E{}$\SHC{ set the led port direction;
+This is pin \#17 }\6
+$\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5}){}$;\SHC{ set the relay port
+direction; This is pin \#8 }\6
+${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB0}){}$;\SHC{ 14.4.9 DDRD – The Port
 D Data Direction Register }\SHC{ port and starboard pwm outputs }\6
 ${}\.{DDRD}\MRL{{\OR}{\K}}((\T{1}\LL\.{DDD5})\OR(\T{1}\LL\.{DDD6})){}$;\SHC{
 Data direction to output (sec 14.3.3) }\SHC{ port and starboard direction
 outputs }\6
 ${}\.{DDRD}\MRL{{\OR}{\K}}((\T{1}\LL\.{DDD3})\OR(\T{1}\LL\.{DDD4})){}$;\SHC{
-Data direction to output (sec 14.3.3) }\6
-\4${}\}{}$\2\par
+Data direction to output (sec 14.3.3) }\par
 \U13.\fi
 
-\M{33}\B\X33:Configure to idle on sleep\X${}\E{}$\6
+\M{35}\B\X35:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
 \U16.\fi
 
-\M{34}
+\M{36}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{35}\B\X35:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{37}\B\X37:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status
@@ -468,12 +508,12 @@ ${}\.{ADMUX}\MRL{\AND{\K}}\CM((\T{1}\LL\.{MUX2})\OR(\T{1}\LL\.{MUX1})\OR(\T{1}%
 \4${}\}{}$\2\par
 \U13.\fi
 
-\M{36}
+\M{38}
 See section 11.8 in the datasheet for details on the Watchdog Timer.
 This is in the ``Interrupt Mode''.
 \fi
 
-\M{37}\B\X37:Initialize watchdog timer\X${}\E{}$\6
+\M{39}\B\X39:Initialize watchdog timer\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{WDTCSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{WDCE})\OR(\T{1}\LL\.{WDE});{}$\6
 ${}\.{WDTCSR}\K(\T{1}\LL\.{WDIE})\OR(\T{1}\LL\.{WDP2}){}$;\SHC{ reset after
@@ -481,7 +521,7 @@ about 0.25 seconds }\6
 \4${}\}{}$\2\par
 \U13.\fi
 
-\M{38}
+\M{40}
 PWM setup isn't too scary.
 Timer Count 0 is configured for ``Phase Correct'' PWM which, according to the
 datasheet, is preferred for motor control.
@@ -490,7 +530,7 @@ non-inverting PWM.
 The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
 \fi
 
-\M{39}\B\X39:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
+\M{41}\B\X41:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
 ${}\{{}$\SHC{ 15.9.1 TCCR0A – Timer/Counter Control Register A }\1\6
 ${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{WGM00}){}$;\SHC{ Phase correct mode of
 PWM (table 15-9) }\6
@@ -503,7 +543,7 @@ ${}\.{TCCR0B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS01}){}$;\SHC{ Prescaler set to clk/8
 \4${}\}{}$\2\par
 \U15.\fi
 
-\M{40}
+\M{42}
 The scaler function takes an input, as in times from the Input Capture
 Register and returns a value scaled by the parameters in structure
 \PB{\.{"inputScale\_s"}}.
@@ -512,7 +552,7 @@ Register and returns a value scaled by the parameters in structure
 \par
 \fi
 
-\M{41}
+\M{43}
 First, we can solve for the obvious cases.
 One is where there is no signal.
 The other is where the input exceeds the range.
@@ -526,7 +566,7 @@ This can easily happen if the trim is shifted.
 \&{return} \\{trans\_s}${}\MG\\{minOut}{}$;\2\par
 \fi
 
-\M{42}
+\M{44}
 If it's not that simple, then compute the gain and offset and then continue in
 the usual way.
 This is not really an effecient method, recomputing gain and offset every time
@@ -548,7 +588,7 @@ ${}\\{int32\_t}\\{offset}\K((\\{ampFact}*(\\{int32\_t})\\{input\_s}\MG%
 \}{}$\par
 \fi
 
-\M{43}
+\M{45}
 We need a way to translate \PB{\.{"thrust"}} and \PB{\.{"radius"}} in order to
 carve a
 \PB{\.{"turn"}}. This procedure should do this but it's not going to be perfect
@@ -569,7 +609,7 @@ just assuming }\6
 \par
 \fi
 
-\M{44}
+\M{46}
 Here we convert desired radius to thrust-difference by scaling to speed.
 Then that difference is converted to rotation by scaling it with \PB{%
 \.{"track"}}.
@@ -580,7 +620,7 @@ ${}\\{rotation}\K(\\{trans\_s}\MG\\{track}*((\\{ampFact}*\\{difference})/%
 \.{UINT8\_MAX}))/\\{ampFact}{}$;\par
 \fi
 
-\M{45}
+\M{47}
 Any rotation involves one motor turning faster than the other.
 At some point, faster is not possible and so the requiered clipping is here.
 
@@ -603,23 +643,27 @@ ${}\{{}$\1\6
 \&{if} ${}(\\{trans\_s}\MG\\{portOut}\G\T{0}){}$\5
 ${}\{{}$\1\6
 ${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{portOut};{}$\6
-${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3});{}$\6
+\\{portDirection}(\.{FORWARD});\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
 ${}\.{OCR0A}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{portOut};{}$\6
-${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD3});{}$\6
+\\{portDirection}(\.{REVERSE});\6
 \4${}\}{}$\2\6
-\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}>\T{0}){}$\5
+\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\5
 ${}\{{}$\1\6
 ${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut};{}$\6
-${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD4});{}$\6
+\\{starboardDirection}(\.{FORWARD});\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
 ${}\.{OCR0B}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{starboardOut};{}$\6
-${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD4});{}$\6
+\\{starboardDirection}(\.{REVERSE});\6
 \4${}\}{}$\2\6
+\&{if} ${}(\\{trans\_s}\MG\\{portOut}\V\\{trans\_s}\MG\\{starboardOut}){}$\1\5
+\\{relayCntl}(\.{CLOSED});\2\6
+\&{else}\1\5
+\\{relayCntl}(\.{OPEN});\2\6
 \4${}\}{}$\2\par
 \fi
 

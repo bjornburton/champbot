@@ -119,7 +119,7 @@ inputStruct input_s= {
 transStruct translation_s= {
 .minOut= -255,
 .maxOut= 255,
-.deadBand= 5
+.deadBand= 10
 };
 
 
@@ -416,7 +416,7 @@ PORTD= state?PORTD|(1<<PORTD4):PORTD&~(1<<PORTD4);
 
 uint16_t scaler(inputStruct*input_s,transStruct*trans_s,uint16_t input)
 {
-
+uint16_t solution;
 /*:42*//*43:*/
 #line 540 "./piruett.w"
 
@@ -431,7 +431,7 @@ return trans_s->minOut;
 
 
 /*:43*//*44:*/
-#line 561 "./piruett.w"
+#line 563 "./piruett.w"
 
 const int32_t ampFact= 128L;
 
@@ -441,13 +441,15 @@ int32_t gain= (ampFact*(int32_t)(input_s->maxIn-input_s->minIn))/
 int32_t offset= ((ampFact*(int32_t)input_s->minIn)/gain)
 -(int32_t)trans_s->minOut;
 
+solution= (ampFact*(int32_t)input/gain)-offset;
 
-return(ampFact*(int32_t)input/gain)-offset;
+
+return(solution> trans_s->deadBand)?solution:0;
 
 }
 
 /*:44*//*45:*/
-#line 583 "./piruett.w"
+#line 587 "./piruett.w"
 
 
 void translate(transStruct*trans_s)
@@ -460,12 +462,12 @@ const int16_t ampFact= 128;
 
 
 /*:45*//*46:*/
-#line 598 "./piruett.w"
+#line 602 "./piruett.w"
 
 difference= (speed*((ampFact*trans_s->radius)/UINT8_MAX))/ampFact;
 rotation= (trans_s->track*((ampFact*difference)/UINT8_MAX))/ampFact;
 /*:46*//*47:*/
-#line 606 "./piruett.w"
+#line 610 "./piruett.w"
 
 if((speed-rotation)>=max)
 trans_s->portOut= max;

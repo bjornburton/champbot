@@ -201,7 +201,7 @@ but the numbers here were from trial and error and seem good.
 transStruct translation_s = {
     .minOut = -255,
     .maxOut = 255,
-    .deadBand = 5
+    .deadBand = 10
     };
 
 
@@ -531,7 +531,7 @@ Register and returns a value scaled by the parameters in structure
 @c
 uint16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
 {@#
-
+uint16_t solution;
 @
 First, we can solve for the obvious cases.
 One is where there is no signal.
@@ -558,6 +558,8 @@ one place.
 
 The constant |"ampFact"| amplifies it so I can take advantage of the extra
 bits for precision.
+
+Dead-band is applied when it returns.
 @c
 const int32_t ampFact = 128L; // factor for precision
 
@@ -567,8 +569,10 @@ int32_t gain = (ampFact*(int32_t)(input_s->maxIn-input_s->minIn))/
 int32_t offset = ((ampFact*(int32_t)input_s->minIn)/gain)
                  -(int32_t)trans_s->minOut;
 
+solution = (ampFact*(int32_t)input/gain)-offset;
 
-return (ampFact*(int32_t)input/gain)-offset;
+
+return (solution > trans_s->deadBand)?solution:0;
 
 }
 

@@ -224,7 +224,7 @@ The \PB{\.{"In"}} numbers are raw from the Input Capture Register.
 At some point a calibration feature could be added which could populate these
 but the numbers here were from trial and error and seem good.
 \Y\B\&{transStruct} \\{translation\_s} $\K$ $\{$ $.$ $\\{minOut}\K{-}\T{255}$
-$,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $\\{deadBand}\K\T{5}$ $\}$  ;\6
+$,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $\\{deadBand}\K\T{10}$ $\}$  ;\6
 \\{cli}(\,);\SHC{disable interrupts during setup }\7
 \X37:Initialize the inputs and capture mode\X\X34:Initialize pin outputs\X%
 \\{cli}(\,);\SHC{ disable interrupts }\6
@@ -548,8 +548,8 @@ The scaler function takes an input, as in times from the Input Capture
 Register and returns a value scaled by the parameters in structure
 \PB{\.{"inputScale\_s"}}.
 \Y\B\\{uint16\_t}\\{scaler}(\&{inputStruct} ${}{*}\\{input\_s},\39{}$%
-\&{transStruct} ${}{*}\\{trans\_s},\39\\{uint16\_t}\\{input}){}$\1\1 $\{{}$\Y%
-\par
+\&{transStruct} ${}{*}\\{trans\_s},\39\\{uint16\_t}\\{input}){}$\1\1 $\{{}$\7
+\\{uint16\_t}\\{solution};\par
 \fi
 
 \M{43}
@@ -577,6 +577,8 @@ one place.
 The constant \PB{\.{"ampFact"}} amplifies it so I can take advantage of the
 extra
 bits for precision.
+
+Dead-band is applied when it returns.
 \Y\B\&{const} \\{int32\_t}\\{ampFact}${}\K\T{128\$L}{}$;\SHC{ factor for
 precision }\7
 ${}\\{int32\_t}\\{gain}\K(\\{ampFact}*(\\{int32\_t})(\\{input\_s}\MG\\{maxIn}-%
@@ -584,8 +586,9 @@ ${}\\{int32\_t}\\{gain}\K(\\{ampFact}*(\\{int32\_t})(\\{input\_s}\MG\\{maxIn}-%
 \_s}\MG\\{minOut});{}$\6
 ${}\\{int32\_t}\\{offset}\K((\\{ampFact}*(\\{int32\_t})\\{input\_s}\MG%
 \\{minIn})/\\{gain})-(\\{int32\_t})\\{trans\_s}\MG\\{minOut};{}$\6
-\&{return} ${}(\\{ampFact}*(\\{int32\_t})\\{input}/\\{gain})-\\{offset};$ $%
-\}{}$\par
+${}\\{solution}\K(\\{ampFact}*(\\{int32\_t})\\{input}/\\{gain})-\\{offset};{}$\6
+\&{return} ${}(\\{solution}>\\{trans\_s}\MG\\{deadBand})\?\\{solution}:\T{0};$
+$\}{}$\par
 \fi
 
 \M{45}

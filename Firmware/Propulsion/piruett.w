@@ -137,7 +137,7 @@ typedef struct {
 
 
 @ @<Prototypes@>=
-void ledcntl(uint8_t state); // LED ON and LED OFF
+void ledCntl(uint8_t state); // LED ON and LED OFF
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
 uint16_t scaler(inputStruct *, transStruct *, uint16_t input);
@@ -235,7 +235,7 @@ program to step past the sleep statement.
 
 @<Configure to idle on sleep...@>
 @#
-ledcntl(OFF);
+ledCntl(OFF);
 
 edgeSelect(&input_s);
 
@@ -283,9 +283,9 @@ translate(&translation_s);
 Some temporary test code here.
 @c
 if(translation_s.portOut == 0)
-    ledcntl(ON);
+    ledCntl(ON);
  else
-    ledcntl(OFF);
+    ledCntl(OFF);
 
 @#
   } // end for
@@ -402,7 +402,7 @@ It's odd but clearing it involves writing a one to it.
 @
 Here is a simple procedure to flip the LED on or off.
 @c
-void ledcntl(uint8_t state)
+void ledCntl(uint8_t state)
 {
   PORTB = state ? PORTB | (1<<PORTB5) : PORTB & ~(1<<PORTB5);
 }

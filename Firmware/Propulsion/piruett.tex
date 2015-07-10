@@ -172,7 +172,7 @@ ${}\}{}$ \&{transStruct};\par
 \&{void} \\{starboardDirection}(\\{int8\_t}\\{state});\6
 \&{void} \\{pwcCalc}(\&{inputStruct} ${}{*});{}$\6
 \&{void} \\{edgeSelect}(\&{inputStruct} ${}{*});{}$\7
-\\{uint16\_t}\\{scaler}(\&{inputStruct} ${}{*},\39{}$\&{transStruct} ${}{*},\39%
+\\{int16\_t}\\{scaler}(\&{inputStruct} ${}{*},\39{}$\&{transStruct} ${}{*},\39%
 \\{uint16\_t}\\{input});{}$\7
 \&{void} \\{translate}(\&{transStruct} ${}{*});{}$\6
 \&{void} \\{setPwm}(\&{transStruct} ${}{*});{}$\6
@@ -547,7 +547,7 @@ ${}\.{TCCR0B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS01}){}$;\SHC{ Prescaler set to clk/8
 The scaler function takes an input, as in times from the Input Capture
 Register and returns a value scaled by the parameters in structure
 \PB{\.{"inputScale\_s"}}.
-\Y\B\\{uint16\_t}\\{scaler}(\&{inputStruct} ${}{*}\\{input\_s},\39{}$%
+\Y\B\\{int16\_t}\\{scaler}(\&{inputStruct} ${}{*}\\{input\_s},\39{}$%
 \&{transStruct} ${}{*}\\{trans\_s},\39\\{uint16\_t}\\{input}){}$\1\1 $\{{}$\7
 \\{uint16\_t}\\{solution};\par
 \fi
@@ -587,8 +587,8 @@ ${}\\{int32\_t}\\{gain}\K(\\{ampFact}*(\\{int32\_t})(\\{input\_s}\MG\\{maxIn}-%
 ${}\\{int32\_t}\\{offset}\K((\\{ampFact}*(\\{int32\_t})\\{input\_s}\MG%
 \\{minIn})/\\{gain})-(\\{int32\_t})\\{trans\_s}\MG\\{minOut};{}$\6
 ${}\\{solution}\K(\\{ampFact}*(\\{int32\_t})\\{input}/\\{gain})-\\{offset};{}$\6
-\&{return} ${}(\\{solution}>\\{trans\_s}\MG\\{deadBand})\?\\{solution}:\T{0};$
-$\}{}$\par
+\&{return} ${}(\\{abs}(\\{solution})>\\{trans\_s}\MG\\{deadBand})\?%
+\\{solution}:\T{0};$ $\}{}$\par
 \fi
 
 \M{45}

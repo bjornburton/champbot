@@ -146,7 +146,7 @@ void portDirection(int8_t state);
 void starboardDirection(int8_t state);
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
-uint16_t scaler(inputStruct *, transStruct *, uint16_t input);
+int16_t scaler(inputStruct *, transStruct *, uint16_t input);
 void translate(transStruct *);
 void setPwm(transStruct *);
 void lostSignal(inputStruct *);
@@ -529,7 +529,7 @@ The scaler function takes an input, as in times from the Input Capture
 Register and returns a value scaled by the parameters in structure
 |"inputScale_s"|.
 @c
-uint16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
+int16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
 {@#
 uint16_t solution;
 @
@@ -572,7 +572,7 @@ int32_t offset = ((ampFact*(int32_t)input_s->minIn)/gain)
 solution = (ampFact*(int32_t)input/gain)-offset;
 
 
-return (solution > trans_s->deadBand)?solution:0;
+return (abs(solution) > trans_s->deadBand)?solution:0;
 
 }
 

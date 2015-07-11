@@ -1,6 +1,9 @@
 \input cwebmac
 
 % piruett
+%\input graphicx.tex
+\input miniltx
+\input graphicx
 
 \nocon % omit table of contents
 \datethis % print date on listing
@@ -12,7 +15,7 @@ Champbot.
 It features separate thrust and steering as well as piruett turning.
 
 This will facilitate motion by taking ``thrust'' and ``radius'' pulse-width,
-or PWC, inputs from the Futaba/Kyosho RC receiver and converting them to the
+or PWC, inputs from the Futaba-Kyosho RC receiver and converting them to the
 appropriate motor actions.
 Thrust is Channel 2, entering analog input A1, and Radius is channel 1, at A0.
 The action will be similar to driving an RC car or boat.
@@ -47,7 +50,7 @@ watchdog timer.
 The radius control will also be the rotate control, if thrust is zero.
 Timer-Counter 0 is used for the PWM.
 
-The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
+The ATmega328 has a 16 bit PWMs with two comparators, Timer 1.
 This has an ``Input Capture Unit'' that may be used for PWC decoding.
 PWC being the type of signal from the RC receiver.
 That seems like as elegant a solution as I will find and it is recommended by
@@ -76,6 +79,13 @@ This will provide ample time to do math and set the motor PWMs.
 
 Extensive use was made of the datasheet, Atmel
 ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
+
+
+\includegraphics[width=35 pc]{piruett.png}
+
+I originaly wanted to use the word "Port" for the left-hand side, when facing
+the front. On a microcontroller that name is used for all of the ports so I
+chose the older word ``larboard''.
 
 \Y\B\X6:Include\X\6
 \X7:Types\X\6
@@ -108,6 +118,8 @@ Extensive use was made of the datasheet, Atmel
 \B\4\D$\.{CLOSED}$ \5
 \T{1}\par
 \B\4\D$\.{OPEN}$ \5
+\T{0}\par
+\B\4\D$\.{STOPPED}$ \5
 \T{0}\par
 \fi
 
@@ -157,7 +169,7 @@ ${}\}{}$ \&{inputStruct};\par
 \\{int16\_t}\\{radius};\SHC{ -255 to 255 }\6
 \\{int16\_t}\\{track};\SHC{    1 to 255 }\6
 \\{int16\_t}\\{starboardOut};\SHC{ -255 to 255 }\6
-\\{int16\_t}\\{portOut};\SHC{ -255 to 255 }\6
+\\{int16\_t}\\{larboardOut};\SHC{ -255 to 255 }\6
 \\{int16\_t}\\{minOut};\SHC{ output, minimum }\6
 \\{int16\_t}\\{maxOut};\SHC{ output, maximum }\6
 \\{int8\_t}\\{deadBand};\SHC{ width of zero in terms of output units }\2\6
@@ -167,7 +179,7 @@ ${}\}{}$ \&{transStruct};\par
 \M{9}\B\X9:Prototypes\X${}\E{}$\6
 \&{void} \\{relayCntl}(\\{int8\_t}\\{state});\6
 \&{void} \\{ledCntl}(\\{int8\_t}\\{state});\6
-\&{void} \\{portDirection}(\\{int8\_t}\\{state});\6
+\&{void} \\{larboardDirection}(\\{int8\_t}\\{state});\6
 \&{void} \\{starboardDirection}(\\{int8\_t}\\{state});\6
 \&{void} \\{pwcCalc}(\&{inputStruct} ${}{*});{}$\6
 \&{void} \\{edgeSelect}(\&{inputStruct} ${}{*});{}$\7
@@ -239,7 +251,7 @@ is set; usually done through calling \PB{\.{"sei()"}}.
 
 \M{15}
 
-The PWM is used to control port and starboard motors through OC0A (D5) and
+The PWM is used to control larboard and starboard motors through OC0A (D5) and
 OC0B (D6), respectivly.
 \Y\B\X49:Initialize the Timer Counter 0 for PWM\X\par
 \fi
@@ -305,7 +317,7 @@ ${}\\{translate}({\AND}\\{translation\_s}){}$;\par
 
 \M{21}
 The LED is used to indicate PWM zeros.
-\Y\B\&{if} ${}(\\{translation\_s}.\\{portOut}\V\\{translation\_s}.%
+\Y\B\&{if} ${}(\\{translation\_s}.\\{larboardOut}\V\\{translation\_s}.%
 \\{starboardOut}){}$\1\5
 \\{ledCntl}(\.{OFF});\2\6
 \&{else}\1\5
@@ -401,28 +413,26 @@ expected edge type.
 $\{{}$\7
 \&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
 ${}\{{}$\1\6
-\4\&{case} \.{CH2RISE}:\SHC{ wait for rising edge on servo channel 2 }\6
-${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 1 }\6
-${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICES1}){}$;\SHC{ Rising edge (23.3.2) }%
-\6
+\4\&{case} \.{CH2RISE}:\C{ To wait for rising edge on servo-channel 2 }\6
+${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\C{ Set to mux channel 1 }\6
+${}\.{TCCR1B}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICES1}){}$;\C{ Rising edge (23.3.2) }\6
 \&{break};\6
 \4\&{case} \.{CH2FALL}:\5
-${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 1 }\6
-${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
-(23.3.2) }\6
+${}\.{ADMUX}\MRL{{\OR}{\K}}(\T{1}\LL\.{MUX0}){}$;\C{ Set to mux channel 1 }\6
+${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\C{ Falling edge (23.3.2)
+}\6
 \&{break};\6
 \4\&{case} \.{CH1FALL}:\5
-${}\.{ADMUX}\MRL{\AND{\K}}\CM(\T{1}\LL\.{MUX0}){}$;\SHC{ Set to mux channel 0 }%
-\6
-${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\SHC{ Falling edge
-(23.3.2) }\6
+${}\.{ADMUX}\MRL{\AND{\K}}\CM(\T{1}\LL\.{MUX0}){}$;\C{ Set to mux channel 0 }\6
+${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\C{ Falling edge (23.3.2)
+}\6
 \4${}\}{}$\2\par
 \fi
 
 \M{29}
 Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
-\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\SHC{ (per 16.6.3) }\7
+\Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\C{ (per 16.6.3) }\7
 $\}{}$\Y\par
 \fi
 
@@ -446,7 +456,7 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
 
 \M{32}
 Here is a simple procedure to reverse thrust on the port motor.
-\Y\B\&{void} \\{portDirection}(\\{int8\_t}\\{state})\7
+\Y\B\&{void} \\{larboardDirection}(\\{int8\_t}\\{state})\7
 ${}\{{}$\1\7
 ${}\.{PORTD}\K\\{state}\?\.{PORTD}\OR(\T{1}\LL\.{PORTD3}):\.{PORTD}\AND\CM(%
 \T{1}\LL\.{PORTD3}){}$;\7
@@ -478,11 +488,10 @@ $\{{}$\7
 
 \M{36}
 First, we can solve for the obvious cases.
-One is where there is no signal.
+One is where there is no signal; when \PB{\.{"lostSignal"}} i \PB{\.{"TRUE"}}.
 The other is where the input exceeds the range.
 This can easily happen if the trim is shifted.
-\Y\B\&{if} ${}(\\{input\_s}\MG\\{lostSignal}\E\.{TRUE}{}$)\SHC{ no valid signal
-}\1\6
+\Y\B\&{if} ${}(\\{input\_s}\MG\\{lostSignal}\E\.{TRUE}){}$\1\5
 \&{return} \T{0};\2\6
 \&{if} ${}(\\{input}>\\{input\_s}\MG\\{maxIn}){}$\1\5
 \&{return} \\{trans\_s}${}\MG\\{maxOut};{}$\2\6
@@ -495,16 +504,14 @@ If it's not that simple, then compute the gain and offset and then continue in
 the usual way.
 This is not really an effecient method, recomputing gain and offset every time
 but we are not in a rush and it makes it easier since, if something changes,
-I don't have to manualy compute and enter these values, also the code is all in
-one place.
+I don't have to manualy compute and enter these value.
 
 The constant \PB{\.{"ampFact"}} amplifies it so I can take advantage of the
 extra
 bits for precision.
 
 Dead-band is applied when it returns.
-\Y\B\&{const} \\{int32\_t}\\{ampFact}${}\K\T{128\$L}{}$;\SHC{ factor for
-precision }\7
+\Y\B\&{const} \\{int32\_t}\\{ampFact}${}\K\T{128\$L};{}$\7
 ${}\\{int32\_t}\\{gain}\K(\\{ampFact}*(\\{int32\_t})(\\{input\_s}\MG\\{maxIn}-%
 \\{input\_s}\MG\\{minIn}))/(\\{int32\_t})(\\{trans\_s}\MG\\{maxOut}-\\{trans%
 \_s}\MG\\{minOut});{}$\6
@@ -526,18 +533,20 @@ Since \PB{\\{speed}} is not known, we will use \PB{\\{thrust}}.
 It should steer OK as long as the speed is constant and small changes in speed
 should not be too disruptive.
 
+The constant \PB{\.{"ampFact"}} amplifies it so I can take advantage of the
+extra
+
 This procedure is intended for values from -255 to 255.
 \Y\B\&{void} \\{translate}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
 $\{{}$\7
-$\\{int16\_t}\\{speed}\K\\{trans\_s}\MG\\{thrust}{}$;\SHC{ assuming it's close
-}\6
+$\\{int16\_t}\\{speed}\K\\{trans\_s}\MG\\{thrust}{}$;\C{ we are assuming it's
+close }\6
 \\{int16\_t}\\{rotation};\6
 \\{int16\_t}\\{difference};\6
 \\{int16\_t}\\{piruett};\7
 \&{const} \\{int16\_t}\\{max}${}\K(\.{MAX\_DUTYCYCLE}*\.{UINT8\_MAX})/%
 \T{100};{}$\6
-\&{const} \\{int16\_t}\\{ampFact}${}\K\T{128}{}$;\SHC{ factor for precision }%
-\par
+\&{const} \\{int16\_t}\\{ampFact}${}\K\T{128}{}$;\par
 \fi
 
 \M{39}
@@ -560,33 +569,34 @@ At some point, faster is not possible and so the requiered clipping is here.
 \PB{\.{"max"}} is set at to support the limit of the bridge-driver's
 charge-pump.
 \Y\B\&{if} ${}((\\{speed}-\\{rotation})\G\\{max}){}$\1\5
-${}\\{trans\_s}\MG\\{portOut}\K\\{max};{}$\2\6
+${}\\{trans\_s}\MG\\{larboardOut}\K\\{max};{}$\2\6
 \&{else} \&{if} ${}((\\{speed}-\\{rotation})\Z{-}\\{max}){}$\1\5
-${}\\{trans\_s}\MG\\{portOut}\K{-}\\{max};{}$\2\6
-\&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\T{0}){}$\1\5
-${}\\{trans\_s}\MG\\{portOut}\K\\{piruett};{}$\2\6
+${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{max};{}$\2\6
+\&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\.{STOPPED}{}$)\C{ here we
+switch to piruett mode }\1\6
+${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{piruett};{}$\2\6
 \&{else}\1\5
-${}\\{trans\_s}\MG\\{portOut}\K\\{speed}-\\{rotation};{}$\2\6
+${}\\{trans\_s}\MG\\{larboardOut}\K\\{speed}-\\{rotation};{}$\2\6
 \&{if} ${}((\\{speed}+\\{rotation})\G\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{max};{}$\2\6
 \&{else} \&{if} ${}((\\{speed}+\\{rotation})\Z{-}\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{max};{}$\2\6
-\&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\T{0}){}$\1\5
-${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{piruett};{}$\2\6
+\&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\.{STOPPED}){}$\1\5
+${}\\{trans\_s}\MG\\{starboardOut}\K\\{piruett};{}$\2\6
 \&{else}\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{speed}+\\{rotation}{}$;\2\7
 $\}{}$\7
 \&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
 $\{{}$\7
-\&{if} ${}(\\{trans\_s}\MG\\{portOut}\G\T{0}){}$\5
+\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\5
 ${}\{{}$\1\6
-${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{portOut};{}$\6
-\\{portDirection}(\.{FORWARD});\6
+${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{larboardOut};{}$\6
+\\{larboardDirection}(\.{FORWARD});\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
-${}\.{OCR0A}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{portOut};{}$\6
-\\{portDirection}(\.{REVERSE});\6
+${}\.{OCR0A}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{larboardOut};{}$\6
+\\{larboardDirection}(\.{REVERSE});\6
 \4${}\}{}$\2\6
 \&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\5
 ${}\{{}$\1\6
@@ -602,8 +612,8 @@ ${}\.{OCR0B}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{starboardOut};{}$\6
 
 \M{41}
 We must see if the fail-safe relay needs to be closed.
-\Y\B\&{if} ${}(\\{trans\_s}\MG\\{portOut}\V\\{trans\_s}\MG\\{starboardOut}){}$%
-\1\5
+\Y\B\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\V\\{trans\_s}\MG%
+\\{starboardOut}){}$\1\5
 \\{relayCntl}(\.{CLOSED});\2\6
 \&{else}\1\5
 \\{relayCntl}(\.{OPEN});\2\7

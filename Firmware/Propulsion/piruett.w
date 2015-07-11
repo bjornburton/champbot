@@ -1,6 +1,9 @@
 
 % piruett
-
+%\input graphicx.tex
+\input miniltx
+\input graphicx
+ 
 \nocon % omit table of contents
 \datethis % print date on listing
 
@@ -9,7 +12,7 @@ Champbot.
 It features separate thrust and steering as well as piruett turning.
 
 This will facilitate motion by taking ``thrust'' and ``radius'' pulse-width,
-or PWC, inputs from the Futaba/Kyosho RC receiver and converting them to the
+or PWC, inputs from the Futaba-Kyosho RC receiver and converting them to the
 appropriate motor actions.
 Thrust is Channel 2, entering analog input A1, and Radius is channel 1, at A0.
 The action will be similar to driving an RC car or boat.
@@ -42,7 +45,7 @@ watchdog timer.
 The radius control will also be the rotate control, if thrust is zero.
 Timer-Counter 0 is used for the PWM.
 
-The ATmega328 has a fancy 16 bit PWM with two comparators, Timer 1.
+The ATmega328 has a 16 bit PWMs with two comparators, Timer 1.
 This has an ``Input Capture Unit'' that may be used for PWC decoding.
 PWC being the type of signal from the RC receiver.
 That seems like as elegant a solution as I will find and it is recommended by
@@ -72,6 +75,13 @@ This will provide ample time to do math and set the motor PWMs.
 Extensive use was made of the datasheet, Atmel
 ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
 
+
+\includegraphics[width=35 pc]{piruett.png}
+
+I originaly wanted to use the word "Port" for the left-hand side, when facing
+the front. On a microcontroller that name is used for all of the ports so I
+chose the older word ``larboard''.
+
 @c
 @< Include @>@;
 @< Types @>@;
@@ -92,6 +102,7 @@ Extensive use was made of the datasheet, Atmel
 @d REVERSE 0
 @d CLOSED 1
 @d OPEN 0
+@d STOPPED 0
 
 
 @ Here are some other definitions.
@@ -132,7 +143,7 @@ typedef struct {
     int16_t radius;       // -255 to 255
     int16_t track;        //    1 to 255
     int16_t starboardOut; // -255 to 255
-    int16_t portOut;      // -255 to 255
+    int16_t larboardOut;      // -255 to 255
     int16_t minOut;   // output, minimum
     int16_t maxOut;   // output, maximum
     int8_t  deadBand; // width of zero in terms of output units
@@ -142,7 +153,7 @@ typedef struct {
 @ @<Prototypes@>=
 void relayCntl(int8_t state);
 void ledCntl(int8_t state);
-void portDirection(int8_t state);
+void larboardDirection(int8_t state);
 void starboardDirection(int8_t state);
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
@@ -221,7 +232,7 @@ is set; usually done through calling |"sei()"|.
 
 @
 
-The PWM is used to control port and starboard motors through OC0A (D5) and
+The PWM is used to control larboard and starboard motors through OC0A (D5) and
 OC0B (D6), respectivly.
 @c
 @<Initialize the Timer Counter 0 for PWM...@>
@@ -294,7 +305,7 @@ translate(&translation_s);
 @
 The LED is used to indicate PWM zeros.
 @c
-if(translation_s.portOut || translation_s.starboardOut)
+if(translation_s.larboardOut || translation_s.starboardOut)
     ledCntl(OFF);
  else
     ledCntl(ON);
@@ -397,24 +408,24 @@ void edgeSelect(inputStruct *input_s)
 
   switch(input_s->edge)
      {
-   case CH2RISE: // wait for rising edge on servo channel 2
-      ADMUX |= (1<<MUX0); // Set to mux channel 1
-      TCCR1B |= (1<<ICES1);  // Rising edge (23.3.2)
+   case CH2RISE: /* To wait for rising edge on servo-channel 2 */
+      ADMUX |= (1<<MUX0); /* Set to mux channel 1 */
+      TCCR1B |= (1<<ICES1);  /* Rising edge (23.3.2) */
     break;
    case CH2FALL:
-      ADMUX |= (1<<MUX0); // Set to mux channel 1
-      TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+      ADMUX |= (1<<MUX0); /* Set to mux channel 1 */
+      TCCR1B &= ~(1<<ICES1);  /* Falling edge (23.3.2) */
     break;
    case CH1FALL:
-      ADMUX &= ~(1<<MUX0); // Set to mux channel 0
-      TCCR1B &= ~(1<<ICES1);  // Falling edge (23.3.2)
+      ADMUX &= ~(1<<MUX0); /* Set to mux channel 0 */
+      TCCR1B &= ~(1<<ICES1);  /* Falling edge (23.3.2) */
    }
 @
 Since the edge has been changed, the Input Capture Flag should be cleared.
 It's odd but clearing it involves writing a one to it.
 @c
 
- TIFR1 |= (1<<ICF1); // (per 16.6.3)
+ TIFR1 |= (1<<ICF1); /* (per 16.6.3) */
 @#}@#
 
 
@@ -437,7 +448,7 @@ void relayCntl(int8_t state)
 @
 Here is a simple procedure to reverse thrust on the port motor.
 @c
-void portDirection(int8_t state)
+void larboardDirection(int8_t state)
 @#{@#
  PORTD = state ? PORTD | (1<<PORTD3):PORTD & ~(1<<PORTD3);
 @#}@#
@@ -462,11 +473,11 @@ int16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
 uint16_t solution;
 @
 First, we can solve for the obvious cases.
-One is where there is no signal.
+One is where there is no signal; when |"lostSignal"| i |"TRUE"|.
 The other is where the input exceeds the range.
 This can easily happen if the trim is shifted.
 @c
-  if (input_s->lostSignal == TRUE) // no valid signal
+  if (input_s->lostSignal == TRUE) 
      return 0;
 
   if (input > input_s->maxIn)
@@ -478,18 +489,17 @@ This can easily happen if the trim is shifted.
 
 @
 If it's not that simple, then compute the gain and offset and then continue in
- the usual way.
+the usual way.
 This is not really an effecient method, recomputing gain and offset every time
 but we are not in a rush and it makes it easier since, if something changes,
-I don't have to manualy compute and enter these values, also the code is all in
-one place.
+I don't have to manualy compute and enter these value.
 
 The constant |"ampFact"| amplifies it so I can take advantage of the extra
 bits for precision.
 
 Dead-band is applied when it returns.
 @c
-const int32_t ampFact = 128L; // factor for precision
+const int32_t ampFact = 128L; 
 
 int32_t gain = (ampFact*(int32_t)(input_s->maxIn-input_s->minIn))/
                     (int32_t)(trans_s->maxOut-trans_s->minOut);
@@ -512,17 +522,19 @@ Since |speed| is not known, we will use |thrust|.
 It should steer OK as long as the speed is constant and small changes in speed
 should not be too disruptive.
 
+The constant |"ampFact"| amplifies it so I can take advantage of the extra
+
 This procedure is intended for values from -255 to 255.
 @c
 
 void translate(transStruct *trans_s)
 @#{@#
-int16_t speed = trans_s->thrust; // assuming it's close
+int16_t speed = trans_s->thrust; /* we are assuming it's close */
 int16_t rotation;
 int16_t difference;
 int16_t piruett;
 const int16_t max = (MAX_DUTYCYCLE * UINT8_MAX)/100;
-const int16_t ampFact = 128; // factor for precision
+const int16_t ampFact = 128;
 
 
 @
@@ -540,20 +552,20 @@ At some point, faster is not possible and so the requiered clipping is here.
 |"max"| is set at to support the limit of the bridge-driver's charge-pump.
 @c
  if((speed-rotation) >= max)
-    trans_s->portOut = max;
+    trans_s->larboardOut = max;
  else if((speed-rotation) <= -max)
-    trans_s->portOut = -max;
- else if(trans_s->thrust == 0) // mode switch to piruett
-    trans_s->portOut = -piruett;
+    trans_s->larboardOut = -max;
+ else if(trans_s->thrust == STOPPED) /* here we switch to piruett mode */
+    trans_s->larboardOut = -piruett;
  else
-    trans_s->portOut = speed-rotation;
+    trans_s->larboardOut = speed-rotation;
 
 
  if((speed+rotation) >= max)
     trans_s->starboardOut = max;
  else if ((speed+rotation) <= -max)
     trans_s->starboardOut = -max;
- else if(trans_s->thrust == 0) // mode switch to piruett
+ else if(trans_s->thrust == STOPPED)
     trans_s->starboardOut = piruett;
  else
    trans_s->starboardOut = speed+rotation;
@@ -563,15 +575,15 @@ At some point, faster is not possible and so the requiered clipping is here.
 void setPwm(transStruct *trans_s)
 @#{@#
 
- if (trans_s->portOut >= 0)
+ if (trans_s->larboardOut >= 0)
     {
-     OCR0A = (uint8_t)trans_s->portOut;
-     portDirection(FORWARD);
+     OCR0A = (uint8_t)trans_s->larboardOut;
+     larboardDirection(FORWARD);
      }
   else
     {
-     OCR0A = (uint8_t)-trans_s->portOut;
-     portDirection(REVERSE);
+     OCR0A = (uint8_t)-trans_s->larboardOut;
+     larboardDirection(REVERSE);
      }
 
 
@@ -589,7 +601,7 @@ void setPwm(transStruct *trans_s)
 @
 We must see if the fail-safe relay needs to be closed.
 @c
- if (trans_s->portOut || trans_s->starboardOut)
+ if (trans_s->larboardOut || trans_s->starboardOut)
     relayCntl(CLOSED);
   else
     relayCntl(OPEN);

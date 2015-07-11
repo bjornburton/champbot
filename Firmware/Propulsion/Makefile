@@ -23,32 +23,50 @@ EFUSE:= efuse:w:0x05:m
 
 # Apps and Flags
 PROGSWFLAGS:= -c $(PROGHW) -p $(BOARD)
-CC       := avr-gcc 
-TANGLE   := ctangle
-WEAVE    := cweave
-TEX      := pdftex
-CFLAGS   :=  -std=c11 -g -mmcu=$(MCU) -Wall -Os -pedantic
-CONV     :=avr-objcopy
-CONVFLAGS:= -j .text -j .data -O ihex
-LIBS     :=
+CC        := avr-gcc 
+DOT       := dot 
+EGYPT     := egypt 
+TANGLE    := ctangle
+WEAVE     := cweave
+TEX       := pdftex
+CFLAGS    :=  -std=c11 -g -mmcu=$(MCU) -Wall -Os -pedantic -fdump-rtl-expand
+CONV      :=avr-objcopy
+CONVFLAGS := -j .text -j .data -O ihex
+LIBS      :=
+DOTFLAGS  := -Tpng
+
+
 
 # Build filenames
-HEADERS := $(TARGET).h
-OBJECTS := $(TARGET).o
-HEX     := $(TARGET).hex
-ELF     := $(TARGET).elf
-CSOURCES:= $(TARGET).c
-WEB     := $(TARGET).w
-DOC     := $(TARGET).pdf
-TEXSRC  := $(TARGET).tex
+HEADERS  := $(TARGET).h
+OBJECTS  := $(TARGET).o
+HEX      := $(TARGET).hex
+ELF      := $(TARGET).elf
+CSOURCES := $(TARGET).c
+WEB      := $(TARGET).w
+DOC      := $(TARGET).pdf
+TEXSRC   := $(TARGET).tex
+DOTSRC   := $(TARGET).dot
+EGYPTSRC := $(TARGET).c.170r.expand
+GRAPH    := $(TARGET).png
 
 
 # The usual make stuff
 default: $(HEX)
-elf: $(ELF)
-all: default
+elf:     $(ELF)
+all:     default
 
-$(CSOURCES): $(WEB)
+$(GRAPH): $(DOTSRC)
+	$(DOT) $(DOTFLAGS) $(DOTSRC) > $(GRAPH)
+
+$(DOTSRC): $(EGYPTSRC)
+	$(EGYPT) $(EGYPTSRC) |\
+        awk '{gsub(/__vector_10/,"TIMER1_CAPT_vect");print}' |\
+        awk '{gsub(/__vector_6/,"WDT_vect");print}' > $(DOTSRC)
+
+$(EGYPTSRC): $(OBJECTS)
+
+$(CSOURCES): $(WEB) $(GRAPH)
 	$(TANGLE) $(WEB)
 	$(WEAVE) $(WEB)
 	$(TEX) $(TEXSRC) 
@@ -68,7 +86,8 @@ clean:
 	-rm -f $(ELF)
 	-rm -f $(TEXSRC)
 	-rm -f $(CSOURCES)
-	-rm -f $(CSOURCES)
+	-rm -f $(DOTSRC)
+	-rm -f $(EGYPTSRC)
 	
 install:
 	$(PROGSW) $(PROGSWFLAGS) -U flash:w:$(HEX)

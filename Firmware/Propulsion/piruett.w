@@ -113,7 +113,6 @@ chose the older word ``larboard''.
 
 @ @<Include...@>=
 # include <avr/io.h> // need some port access
-# include <util/delay.h> // need to delay
 # include <avr/interrupt.h> // have need of an interrupt
 # include <avr/sleep.h> // have need of sleep
 # include <avr/wdt.h> // have need of watchdog
@@ -121,32 +120,33 @@ chose the older word ``larboard''.
 # include <stdint.h>
 
 @ Here is a structure type to keep track of the state of remote-control
-input, e.g. servo timing.
+input, e.g. servo timing. Rise and Fall indicate the PWC edges.
+|"edge"| is set to the edge type expected for the interrupt.
 
 @<Types@>=
 typedef struct {
-    uint16_t ch2rise; // pwc edge
-    uint16_t ch2fall; // pwc edge
-    uint16_t ch1fall; // pwc edge
+    uint16_t ch2rise;
+    uint16_t ch2fall;
+    uint16_t ch1fall;
     uint16_t ch1duration;
     uint16_t ch2duration;
-    uint16_t minIn;    // input, minimum
-    uint16_t maxIn;    // input, maximum
     uint8_t  edge;
     uint8_t  lostSignal;
+    const uint16_t minIn;    // input, minimum
+    const uint16_t maxIn;    // input, maximum
     } inputStruct;
 
 @ Here is a structure type to keep track of the state of translation items.
 @<Types@>=
 typedef struct {
-    int16_t thrust;       // -255 to 255
-    int16_t radius;       // -255 to 255
-    int16_t track;        //    1 to 255
-    int16_t starboardOut; // -255 to 255
-    int16_t larboardOut;      // -255 to 255
-    int16_t minOut;   // output, minimum
-    int16_t maxOut;   // output, maximum
-    int8_t  deadBand; // width of zero in terms of output units
+    int16_t thrust;         // -255 to 255
+    int16_t radius;         // -255 to 255
+    int16_t track;          //    1 to 255
+    int16_t starboardOut;   // -255 to 255
+    int16_t larboardOut;    // -255 to 255
+    const int16_t minOut;   // output, minimum
+    const int16_t maxOut;   // output, maximum
+    const int8_t  deadBand; // width of zero in terms of output units
    } transStruct;
 
 
@@ -167,14 +167,12 @@ My lone global variable is a function pointer.
 This lets me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the |"ISR()"| function.
 
-The input structure is to contain all of the external inputs.
+This input structure is to contain all of the external inputs.
 
 @<Global var...@>=
 void (*handleIrq)(inputStruct *) = NULL;
 
-@
-Here is |main()|.
-@c
+@#
 
 int main(void)
 @#{@#
@@ -183,31 +181,33 @@ int main(void)
 The Futaba receiver leads with channel two, rising edge, so we will start
 looking for that by setting |"edge"| to look for a rise on channel 2.
 
-Until we have collected the edges we will assume there is no signal.
-@c
-
-inputStruct input_s = {
-    .edge = CH2RISE,
-    .minIn = 14970, // ticks for hard right or down
-    .maxIn = 27530, // ticks for hard left or up
-    .lostSignal = TRUE // we need to wait for edges before we know
-    };
-
-
-@
-Center position of the controller results in a count of  about 21250,
+Center position of the controller results in a count of about 21250,
 hard left, or up, with trim reports about 29100 and hard right, or down,
  with trim reports about 13400.
 
 About 4/5ths of that range are the full swing of the stick, without trim.
 This is from about 14970 and 27530 ticks.
 
-This |"inputScale_s"| structure holds the parameters used in the scaler
-function.
-The |"In"| numbers are raw from the Input Capture Register.
+|".minIn"| |".maxIn"| are the endpoints of the normal stick travel.
+The units are raw counnts as the Input Capture Register will use.
 
 At some point a calibration feature could be added which could populate these
 but the numbers here were from trial and error and seem good.
+
+Until we have collected the edges we will assume there is no signal.
+@c
+
+inputStruct input_s = {
+    .edge = CH2RISE,
+    .minIn = 14970,
+    .maxIn = 27530,
+    .lostSignal = TRUE
+    };
+
+
+@
+This is the structure that holds output parameters.
+It's instantiated with the endpoint constants. 
 @c
 transStruct translation_s = {
     .minOut = -255,
@@ -215,12 +215,13 @@ transStruct translation_s = {
     .deadBand = 10
     };
 
-
- cli(); //disable interrupts during setup
+@
+Here the interrupts are disabled so that configuring them doesn't set it off.
+@c
+ cli(); 
 @#
 @<Initialize the inputs and capture mode...@>
 @<Initialize pin outputs...@>
-cli(); // disable interrupts
 @<Initialize watchdog timer...@>
 @#
 @
@@ -257,9 +258,9 @@ This stumped me for a good while.
 ledCntl(OFF);
 
 @
-Calling |edgeSelect()| will get it ready for the first rising edge of
-channel~2.
-Each call to |edgeSelect| rotates to the next edge type.
+Since |"edge"| is already set, calling |edgeSelect()| will get it ready for
+the first rising edge of channel~2.
+Subsequent calls to |edgeSelect| rotates it to the next edge type.
 @c
 edgeSelect(&input_s);
 
@@ -274,31 +275,37 @@ interrupt event caused by an edge or watchdog timeout.
   {@#
 
 @
-Now that a loop is started, the PWM is given an initial value and we wait in
+Now that a loop is started, the PWM is value and we wait in
 |"idle"| for the edge on the channel selected. Each sucessive loop will finish
 in the same way.
+After three passes |"translation_s"| will have good values.
+
 @c
  setPwm(&translation_s);
 
- sleep_mode(); // idle
+ sleep_mode();
 
 @
 If execution arrives here, some interrupt has woken it from sleep and some
-vector has possibly run.
+vector has possibly run. The possibility is first checked.
 The pointer |"handleIrq"| will be assigned the value of the responsible
-function.
+function and then executed.
+After that the IRQ is nulled so as to avoid repeating the action, should it
+wake for some other reason.
+
+
 @c
-if (handleIrq != NULL) // in case it woke for some other reason
+if (handleIrq != NULL)
    {@#
     handleIrq(&input_s);
-    handleIrq = NULL; // reset so that the action cannot be repeated
-    }// end if handleirq
+    handleIrq = NULL;
+    }
 
 
 
 translation_s.radius = scaler(&input_s, &translation_s, input_s.ch1duration);
 translation_s.thrust = scaler(&input_s, &translation_s, input_s.ch2duration);
-translation_s.track = 100; // represent unit-less prop-to-prop distance
+translation_s.track = 100; /* represent unit-less prop-to-prop distance */
 
 translate(&translation_s);
 
@@ -311,13 +318,13 @@ if(translation_s.larboardOut || translation_s.starboardOut)
     ledCntl(ON);
 
 @#
-  } // end for
+  } /* end for */
 @#
 
 
-return 0; // it's the right thing to do!
+return 0; 
 @#
-}@# // end main()
+}@# /* end main() */
 
 
 @* Supporting routines, functions, procedures and configuration
@@ -326,7 +333,7 @@ blocks.
 
 @
 Here is the ISR that fires at each captured edge.
-Escentialy is grabs and processes the |Input Capture| data.
+Escentialy it grabs and processes the |Input Capture| data.
 @c
 
 ISR (TIMER1_CAPT_vect)
@@ -335,7 +342,7 @@ ISR (TIMER1_CAPT_vect)
 @#}@#
 
 @
-This is a variant of |pwcCalc| that flips the |lostSignal| flag.
+This is a variant of |pwcCalc| that only flips the |lostSignal| flag.
 @c
 ISR (WDT_vect)
 @#{@#
@@ -379,8 +386,8 @@ the flag and resets the watchdog timer.
          input_s->ch1fall = ICR1;
          input_s->ch1duration = input_s->ch1fall - input_s->ch2fall;
          input_s->edge = CH2RISE;
-         input_s->lostSignal = FALSE; // signal seems OK now
-         wdt_reset(); // watchdog timer is reset at each edge capture
+         input_s->lostSignal = FALSE; 
+         wdt_reset(); /* watchdog timer is reset at each edge capture */
 @t\hskip 1in@>  }
 
 edgeSelect(input_s);
@@ -392,14 +399,14 @@ This procedure sets output to zero in the event of a lost signal.
 void lostSignal(inputStruct *input_s)
 @#{@#
  input_s->lostSignal = TRUE;
- input_s->edge = CH2RISE; // Back to first step
+ input_s->edge = CH2RISE;
 
  edgeSelect(input_s);
 @#}@#
 
 @
 
-The procedure edgeSelect configures the Input Capture unit to capture on the
+The procedure edgeSelect configures the |"Input Capture"| unit to capture on the
 expected edge type.
 
 @c

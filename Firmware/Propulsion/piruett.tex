@@ -136,7 +136,6 @@ chose the older word ``larboard''.
 
 \M{6}\B\X6:Include\X${}\E{}$\6
 \8\#\&{include} \.{<avr/io.h>}\SHC{ need some port access }\6
-\8\#\&{include} \.{<util/delay.h>}\SHC{ need to delay }\6
 \8\#\&{include} \.{<avr/interrupt.h>}\SHC{ have need of an interrupt }\6
 \8\#\&{include} \.{<avr/sleep.h>}\SHC{ have need of sleep }\6
 \8\#\&{include} \.{<avr/wdt.h>}\SHC{ have need of watchdog }\6
@@ -145,19 +144,20 @@ chose the older word ``larboard''.
 \U2.\fi
 
 \M{7}Here is a structure type to keep track of the state of remote-control
-input, e.g. servo timing.
+input, e.g. servo timing. Rise and Fall indicate the PWC edges.
+\PB{\.{"edge"}} is set to the edge type expected for the interrupt.
 
 \Y\B\4\X7:Types\X${}\E{}$\6
 \&{typedef} \&{struct} ${}\{{}$\1\6
-\\{uint16\_t}\\{ch2rise};\SHC{ pwc edge }\6
-\\{uint16\_t}\\{ch2fall};\SHC{ pwc edge }\6
-\\{uint16\_t}\\{ch1fall};\SHC{ pwc edge }\6
+\\{uint16\_t}\\{ch2rise};\6
+\\{uint16\_t}\\{ch2fall};\6
+\\{uint16\_t}\\{ch1fall};\6
 \\{uint16\_t}\\{ch1duration};\6
 \\{uint16\_t}\\{ch2duration};\6
-\\{uint16\_t}\\{minIn};\SHC{ input, minimum }\6
-\\{uint16\_t}\\{maxIn};\SHC{ input, maximum }\6
 \\{uint8\_t}\\{edge};\6
-\\{uint8\_t}\\{lostSignal};\2\6
+\\{uint8\_t}\\{lostSignal};\7
+\&{const} \\{uint16\_t}\\{minIn};\SHC{ input, minimum }\6
+\&{const} \\{uint16\_t}\\{maxIn};\SHC{ input, maximum }\2\6
 ${}\}{}$ \&{inputStruct};\par
 \A8.
 \U2.\fi
@@ -169,10 +169,11 @@ ${}\}{}$ \&{inputStruct};\par
 \\{int16\_t}\\{radius};\SHC{ -255 to 255 }\6
 \\{int16\_t}\\{track};\SHC{    1 to 255 }\6
 \\{int16\_t}\\{starboardOut};\SHC{ -255 to 255 }\6
-\\{int16\_t}\\{larboardOut};\SHC{ -255 to 255 }\6
-\\{int16\_t}\\{minOut};\SHC{ output, minimum }\6
-\\{int16\_t}\\{maxOut};\SHC{ output, maximum }\6
-\\{int8\_t}\\{deadBand};\SHC{ width of zero in terms of output units }\2\6
+\\{int16\_t}\\{larboardOut};\SHC{ -255 to 255 }\7
+\&{const} \\{int16\_t}\\{minOut};\SHC{ output, minimum }\6
+\&{const} \\{int16\_t}\\{maxOut};\SHC{ output, maximum }\6
+\&{const} \\{int8\_t}\\{deadBand};\SHC{ width of zero in terms of output units
+}\2\6
 ${}\}{}$ \&{transStruct};\par
 \fi
 
@@ -196,50 +197,49 @@ This lets me pass arguments to the actual interrupt handlers.
 This pointer gets the appropriate function attached by the \PB{\.{"ISR()"}}
 function.
 
-The input structure is to contain all of the external inputs.
+This input structure is to contain all of the external inputs.
 
 \Y\B\4\X10:Global variables\X${}\E{}$\6
-$\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*})\K\NULL{}$;\par
+$\&{void}({*}\\{handleIrq}){}$(\&{inputStruct} ${}{*})\K\NULL{}$;\7
+\&{int} \\{main}(\&{void})\1\1\7
+$\{{}$\Y\par
 \U2.\fi
 
 \M{11}
-Here is \PB{\\{main}(\,)}.
-\Y\B\&{int} \\{main}(\&{void})\1\1\7
-$\{{}$\Y\par
-\fi
-
-\M{12}
 The Futaba receiver leads with channel two, rising edge, so we will start
 looking for that by setting \PB{\.{"edge"}} to look for a rise on channel 2.
 
-Until we have collected the edges we will assume there is no signal.
-\Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{edge}\K\.{CH2RISE}$ $,$ $.$
-$\\{minIn}\K\T{14970}$ $,{}$\SHC{ ticks for hard right or down }\6
-$.$ $\\{maxIn}\K\T{27530}$ $,{}$\SHC{ ticks for hard left or up }\6
-$.$ $\\{lostSignal}\K{}$\.{TRUE}\SHC{ we need to wait for edges before we know
-}\6
-$\}$  ;\par
-\fi
-
-\M{13}
-Center position of the controller results in a count of  about 21250,
+Center position of the controller results in a count of about 21250,
 hard left, or up, with trim reports about 29100 and hard right, or down,
 with trim reports about 13400.
 
 About 4/5ths of that range are the full swing of the stick, without trim.
 This is from about 14970 and 27530 ticks.
 
-This \PB{\.{"inputScale\_s"}} structure holds the parameters used in the scaler
-function.
-The \PB{\.{"In"}} numbers are raw from the Input Capture Register.
+\PB{\.{".minIn"}} \PB{\.{".maxIn"}} are the endpoints of the normal stick
+travel.
+The units are raw counnts as the Input Capture Register will use.
 
 At some point a calibration feature could be added which could populate these
 but the numbers here were from trial and error and seem good.
+
+Until we have collected the edges we will assume there is no signal.
+\Y\B\&{inputStruct} \\{input\_s} $\K$ $\{$ $.$ $\\{edge}\K\.{CH2RISE}$ $,$ $.$
+$\\{minIn}\K\T{14970}$ $,$ $.$ $\\{maxIn}\K\T{27530}$ $,$ $.$ $\\{lostSignal}\K%
+\.{TRUE}$ $\}$  ;\par
+\fi
+
+\M{12}
+This is the structure that holds output parameters.
+It's instantiated with the endpoint constants.
 \Y\B\&{transStruct} \\{translation\_s} $\K$ $\{$ $.$ $\\{minOut}\K{-}\T{255}$
-$,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $\\{deadBand}\K\T{10}$ $\}$  ;\6
-\\{cli}(\,);\SHC{disable interrupts during setup }\7
+$,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $\\{deadBand}\K\T{10}$ $\}$  ;\par
+\fi
+
+\M{13}
+Here the interrupts are disabled so that configuring them doesn't set it off.
+\Y\B\\{cli}(\,);\7
 \X45:Initialize the inputs and capture mode\X\X42:Initialize pin outputs\X%
-\\{cli}(\,);\SHC{ disable interrupts }\6
 \X47:Initialize watchdog timer\X\Y\par
 \fi
 
@@ -273,9 +273,10 @@ This stumped me for a good while.
 \fi
 
 \M{17}
-Calling \PB{\\{edgeSelect}(\,)} will get it ready for the first rising edge of
-channel~2.
-Each call to \PB{\\{edgeSelect}} rotates to the next edge type.
+Since \PB{\.{"edge"}} is already set, calling \PB{\\{edgeSelect}(\,)} will get
+it ready for
+the first rising edge of channel~2.
+Subsequent calls to \PB{\\{edgeSelect}} rotates it to the next edge type.
 \Y\B$\\{edgeSelect}({\AND}\\{input\_s}){}$;\par
 \fi
 
@@ -287,30 +288,35 @@ interrupt event caused by an edge or watchdog timeout.
 \fi
 
 \M{19}
-Now that a loop is started, the PWM is given an initial value and we wait in
+Now that a loop is started, the PWM is value and we wait in
 \PB{\.{"idle"}} for the edge on the channel selected. Each sucessive loop will
 finish
 in the same way.
+After three passes \PB{\.{"translation\_s"}} will have good values.
+
 \Y\B$\\{setPwm}({\AND}\\{translation\_s});{}$\6
-\\{sleep\_mode}(\,);\SHC{ idle }\par
+\\{sleep\_mode}(\,);\par
 \fi
 
 \M{20}
 If execution arrives here, some interrupt has woken it from sleep and some
-vector has possibly run.
+vector has possibly run. The possibility is first checked.
 The pointer \PB{\.{"handleIrq"}} will be assigned the value of the responsible
-function.
-\Y\B\&{if} ${}(\\{handleIrq}\I\NULL{}$)\SHC{ in case it woke for some other
-reason }\6
+function and then executed.
+After that the IRQ is nulled so as to avoid repeating the action, should it
+wake for some other reason.
+
+
+\Y\B\&{if} ${}(\\{handleIrq}\I\NULL){}$\5
 ${}\{{}$\1\7
 ${}\\{handleIrq}({\AND}\\{input\_s});{}$\6
-${}\\{handleIrq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
-\4${}\}{}$\SHC{ end if handleirq }\2\6
+${}\\{handleIrq}\K\NULL;{}$\6
+\4${}\}{}$\2\6
 ${}\\{translation\_s}.\\{radius}\K\\{scaler}({\AND}\\{input\_s},\39{\AND}%
 \\{translation\_s},\39\\{input\_s}.\\{ch1duration});{}$\6
 ${}\\{translation\_s}.\\{thrust}\K\\{scaler}({\AND}\\{input\_s},\39{\AND}%
 \\{translation\_s},\39\\{input\_s}.\\{ch2duration});{}$\6
-${}\\{translation\_s}.\\{track}\K\T{100}{}$;\SHC{ represent unit-less
+${}\\{translation\_s}.\\{track}\K\T{100}{}$;\C{ represent unit-less
 prop-to-prop distance }\6
 ${}\\{translate}({\AND}\\{translation\_s}){}$;\par
 \fi
@@ -322,9 +328,9 @@ The LED is used to indicate PWM zeros.
 \\{ledCntl}(\.{OFF});\2\6
 \&{else}\1\5
 \\{ledCntl}(\.{ON});\2\7
-$\}{}$\SHC{ end for }\7
-\&{return} \T{0};\SHC{ it's the right thing to do! }\7
-$\}{}$\SHC{ end main() }\par
+$\}{}$\C{ end for }\7
+\&{return} \T{0};\7
+$\}{}$\C{ end main() }\par
 \fi
 
 \N{1}{22}Supporting routines, functions, procedures and configuration
@@ -335,7 +341,7 @@ blocks.
 
 \M{23}
 Here is the ISR that fires at each captured edge.
-Escentialy is grabs and processes the \PB{\\{Input}\\{Capture}} data.
+Escentialy it grabs and processes the \PB{\\{Input}\\{Capture}} data.
 \Y\B\.{ISR}(\\{TIMER1\_CAPT\_vect})\7
 ${}\{{}$\1\7
 ${}\\{handleIrq}\K{\AND}\\{pwcCalc}{}$;\7
@@ -343,7 +349,8 @@ ${}\\{handleIrq}\K{\AND}\\{pwcCalc}{}$;\7
 \fi
 
 \M{24}
-This is a variant of \PB{\\{pwcCalc}} that flips the \PB{\\{lostSignal}} flag.
+This is a variant of \PB{\\{pwcCalc}} that only flips the \PB{\\{lostSignal}}
+flag.
 \Y\B\.{ISR}(\\{WDT\_vect})\7
 ${}\{{}$\1\7
 ${}\\{handleIrq}\K{\AND}\\{lostSignal}{}$;\7
@@ -387,8 +394,8 @@ ${}\\{input\_s}\MG\\{ch1fall}\K\.{ICR1};{}$\6
 ${}\\{input\_s}\MG\\{ch1duration}\K\\{input\_s}\MG\\{ch1fall}-\\{input\_s}\MG%
 \\{ch2fall};{}$\6
 ${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE};{}$\6
-${}\\{input\_s}\MG\\{lostSignal}\K\.{FALSE}{}$;\SHC{ signal seems OK now }\6
-\\{wdt\_reset}(\,);\SHC{ watchdog timer is reset at each edge capture }\6
+${}\\{input\_s}\MG\\{lostSignal}\K\.{FALSE};{}$\6
+\\{wdt\_reset}(\,);\C{ watchdog timer is reset at each edge capture }\6
 \4${}\hbox{\hskip 1in}\}{}$\2\6
 \\{edgeSelect}(\\{input\_s});\7
 $\}{}$\Y\par
@@ -399,14 +406,15 @@ This procedure sets output to zero in the event of a lost signal.
 \Y\B\&{void} \\{lostSignal}(\&{inputStruct} ${}{*}\\{input\_s}{}$)\7
 ${}\{{}$\1\7
 ${}\\{input\_s}\MG\\{lostSignal}\K\.{TRUE};{}$\6
-${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE}{}$;\SHC{ Back to first step }\6
+${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE};{}$\6
 \\{edgeSelect}(\\{input\_s});\7
 \4${}\}{}$\2\Y\par
 \fi
 
 \M{28}
 
-The procedure edgeSelect configures the Input Capture unit to capture on the
+The procedure edgeSelect configures the \PB{\.{"Input\ Capture"}} unit to
+capture on the
 expected edge type.
 
 \Y\B\&{void} \\{edgeSelect}(\&{inputStruct} ${}{*}\\{input\_s}{}$)\1\1\7

@@ -20,8 +20,8 @@ By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
 The port-side motor pulse will be available at Pin 5, starboard will be at
-Pin6. The port-side motor direction control will be available at Pin 2,
-starboard will be at Pin4. A fail-safe relay output will be at pin 8.
+Pin 6. The port-side motor direction control will be available at Pin 3,
+starboard will be at Pin 4. A fail-safe relay output will be at pin 8.
 
 @* Implementation.
 The Futaba receiver has two PWC channels.

@@ -23,6 +23,16 @@ The port-side motor pulse will be available at Pin 5, starboard will be at
 Pin 6. The port-side motor direction control will be available at Pin 3,
 starboard will be at Pin 4. A fail-safe relay output will be at pin 8.
 
+We are using the Wingxing DBH-01C. The Inputs are unique on this as the PWM
+logic input inverts with reversal. Actualy, there isn't really a dedicated
+PWM or reverse inputs; either can be either. The example in the datasheet has
+PWM on IN1 and LOW on IN2 for forward. For reverse, LOW on IN1 and PWM on IN2.
+We don't want PWM hopping between pins so we keep PWM on IN1. IN2 is reserved
+for direction. The result of this mode is that PWM as IN1 is inverted when
+IN2 is HIGH. This means we need to flip the PWM when the direction pin goes
+HIGH. 
+
+
 @* Implementation.
 The Futaba receiver has two PWC channels.
 The pulse-width from the receiver is at 20~ms intervals.
@@ -454,18 +464,41 @@ void relayCntl(int8_t state)
 
 @
 Here is a simple procedure to reverse thrust on the port motor.
+It includes inverting PWM in support of the H-Bridge direction input's
+inverting side effect.
 @c
 void larboardDirection(int8_t state)
 @#{@#
- PORTD = state ? PORTD | (1<<PORTD3):PORTD & ~(1<<PORTD3);
+ if(state)
+   {
+    PORTD |= (1<<PORTD3);
+    TCCR0A |= (1<<COM0A0); // Set on Comparator A match (table 15-4)
+    }
+  else
+   {
+    PORTD &= ~(1<<PORTD3);
+    TCCR0A &= ~(1<<COM0A0); // Clear on Comparator A match (table 15-4)
+    }
+
 @#}@#
 
 @
 Here is a simple procedure to reverse thrust on the starboard motor.
+It includes inverting PWM in support of the H-Bridge direction input's
+inverting side effect.
 @c
 void starboardDirection(int8_t state)
 @#{@#
- PORTD = state ? PORTD | (1<<PORTD4):PORTD & ~(1<<PORTD4);
+ if(state)
+   {
+    PORTD |= (1<<PORTD4);
+    TCCR0A |= (1<<COM0B0); // Set on Comparator B match (table 15-7)
+    }
+  else
+   {
+    PORTD &= ~(1<<PORTD4);
+    TCCR0A &= ~(1<<COM0B0); // Clear on Comparator B match (table 15-7)
+    }
 @#}@#
 
 @
@@ -625,10 +658,10 @@ We must see if the fail-safe relay needs to be closed.
 
 
  // 14.4.9 DDRD – The Port D Data Direction Register
- // port and starboard pwm outputs
+ // larboard and starboard pwm outputs
   DDRD |= ((1<<DDD5)|(1<<DDD6)); // Data direction to output (sec 14.3.3)
 
- // port and starboard direction outputs
+ // larboard and starboard direction outputs
   DDRD |= ((1<<DDD3)|(1<<DDD4)); // Data direction to output (sec 14.3.3)
 
 @ @<Configure to idle on sleep...@>=
@@ -687,10 +720,10 @@ The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
  // 15.9.1 TCCR0A – Timer/Counter Control Register A
  TCCR0A |= (1<<WGM00);  // Phase correct mode of PWM (table 15-9)
  TCCR0A |= (1<<COM0A1); // Clear on Comparator A match (table 15-4)
- TCCR0A |= (1<<COM0B1); // Clear on Comparator B match (table 15-7)
-
- // 15.9.2 TCCR0B – Timer/Counter Control Register B
+ 
+// 15.9.2 TCCR0B – Timer/Counter Control Register B
  TCCR0B |= (1<<CS01);   // Prescaler set to clk/8 (table 15-9)
+ TCCR0A |= (1<<COM0B1); // Clear on Comparator B match (table 15-7)
 }
 
 

@@ -125,7 +125,7 @@ transStruct translation_s= {
 cli();
 
 /*45:*/
-#line 665 "./piruett.w"
+#line 673 "./piruett.w"
 
 {
 
@@ -157,7 +157,7 @@ ADMUX&= ~((1<<MUX2)|(1<<MUX1)|(1<<MUX0));
 #line 234 "./piruett.w"
 
 /*42:*/
-#line 642 "./piruett.w"
+#line 650 "./piruett.w"
 
 
 DDRB|= (1<<DDB5);
@@ -178,7 +178,7 @@ DDRD|= ((1<<DDD3)|(1<<DDD4));
 #line 235 "./piruett.w"
 
 /*47:*/
-#line 695 "./piruett.w"
+#line 703 "./piruett.w"
 
 {
 
@@ -200,7 +200,7 @@ sei();
 #line 249 "./piruett.w"
 
 /*49:*/
-#line 709 "./piruett.w"
+#line 717 "./piruett.w"
 
 {
 
@@ -224,7 +224,7 @@ TCCR0B|= (1<<CS01);
 
 
 /*43:*/
-#line 658 "./piruett.w"
+#line 666 "./piruett.w"
 
 {
 SMCR&= ~((1<<SM2)|(1<<SM1)|(1<<SM0));
@@ -483,7 +483,7 @@ const int16_t ampFact= 128;
 
 difference= (speed*((ampFact*trans_s->radius)/UINT8_MAX))/ampFact;
 rotation= (trans_s->track*((ampFact*difference)/UINT8_MAX))/ampFact;
-piruett= (trans_s->track*((ampFact*trans_s->radius)/UINT8_MAX))/ampFact;
+piruett= (((ampFact*trans_s->radius)/UINT8_MAX))/ampFact;
 /*:39*//*40:*/
 #line 594 "./piruett.w"
 
@@ -492,7 +492,7 @@ trans_s->larboardOut= max;
 else if((speed-rotation)<=-max)
 trans_s->larboardOut= -max;
 else if(trans_s->thrust==STOPPED)
-trans_s->larboardOut= piruett;
+trans_s->larboardOut= -piruett;
 else
 trans_s->larboardOut= speed-rotation;
 
@@ -502,7 +502,7 @@ trans_s->starboardOut= max;
 else if((speed+rotation)<=-max)
 trans_s->starboardOut= -max;
 else if(trans_s->thrust==STOPPED)
-trans_s->starboardOut= -piruett;
+trans_s->starboardOut= piruett;
 else
 trans_s->starboardOut= speed+rotation;
 
@@ -512,20 +512,28 @@ void setPwm(transStruct*trans_s)
 {
 
 if(trans_s->larboardOut>=0)
+{
 larboardDirection(FORWARD);
+OCR0A= (uint8_t)trans_s->larboardOut;
+}
 else
+{
 larboardDirection(REVERSE);
-
+OCR0A= (uint8_t)trans_s->larboardOut;
+}
 
 if(trans_s->starboardOut>=0)
+{
 starboardDirection(FORWARD);
-else
-starboardDirection(REVERSE);
-
-OCR0A= (uint8_t)trans_s->larboardOut;
 OCR0B= (uint8_t)trans_s->starboardOut;
+}
+else
+{
+starboardDirection(REVERSE);
+OCR0B= (uint8_t)trans_s->starboardOut;
+}
 /*:40*//*41:*/
-#line 634 "./piruett.w"
+#line 642 "./piruett.w"
 
 if(trans_s->larboardOut||trans_s->starboardOut)
 relayCntl(CLOSED);

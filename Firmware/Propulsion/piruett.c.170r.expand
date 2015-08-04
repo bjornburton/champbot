@@ -26,9 +26,9 @@ try_optimize_cfg iteration 2
 (note 3 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
 (note 2 3 5 2 NOTE_INSN_FUNCTION_BEG)
 (insn 5 2 6 2 (set (reg:HI 42)
-        (symbol_ref:HI ("pwcCalc") [flags 0x3]  <function_decl 0x7fa078e7d700 pwcCalc>)) ./piruett.w:352 -1
+        (symbol_ref:HI ("pwcCalc") [flags 0x3]  <function_decl 0x7fcb3c282700 pwcCalc>)) ./piruett.w:352 -1
      (nil))
-(insn 6 5 0 2 (set (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fa078e7e130 handleIrq>) [1 handleIrq+0 S2 A8])
+(insn 6 5 0 2 (set (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fcb3c283130 handleIrq>) [1 handleIrq+0 S2 A8])
         (reg:HI 42)) ./piruett.w:352 -1
      (nil))
 
@@ -59,9 +59,9 @@ try_optimize_cfg iteration 2
 (note 3 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
 (note 2 3 5 2 NOTE_INSN_FUNCTION_BEG)
 (insn 5 2 6 2 (set (reg:HI 42)
-        (symbol_ref:HI ("lostSignal") [flags 0x3]  <function_decl 0x7fa078e7dc00 lostSignal>)) ./piruett.w:360 -1
+        (symbol_ref:HI ("lostSignal") [flags 0x3]  <function_decl 0x7fcb3c282c00 lostSignal>)) ./piruett.w:360 -1
      (nil))
-(insn 6 5 0 2 (set (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fa078e7e130 handleIrq>) [1 handleIrq+0 S2 A8])
+(insn 6 5 0 2 (set (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fcb3c283130 handleIrq>) [1 handleIrq+0 S2 A8])
         (reg:HI 42)) ./piruett.w:360 -1
      (nil))
 
@@ -105,12 +105,12 @@ Forwarding edge 5->6 to 10 failed.
         (reg:HI 24 r24 [ input_s ])) ./piruett.w:425 -1
      (nil))
 (note 3 2 6 2 NOTE_INSN_FUNCTION_BEG)
-(insn 6 3 7 2 (set (reg:QI 58 [ D.1916 ])
+(insn 6 3 7 2 (set (reg:QI 58 [ D.1915 ])
         (mem:QI (plus:HI (reg/v/f:HI 57 [ input_s ])
                 (const_int 10 [0xa])) [0 input_s_3(D)->edge+0 S1 A8])) ./piruett.w:427 -1
      (nil))
 (insn 7 6 8 2 (set (cc0)
-        (compare (reg:QI 58 [ D.1916 ])
+        (compare (reg:QI 58 [ D.1915 ])
             (const_int 1 [0x1]))) ./piruett.w:427 -1
      (nil))
 (jump_insn 8 7 64 2 (set (pc)
@@ -122,7 +122,7 @@ Forwarding edge 5->6 to 10 failed.
  -> 29)
 (note 64 8 9 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
 (insn 9 64 10 4 (set (cc0)
-        (compare (reg:QI 58 [ D.1916 ])
+        (compare (reg:QI 58 [ D.1915 ])
             (const_int 1 [0x1]))) ./piruett.w:427 -1
      (nil))
 (jump_insn 10 9 65 4 (set (pc)
@@ -134,7 +134,7 @@ Forwarding edge 5->6 to 10 failed.
  -> 15)
 (note 65 10 11 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
 (insn 11 65 12 5 (set (cc0)
-        (compare (reg:QI 58 [ D.1916 ])
+        (compare (reg:QI 58 [ D.1915 ])
             (const_int 2 [0x2]))) ./piruett.w:427 -1
      (nil))
 (jump_insn 12 11 66 5 (set (pc)
@@ -155,34 +155,34 @@ Forwarding edge 5->6 to 10 failed.
 (insn 17 16 18 7 (set (reg/f:HI 59)
         (const_int 124 [0x7c])) ./piruett.w:430 -1
      (nil))
-(insn 18 17 19 7 (set (reg:QI 43 [ D.1916 ])
+(insn 18 17 19 7 (set (reg:QI 43 [ D.1915 ])
         (mem/v:QI (reg/f:HI 59) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])) ./piruett.w:430 -1
      (nil))
-(insn 19 18 20 7 (set (reg:QI 44 [ D.1916 ])
-        (ior:QI (reg:QI 43 [ D.1916 ])
+(insn 19 18 20 7 (set (reg:QI 44 [ D.1915 ])
+        (ior:QI (reg:QI 43 [ D.1915 ])
             (const_int 1 [0x1]))) ./piruett.w:430 -1
      (nil))
 (insn 20 19 21 7 (set (reg/f:HI 60)
         (const_int 124 [0x7c])) ./piruett.w:430 -1
      (nil))
 (insn 21 20 22 7 (set (mem/v:QI (reg/f:HI 60) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])
-        (reg:QI 44 [ D.1916 ])) ./piruett.w:430 -1
+        (reg:QI 44 [ D.1915 ])) ./piruett.w:430 -1
      (nil))
 (insn 22 21 23 7 (set (reg/f:HI 61)
         (const_int 129 [0x81])) ./piruett.w:431 -1
      (nil))
-(insn 23 22 24 7 (set (reg:QI 45 [ D.1916 ])
+(insn 23 22 24 7 (set (reg:QI 45 [ D.1915 ])
         (mem/v:QI (reg/f:HI 61) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])) ./piruett.w:431 -1
      (nil))
-(insn 24 23 25 7 (set (reg:QI 46 [ D.1916 ])
-        (ior:QI (reg:QI 45 [ D.1916 ])
+(insn 24 23 25 7 (set (reg:QI 46 [ D.1915 ])
+        (ior:QI (reg:QI 45 [ D.1915 ])
             (const_int 64 [0x40]))) ./piruett.w:431 -1
      (nil))
 (insn 25 24 26 7 (set (reg/f:HI 62)
         (const_int 129 [0x81])) ./piruett.w:431 -1
      (nil))
 (insn 26 25 27 7 (set (mem/v:QI (reg/f:HI 62) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])
-        (reg:QI 46 [ D.1916 ])) ./piruett.w:431 -1
+        (reg:QI 46 [ D.1915 ])) ./piruett.w:431 -1
      (nil))
 (jump_insn 27 26 28 7 (set (pc)
         (label_ref 55)) ./piruett.w:432 -1
@@ -194,34 +194,34 @@ Forwarding edge 5->6 to 10 failed.
 (insn 31 30 32 8 (set (reg/f:HI 63)
         (const_int 124 [0x7c])) ./piruett.w:434 -1
      (nil))
-(insn 32 31 33 8 (set (reg:QI 47 [ D.1916 ])
+(insn 32 31 33 8 (set (reg:QI 47 [ D.1915 ])
         (mem/v:QI (reg/f:HI 63) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])) ./piruett.w:434 -1
      (nil))
-(insn 33 32 34 8 (set (reg:QI 48 [ D.1916 ])
-        (ior:QI (reg:QI 47 [ D.1916 ])
+(insn 33 32 34 8 (set (reg:QI 48 [ D.1915 ])
+        (ior:QI (reg:QI 47 [ D.1915 ])
             (const_int 1 [0x1]))) ./piruett.w:434 -1
      (nil))
 (insn 34 33 35 8 (set (reg/f:HI 64)
         (const_int 124 [0x7c])) ./piruett.w:434 -1
      (nil))
 (insn 35 34 36 8 (set (mem/v:QI (reg/f:HI 64) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])
-        (reg:QI 48 [ D.1916 ])) ./piruett.w:434 -1
+        (reg:QI 48 [ D.1915 ])) ./piruett.w:434 -1
      (nil))
 (insn 36 35 37 8 (set (reg/f:HI 65)
         (const_int 129 [0x81])) ./piruett.w:435 -1
      (nil))
-(insn 37 36 38 8 (set (reg:QI 49 [ D.1916 ])
+(insn 37 36 38 8 (set (reg:QI 49 [ D.1915 ])
         (mem/v:QI (reg/f:HI 65) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])) ./piruett.w:435 -1
      (nil))
-(insn 38 37 39 8 (set (reg:QI 50 [ D.1916 ])
-        (and:QI (reg:QI 49 [ D.1916 ])
+(insn 38 37 39 8 (set (reg:QI 50 [ D.1915 ])
+        (and:QI (reg:QI 49 [ D.1915 ])
             (const_int -65 [0xffffffffffffffbf]))) ./piruett.w:435 -1
      (nil))
 (insn 39 38 40 8 (set (reg/f:HI 66)
         (const_int 129 [0x81])) ./piruett.w:435 -1
      (nil))
 (insn 40 39 41 8 (set (mem/v:QI (reg/f:HI 66) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])
-        (reg:QI 50 [ D.1916 ])) ./piruett.w:435 -1
+        (reg:QI 50 [ D.1915 ])) ./piruett.w:435 -1
      (nil))
 (jump_insn 41 40 42 8 (set (pc)
         (label_ref 55)) ./piruett.w:436 -1
@@ -233,52 +233,52 @@ Forwarding edge 5->6 to 10 failed.
 (insn 45 44 46 9 (set (reg/f:HI 67)
         (const_int 124 [0x7c])) ./piruett.w:438 -1
      (nil))
-(insn 46 45 47 9 (set (reg:QI 51 [ D.1916 ])
+(insn 46 45 47 9 (set (reg:QI 51 [ D.1915 ])
         (mem/v:QI (reg/f:HI 67) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])) ./piruett.w:438 -1
      (nil))
-(insn 47 46 48 9 (set (reg:QI 52 [ D.1916 ])
-        (and:QI (reg:QI 51 [ D.1916 ])
+(insn 47 46 48 9 (set (reg:QI 52 [ D.1915 ])
+        (and:QI (reg:QI 51 [ D.1915 ])
             (const_int -2 [0xfffffffffffffffe]))) ./piruett.w:438 -1
      (nil))
 (insn 48 47 49 9 (set (reg/f:HI 68)
         (const_int 124 [0x7c])) ./piruett.w:438 -1
      (nil))
 (insn 49 48 50 9 (set (mem/v:QI (reg/f:HI 68) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])
-        (reg:QI 52 [ D.1916 ])) ./piruett.w:438 -1
+        (reg:QI 52 [ D.1915 ])) ./piruett.w:438 -1
      (nil))
 (insn 50 49 51 9 (set (reg/f:HI 69)
         (const_int 129 [0x81])) ./piruett.w:439 -1
      (nil))
-(insn 51 50 52 9 (set (reg:QI 53 [ D.1916 ])
+(insn 51 50 52 9 (set (reg:QI 53 [ D.1915 ])
         (mem/v:QI (reg/f:HI 69) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])) ./piruett.w:439 -1
      (nil))
-(insn 52 51 53 9 (set (reg:QI 54 [ D.1916 ])
-        (and:QI (reg:QI 53 [ D.1916 ])
+(insn 52 51 53 9 (set (reg:QI 54 [ D.1915 ])
+        (and:QI (reg:QI 53 [ D.1915 ])
             (const_int -65 [0xffffffffffffffbf]))) ./piruett.w:439 -1
      (nil))
 (insn 53 52 54 9 (set (reg/f:HI 70)
         (const_int 129 [0x81])) ./piruett.w:439 -1
      (nil))
 (insn 54 53 55 9 (set (mem/v:QI (reg/f:HI 70) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])
-        (reg:QI 54 [ D.1916 ])) ./piruett.w:439 -1
+        (reg:QI 54 [ D.1915 ])) ./piruett.w:439 -1
      (nil))
 (code_label 55 54 56 10 4 "" [3 uses])
 (note 56 55 57 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
 (insn 57 56 58 10 (set (reg/f:HI 71)
         (const_int 54 [0x36])) ./piruett.w:446 -1
      (nil))
-(insn 58 57 59 10 (set (reg:QI 55 [ D.1916 ])
+(insn 58 57 59 10 (set (reg:QI 55 [ D.1915 ])
         (mem/v:QI (reg/f:HI 71) [0 MEM[(volatile uint8_t *)54B]+0 S1 A8])) ./piruett.w:446 -1
      (nil))
-(insn 59 58 60 10 (set (reg:QI 56 [ D.1916 ])
-        (ior:QI (reg:QI 55 [ D.1916 ])
+(insn 59 58 60 10 (set (reg:QI 56 [ D.1915 ])
+        (ior:QI (reg:QI 55 [ D.1915 ])
             (const_int 32 [0x20]))) ./piruett.w:446 -1
      (nil))
 (insn 60 59 61 10 (set (reg/f:HI 72)
         (const_int 54 [0x36])) ./piruett.w:446 -1
      (nil))
 (insn 61 60 0 10 (set (mem/v:QI (reg/f:HI 72) [0 MEM[(volatile uint8_t *)54B]+0 S1 A8])
-        (reg:QI 56 [ D.1916 ])) ./piruett.w:446 -1
+        (reg:QI 56 [ D.1915 ])) ./piruett.w:446 -1
      (nil))
 
 ;; Function pwcCalc (pwcCalc, funcdef_no=7, decl_uid=1571, symbol_order=8)
@@ -319,12 +319,12 @@ Forwarding edge 5->6 to 10 failed.
         (reg:HI 24 r24 [ input_s ])) ./piruett.w:374 -1
      (nil))
 (note 3 2 6 2 NOTE_INSN_FUNCTION_BEG)
-(insn 6 3 7 2 (set (reg:QI 51 [ D.1921 ])
+(insn 6 3 7 2 (set (reg:QI 51 [ D.1920 ])
         (mem:QI (plus:HI (reg/v/f:HI 50 [ input_s ])
                 (const_int 10 [0xa])) [0 input_s_3(D)->edge+0 S1 A8])) ./piruett.w:385 -1
      (nil))
 (insn 7 6 8 2 (set (cc0)
-        (compare (reg:QI 51 [ D.1921 ])
+        (compare (reg:QI 51 [ D.1920 ])
             (const_int 1 [0x1]))) ./piruett.w:385 -1
      (nil))
 (jump_insn 8 7 54 2 (set (pc)
@@ -336,7 +336,7 @@ Forwarding edge 5->6 to 10 failed.
  -> 24)
 (note 54 8 9 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
 (insn 9 54 10 4 (set (cc0)
-        (compare (reg:QI 51 [ D.1921 ])
+        (compare (reg:QI 51 [ D.1920 ])
             (const_int 1 [0x1]))) ./piruett.w:385 -1
      (nil))
 (jump_insn 10 9 55 4 (set (pc)
@@ -348,7 +348,7 @@ Forwarding edge 5->6 to 10 failed.
  -> 15)
 (note 55 10 11 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
 (insn 11 55 12 5 (set (cc0)
-        (compare (reg:QI 51 [ D.1921 ])
+        (compare (reg:QI 51 [ D.1920 ])
             (const_int 2 [0x2]))) ./piruett.w:385 -1
      (nil))
 (jump_insn 12 11 56 5 (set (pc)
@@ -369,11 +369,11 @@ Forwarding edge 5->6 to 10 failed.
 (insn 17 16 18 7 (set (reg/f:HI 52)
         (const_int 134 [0x86])) ./piruett.w:388 -1
      (nil))
-(insn 18 17 19 7 (set (reg:HI 43 [ D.1922 ])
+(insn 18 17 19 7 (set (reg:HI 43 [ D.1921 ])
         (mem/v:HI (reg/f:HI 52) [3 MEM[(volatile uint16_t *)134B]+0 S2 A8])) ./piruett.w:388 -1
      (nil))
 (insn 19 18 20 7 (set (mem:HI (reg/v/f:HI 50 [ input_s ]) [3 input_s_3(D)->ch2rise+0 S2 A8])
-        (reg:HI 43 [ D.1922 ])) ./piruett.w:388 -1
+        (reg:HI 43 [ D.1921 ])) ./piruett.w:388 -1
      (nil))
 (insn 20 19 21 7 (set (reg:QI 53)
         (const_int 1 [0x1])) ./piruett.w:389 -1
@@ -392,26 +392,26 @@ Forwarding edge 5->6 to 10 failed.
 (insn 26 25 27 8 (set (reg/f:HI 54)
         (const_int 134 [0x86])) ./piruett.w:392 -1
      (nil))
-(insn 27 26 28 8 (set (reg:HI 44 [ D.1922 ])
+(insn 27 26 28 8 (set (reg:HI 44 [ D.1921 ])
         (mem/v:HI (reg/f:HI 54) [3 MEM[(volatile uint16_t *)134B]+0 S2 A8])) ./piruett.w:392 -1
      (nil))
 (insn 28 27 29 8 (set (mem:HI (plus:HI (reg/v/f:HI 50 [ input_s ])
                 (const_int 2 [0x2])) [3 input_s_3(D)->ch2fall+0 S2 A8])
-        (reg:HI 44 [ D.1922 ])) ./piruett.w:392 -1
+        (reg:HI 44 [ D.1921 ])) ./piruett.w:392 -1
      (nil))
 (insn 29 28 30 8 (set (reg:HI 56)
         (mem:HI (reg/v/f:HI 50 [ input_s ]) [3 input_s_3(D)->ch2rise+0 S2 A8])) ./piruett.w:393 -1
      (nil))
 (insn 30 29 31 8 (parallel [
-            (set (reg:HI 55 [ D.1922 ])
-                (minus:HI (reg:HI 44 [ D.1922 ])
+            (set (reg:HI 55 [ D.1921 ])
+                (minus:HI (reg:HI 44 [ D.1921 ])
                     (reg:HI 56)))
             (clobber (scratch:QI))
         ]) ./piruett.w:393 -1
      (nil))
 (insn 31 30 32 8 (set (mem:HI (plus:HI (reg/v/f:HI 50 [ input_s ])
                 (const_int 8 [0x8])) [3 input_s_3(D)->ch2duration+0 S2 A8])
-        (reg:HI 55 [ D.1922 ])) ./piruett.w:393 -1
+        (reg:HI 55 [ D.1921 ])) ./piruett.w:393 -1
      (nil))
 (insn 32 31 33 8 (set (reg:QI 57)
         (const_int 2 [0x2])) ./piruett.w:394 -1
@@ -430,27 +430,27 @@ Forwarding edge 5->6 to 10 failed.
 (insn 38 37 39 9 (set (reg/f:HI 58)
         (const_int 134 [0x86])) ./piruett.w:397 -1
      (nil))
-(insn 39 38 40 9 (set (reg:HI 47 [ D.1922 ])
+(insn 39 38 40 9 (set (reg:HI 47 [ D.1921 ])
         (mem/v:HI (reg/f:HI 58) [3 MEM[(volatile uint16_t *)134B]+0 S2 A8])) ./piruett.w:397 -1
      (nil))
 (insn 40 39 41 9 (set (mem:HI (plus:HI (reg/v/f:HI 50 [ input_s ])
                 (const_int 4 [0x4])) [3 input_s_3(D)->ch1fall+0 S2 A8])
-        (reg:HI 47 [ D.1922 ])) ./piruett.w:397 -1
+        (reg:HI 47 [ D.1921 ])) ./piruett.w:397 -1
      (nil))
 (insn 41 40 42 9 (set (reg:HI 60)
         (mem:HI (plus:HI (reg/v/f:HI 50 [ input_s ])
                 (const_int 2 [0x2])) [3 input_s_3(D)->ch2fall+0 S2 A8])) ./piruett.w:398 -1
      (nil))
 (insn 42 41 43 9 (parallel [
-            (set (reg:HI 59 [ D.1922 ])
-                (minus:HI (reg:HI 47 [ D.1922 ])
+            (set (reg:HI 59 [ D.1921 ])
+                (minus:HI (reg:HI 47 [ D.1921 ])
                     (reg:HI 60)))
             (clobber (scratch:QI))
         ]) ./piruett.w:398 -1
      (nil))
 (insn 43 42 44 9 (set (mem:HI (plus:HI (reg/v/f:HI 50 [ input_s ])
                 (const_int 6 [0x6])) [3 input_s_3(D)->ch1duration+0 S2 A8])
-        (reg:HI 59 [ D.1922 ])) ./piruett.w:398 -1
+        (reg:HI 59 [ D.1921 ])) ./piruett.w:398 -1
      (nil))
 (insn 44 43 45 9 (set (mem:QI (plus:HI (reg/v/f:HI 50 [ input_s ])
                 (const_int 10 [0xa])) [0 input_s_3(D)->edge+0 S1 A8])
@@ -468,7 +468,7 @@ Forwarding edge 5->6 to 10 failed.
         (reg/v/f:HI 50 [ input_s ])) ./piruett.w:404 -1
      (nil))
 (call_insn/j 50 49 51 10 (parallel [
-            (call (mem:HI (symbol_ref:HI ("edgeSelect") [flags 0x3]  <function_decl 0x7fa078e7d800 edgeSelect>) [0 edgeSelect S2 A8])
+            (call (mem:HI (symbol_ref:HI ("edgeSelect") [flags 0x3]  <function_decl 0x7fcb3c282800 edgeSelect>) [0 edgeSelect S2 A8])
                 (const_int 0 [0]))
             (use (const_int 1 [0x1]))
         ]) ./piruett.w:404 -1
@@ -520,7 +520,7 @@ try_optimize_cfg iteration 2
         (reg/v/f:HI 42 [ input_s ])) ./piruett.w:415 -1
      (nil))
 (call_insn/j 10 9 11 2 (parallel [
-            (call (mem:HI (symbol_ref:HI ("edgeSelect") [flags 0x3]  <function_decl 0x7fa078e7d800 edgeSelect>) [0 edgeSelect S2 A8])
+            (call (mem:HI (symbol_ref:HI ("edgeSelect") [flags 0x3]  <function_decl 0x7fcb3c282800 edgeSelect>) [0 edgeSelect S2 A8])
                 (const_int 0 [0]))
             (use (const_int 1 [0x1]))
         ]) ./piruett.w:415 -1
@@ -580,11 +580,11 @@ try_optimize_cfg iteration 2
 (insn 9 8 10 4 (set (reg/f:HI 46)
         (const_int 37 [0x25])) ./piruett.w:455 -1
      (nil))
-(insn 10 9 11 4 (set (reg:QI 43 [ D.1928 ])
+(insn 10 9 11 4 (set (reg:QI 43 [ D.1927 ])
         (mem/v:QI (reg/f:HI 46) [0 MEM[(volatile uint8_t *)37B]+0 S1 A8])) ./piruett.w:455 -1
      (nil))
-(insn 11 10 12 4 (set (reg:QI 42 [ D.1927 ])
-        (ior:QI (reg:QI 43 [ D.1928 ])
+(insn 11 10 12 4 (set (reg:QI 42 [ D.1926 ])
+        (ior:QI (reg:QI 43 [ D.1927 ])
             (const_int 32 [0x20]))) ./piruett.w:455 -1
      (nil))
 (jump_insn 12 11 13 4 (set (pc)
@@ -597,11 +597,11 @@ try_optimize_cfg iteration 2
 (insn 16 15 17 5 (set (reg/f:HI 47)
         (const_int 37 [0x25])) ./piruett.w:455 -1
      (nil))
-(insn 17 16 18 5 (set (reg:QI 44 [ D.1928 ])
+(insn 17 16 18 5 (set (reg:QI 44 [ D.1927 ])
         (mem/v:QI (reg/f:HI 47) [0 MEM[(volatile uint8_t *)37B]+0 S1 A8])) ./piruett.w:455 -1
      (nil))
-(insn 18 17 19 5 (set (reg:QI 42 [ D.1927 ])
-        (and:QI (reg:QI 44 [ D.1928 ])
+(insn 18 17 19 5 (set (reg:QI 42 [ D.1926 ])
+        (and:QI (reg:QI 44 [ D.1927 ])
             (const_int -33 [0xffffffffffffffdf]))) ./piruett.w:455 -1
      (nil))
 (code_label 19 18 20 6 20 "" [1 uses])
@@ -610,7 +610,7 @@ try_optimize_cfg iteration 2
         (const_int 37 [0x25])) ./piruett.w:455 -1
      (nil))
 (insn 22 21 0 6 (set (mem/v:QI (reg/f:HI 48) [0 MEM[(volatile uint8_t *)37B]+0 S1 A8])
-        (reg:QI 42 [ D.1927 ])) ./piruett.w:455 -1
+        (reg:QI 42 [ D.1926 ])) ./piruett.w:455 -1
      (nil))
 
 ;; Function relayCntl (relayCntl, funcdef_no=11, decl_uid=1563, symbol_order=12)
@@ -663,11 +663,11 @@ try_optimize_cfg iteration 2
 (insn 9 8 10 4 (set (reg/f:HI 46)
         (const_int 37 [0x25])) ./piruett.w:463 -1
      (nil))
-(insn 10 9 11 4 (set (reg:QI 43 [ D.1932 ])
+(insn 10 9 11 4 (set (reg:QI 43 [ D.1931 ])
         (mem/v:QI (reg/f:HI 46) [0 MEM[(volatile uint8_t *)37B]+0 S1 A8])) ./piruett.w:463 -1
      (nil))
-(insn 11 10 12 4 (set (reg:QI 42 [ D.1931 ])
-        (ior:QI (reg:QI 43 [ D.1932 ])
+(insn 11 10 12 4 (set (reg:QI 42 [ D.1930 ])
+        (ior:QI (reg:QI 43 [ D.1931 ])
             (const_int 1 [0x1]))) ./piruett.w:463 -1
      (nil))
 (jump_insn 12 11 13 4 (set (pc)
@@ -680,11 +680,11 @@ try_optimize_cfg iteration 2
 (insn 16 15 17 5 (set (reg/f:HI 47)
         (const_int 37 [0x25])) ./piruett.w:463 -1
      (nil))
-(insn 17 16 18 5 (set (reg:QI 44 [ D.1932 ])
+(insn 17 16 18 5 (set (reg:QI 44 [ D.1931 ])
         (mem/v:QI (reg/f:HI 47) [0 MEM[(volatile uint8_t *)37B]+0 S1 A8])) ./piruett.w:463 -1
      (nil))
-(insn 18 17 19 5 (set (reg:QI 42 [ D.1931 ])
-        (and:QI (reg:QI 44 [ D.1932 ])
+(insn 18 17 19 5 (set (reg:QI 42 [ D.1930 ])
+        (and:QI (reg:QI 44 [ D.1931 ])
             (const_int -2 [0xfffffffffffffffe]))) ./piruett.w:463 -1
      (nil))
 (code_label 19 18 20 6 23 "" [1 uses])
@@ -693,7 +693,7 @@ try_optimize_cfg iteration 2
         (const_int 37 [0x25])) ./piruett.w:463 -1
      (nil))
 (insn 22 21 0 6 (set (mem/v:QI (reg/f:HI 48) [0 MEM[(volatile uint8_t *)37B]+0 S1 A8])
-        (reg:QI 42 [ D.1931 ])) ./piruett.w:463 -1
+        (reg:QI 42 [ D.1930 ])) ./piruett.w:463 -1
      (nil))
 
 ;; Function larboardDirection (larboardDirection, funcdef_no=12, decl_uid=1567, symbol_order=13)
@@ -747,18 +747,18 @@ try_optimize_cfg iteration 2
 (insn 9 8 10 4 (set (reg/f:HI 47)
         (const_int 43 [0x2b])) ./piruett.w:477 -1
      (nil))
-(insn 10 9 11 4 (set (reg:QI 44 [ D.1940 ])
+(insn 10 9 11 4 (set (reg:QI 44 [ D.1939 ])
         (mem/v:QI (reg/f:HI 47) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:477 -1
      (nil))
-(insn 11 10 12 4 (set (reg:QI 45 [ D.1940 ])
-        (ior:QI (reg:QI 44 [ D.1940 ])
+(insn 11 10 12 4 (set (reg:QI 45 [ D.1939 ])
+        (ior:QI (reg:QI 44 [ D.1939 ])
             (const_int 8 [0x8]))) ./piruett.w:477 -1
      (nil))
 (insn 12 11 13 4 (set (reg/f:HI 48)
         (const_int 43 [0x2b])) ./piruett.w:477 -1
      (nil))
 (insn 13 12 14 4 (set (mem/v:QI (reg/f:HI 48) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
-        (reg:QI 45 [ D.1940 ])) ./piruett.w:477 -1
+        (reg:QI 45 [ D.1939 ])) ./piruett.w:477 -1
      (nil))
 (jump_insn 14 13 15 4 (set (pc)
         (label_ref:HI 25)) ./piruett.w:477 432 {jump}
@@ -770,18 +770,18 @@ try_optimize_cfg iteration 2
 (insn 18 17 19 5 (set (reg/f:HI 49)
         (const_int 43 [0x2b])) ./piruett.w:481 -1
      (nil))
-(insn 19 18 20 5 (set (reg:QI 42 [ D.1940 ])
+(insn 19 18 20 5 (set (reg:QI 42 [ D.1939 ])
         (mem/v:QI (reg/f:HI 49) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:481 -1
      (nil))
-(insn 20 19 21 5 (set (reg:QI 43 [ D.1940 ])
-        (and:QI (reg:QI 42 [ D.1940 ])
+(insn 20 19 21 5 (set (reg:QI 43 [ D.1939 ])
+        (and:QI (reg:QI 42 [ D.1939 ])
             (const_int -9 [0xfffffffffffffff7]))) ./piruett.w:481 -1
      (nil))
 (insn 21 20 22 5 (set (reg/f:HI 50)
         (const_int 43 [0x2b])) ./piruett.w:481 -1
      (nil))
 (insn 22 21 25 5 (set (mem/v:QI (reg/f:HI 50) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
-        (reg:QI 43 [ D.1940 ])) ./piruett.w:481 -1
+        (reg:QI 43 [ D.1939 ])) ./piruett.w:481 -1
      (nil))
 (code_label 25 22 26 7 24 "" [1 uses])
 (note 26 25 0 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
@@ -837,18 +837,18 @@ try_optimize_cfg iteration 2
 (insn 9 8 10 4 (set (reg/f:HI 47)
         (const_int 43 [0x2b])) ./piruett.w:496 -1
      (nil))
-(insn 10 9 11 4 (set (reg:QI 44 [ D.1948 ])
+(insn 10 9 11 4 (set (reg:QI 44 [ D.1947 ])
         (mem/v:QI (reg/f:HI 47) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:496 -1
      (nil))
-(insn 11 10 12 4 (set (reg:QI 45 [ D.1948 ])
-        (ior:QI (reg:QI 44 [ D.1948 ])
+(insn 11 10 12 4 (set (reg:QI 45 [ D.1947 ])
+        (ior:QI (reg:QI 44 [ D.1947 ])
             (const_int 16 [0x10]))) ./piruett.w:496 -1
      (nil))
 (insn 12 11 13 4 (set (reg/f:HI 48)
         (const_int 43 [0x2b])) ./piruett.w:496 -1
      (nil))
 (insn 13 12 14 4 (set (mem/v:QI (reg/f:HI 48) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
-        (reg:QI 45 [ D.1948 ])) ./piruett.w:496 -1
+        (reg:QI 45 [ D.1947 ])) ./piruett.w:496 -1
      (nil))
 (jump_insn 14 13 15 4 (set (pc)
         (label_ref:HI 25)) ./piruett.w:496 432 {jump}
@@ -860,18 +860,18 @@ try_optimize_cfg iteration 2
 (insn 18 17 19 5 (set (reg/f:HI 49)
         (const_int 43 [0x2b])) ./piruett.w:500 -1
      (nil))
-(insn 19 18 20 5 (set (reg:QI 42 [ D.1948 ])
+(insn 19 18 20 5 (set (reg:QI 42 [ D.1947 ])
         (mem/v:QI (reg/f:HI 49) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:500 -1
      (nil))
-(insn 20 19 21 5 (set (reg:QI 43 [ D.1948 ])
-        (and:QI (reg:QI 42 [ D.1948 ])
+(insn 20 19 21 5 (set (reg:QI 43 [ D.1947 ])
+        (and:QI (reg:QI 42 [ D.1947 ])
             (const_int -17 [0xffffffffffffffef]))) ./piruett.w:500 -1
      (nil))
 (insn 21 20 22 5 (set (reg/f:HI 50)
         (const_int 43 [0x2b])) ./piruett.w:500 -1
      (nil))
 (insn 22 21 25 5 (set (mem/v:QI (reg/f:HI 50) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
-        (reg:QI 43 [ D.1948 ])) ./piruett.w:500 -1
+        (reg:QI 43 [ D.1947 ])) ./piruett.w:500 -1
      (nil))
 (code_label 25 22 26 7 27 "" [1 uses])
 (note 26 25 0 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
@@ -951,14 +951,14 @@ Forwarding edge 10->11 to 14 failed.
      (int_list:REG_BR_PROB 1991 (nil))
  -> 75)
 (note 13 12 14 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
-(insn 14 13 15 4 (set (reg:HI 44 [ D.1953 ])
+(insn 14 13 15 4 (set (reg:HI 44 [ D.1952 ])
         (mem:HI (plus:HI (reg/v/f:HI 69 [ input_s ])
                 (const_int 14 [0xe])) [3 input_s_4(D)->maxIn+0 S2 A8])) ./piruett.w:523 -1
      (nil))
 (insn 15 14 16 4 (parallel [
             (set (cc0)
                 (compare (reg/v:HI 71 [ input ])
-                    (reg:HI 44 [ D.1953 ])))
+                    (reg:HI 44 [ D.1952 ])))
             (clobber (scratch:QI))
         ]) ./piruett.w:523 -1
      (nil))
@@ -970,7 +970,7 @@ Forwarding edge 10->11 to 14 failed.
      (int_list:REG_BR_PROB 6100 (nil))
  -> 21)
 (note 17 16 18 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
-(insn 18 17 19 5 (set (reg:HI 42 [ D.1951 ])
+(insn 18 17 19 5 (set (reg:HI 42 [ D.1950 ])
         (mem:HI (plus:HI (reg/v/f:HI 70 [ trans_s ])
                 (const_int 12 [0xc])) [3 trans_s_8(D)->maxOut+0 S2 A8])) ./piruett.w:524 -1
      (nil))
@@ -981,14 +981,14 @@ Forwarding edge 10->11 to 14 failed.
 (barrier 20 19 21)
 (code_label 21 20 22 6 32 "" [1 uses])
 (note 22 21 23 6 [bb 6] NOTE_INSN_BASIC_BLOCK)
-(insn 23 22 24 6 (set (reg:HI 45 [ D.1953 ])
+(insn 23 22 24 6 (set (reg:HI 45 [ D.1952 ])
         (mem:HI (plus:HI (reg/v/f:HI 69 [ input_s ])
                 (const_int 12 [0xc])) [3 input_s_4(D)->minIn+0 S2 A8])) ./piruett.w:526 -1
      (nil))
 (insn 24 23 25 6 (parallel [
             (set (cc0)
                 (compare (reg/v:HI 71 [ input ])
-                    (reg:HI 45 [ D.1953 ])))
+                    (reg:HI 45 [ D.1952 ])))
             (clobber (scratch:QI))
         ]) ./piruett.w:526 -1
      (nil))
@@ -1000,7 +1000,7 @@ Forwarding edge 10->11 to 14 failed.
      (int_list:REG_BR_PROB 6100 (nil))
  -> 30)
 (note 26 25 27 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
-(insn 27 26 28 7 (set (reg:HI 42 [ D.1951 ])
+(insn 27 26 28 7 (set (reg:HI 42 [ D.1950 ])
         (mem:HI (plus:HI (reg/v/f:HI 70 [ trans_s ])
                 (const_int 10 [0xa])) [3 trans_s_8(D)->minOut+0 S2 A8])) ./piruett.w:527 -1
      (nil))
@@ -1012,23 +1012,23 @@ Forwarding edge 10->11 to 14 failed.
 (code_label 30 29 31 8 33 "" [1 uses])
 (note 31 30 32 8 [bb 8] NOTE_INSN_BASIC_BLOCK)
 (insn 32 31 33 8 (parallel [
-            (set (reg:HI 46 [ D.1953 ])
-                (minus:HI (reg:HI 44 [ D.1953 ])
-                    (reg:HI 45 [ D.1953 ])))
+            (set (reg:HI 46 [ D.1952 ])
+                (minus:HI (reg:HI 44 [ D.1952 ])
+                    (reg:HI 45 [ D.1952 ])))
             (clobber (scratch:QI))
         ]) ./piruett.w:544 -1
      (nil))
-(insn 33 32 34 8 (set (reg:SI 47 [ D.1954 ])
-        (zero_extend:SI (reg:HI 46 [ D.1953 ]))) ./piruett.w:544 -1
+(insn 33 32 34 8 (set (reg:SI 47 [ D.1953 ])
+        (zero_extend:SI (reg:HI 46 [ D.1952 ]))) ./piruett.w:544 -1
      (nil))
-(insn 34 33 35 8 (set (reg:HI 50 [ D.1955 ])
+(insn 34 33 35 8 (set (reg:HI 50 [ D.1954 ])
         (mem:HI (plus:HI (reg/v/f:HI 70 [ trans_s ])
                 (const_int 10 [0xa])) [3 trans_s_8(D)->minOut+0 S2 A8])) ./piruett.w:545 -1
      (nil))
 (insn 35 34 36 8 (set (reg:SI 73)
-        (zero_extend:SI (reg:HI 46 [ D.1953 ]))) ./piruett.w:544 -1
+        (zero_extend:SI (reg:HI 46 [ D.1952 ]))) ./piruett.w:544 -1
      (nil))
-(insn 36 35 37 8 (set (reg:SI 74 [ D.1954 ])
+(insn 36 35 37 8 (set (reg:SI 74 [ D.1953 ])
         (ashift:SI (reg:SI 73)
             (const_int 7 [0x7]))) ./piruett.w:544 -1
      (nil))
@@ -1037,22 +1037,22 @@ Forwarding edge 10->11 to 14 failed.
                 (const_int 12 [0xc])) [3 trans_s_8(D)->maxOut+0 S2 A8])) ./piruett.w:545 -1
      (nil))
 (insn 38 37 39 8 (parallel [
-            (set (reg:HI 75 [ D.1955 ])
+            (set (reg:HI 75 [ D.1954 ])
                 (minus:HI (reg:HI 76)
-                    (reg:HI 50 [ D.1955 ])))
+                    (reg:HI 50 [ D.1954 ])))
             (clobber (scratch:QI))
         ]) ./piruett.w:545 -1
      (nil))
-(insn 39 38 40 8 (set (reg:SI 77 [ D.1954 ])
-        (sign_extend:SI (reg:HI 75 [ D.1955 ]))) ./piruett.w:545 -1
+(insn 39 38 40 8 (set (reg:SI 77 [ D.1953 ])
+        (sign_extend:SI (reg:HI 75 [ D.1954 ]))) ./piruett.w:545 -1
      (nil))
 (insn 40 39 41 8 (parallel [
             (set (reg:SI 78)
-                (div:SI (reg:SI 74 [ D.1954 ])
-                    (reg:SI 77 [ D.1954 ])))
+                (div:SI (reg:SI 74 [ D.1953 ])
+                    (reg:SI 77 [ D.1953 ])))
             (set (reg:SI 79)
-                (mod:SI (reg:SI 74 [ D.1954 ])
-                    (reg:SI 77 [ D.1954 ])))
+                (mod:SI (reg:SI 74 [ D.1953 ])
+                    (reg:SI 77 [ D.1953 ])))
             (clobber (reg:SI 18 r18))
             (clobber (reg:SI 22 r22))
             (clobber (reg:HI 26 r26))
@@ -1062,25 +1062,25 @@ Forwarding edge 10->11 to 14 failed.
 (insn 41 40 42 8 (set (reg/v:SI 53 [ gain ])
         (reg:SI 78)) ./piruett.w:544 -1
      (nil))
-(insn 42 41 43 8 (set (reg:SI 54 [ D.1954 ])
-        (zero_extend:SI (reg:HI 45 [ D.1953 ]))) ./piruett.w:547 -1
+(insn 42 41 43 8 (set (reg:SI 54 [ D.1953 ])
+        (zero_extend:SI (reg:HI 45 [ D.1952 ]))) ./piruett.w:547 -1
      (nil))
-(insn 43 42 44 8 (set (reg:SI 59 [ D.1954 ])
+(insn 43 42 44 8 (set (reg:SI 59 [ D.1953 ])
         (zero_extend:SI (reg/v:HI 71 [ input ]))) ./piruett.w:550 -1
      (nil))
 (insn 44 43 45 8 (set (reg:SI 80)
         (zero_extend:SI (reg/v:HI 71 [ input ]))) ./piruett.w:550 -1
      (nil))
-(insn 45 44 46 8 (set (reg:SI 81 [ D.1954 ])
+(insn 45 44 46 8 (set (reg:SI 81 [ D.1953 ])
         (ashift:SI (reg:SI 80)
             (const_int 7 [0x7]))) ./piruett.w:550 -1
      (nil))
 (insn 46 45 47 8 (parallel [
-            (set (reg:SI 83 [ D.1954 ])
-                (div:SI (reg:SI 81 [ D.1954 ])
+            (set (reg:SI 83 [ D.1953 ])
+                (div:SI (reg:SI 81 [ D.1953 ])
                     (reg/v:SI 53 [ gain ])))
             (set (reg:SI 84)
-                (mod:SI (reg:SI 81 [ D.1954 ])
+                (mod:SI (reg:SI 81 [ D.1953 ])
                     (reg/v:SI 53 [ gain ])))
             (clobber (reg:SI 18 r18))
             (clobber (reg:SI 22 r22))
@@ -1089,18 +1089,18 @@ Forwarding edge 10->11 to 14 failed.
         ]) ./piruett.w:550 -1
      (nil))
 (insn 47 46 48 8 (set (reg:SI 85)
-        (zero_extend:SI (reg:HI 45 [ D.1953 ]))) ./piruett.w:547 -1
+        (zero_extend:SI (reg:HI 45 [ D.1952 ]))) ./piruett.w:547 -1
      (nil))
-(insn 48 47 49 8 (set (reg:SI 86 [ D.1954 ])
+(insn 48 47 49 8 (set (reg:SI 86 [ D.1953 ])
         (ashift:SI (reg:SI 85)
             (const_int 7 [0x7]))) ./piruett.w:547 -1
      (nil))
 (insn 49 48 50 8 (parallel [
-            (set (reg:SI 88 [ D.1954 ])
-                (div:SI (reg:SI 86 [ D.1954 ])
+            (set (reg:SI 88 [ D.1953 ])
+                (div:SI (reg:SI 86 [ D.1953 ])
                     (reg/v:SI 53 [ gain ])))
             (set (reg:SI 89)
-                (mod:SI (reg:SI 86 [ D.1954 ])
+                (mod:SI (reg:SI 86 [ D.1953 ])
                     (reg/v:SI 53 [ gain ])))
             (clobber (reg:SI 18 r18))
             (clobber (reg:SI 22 r22))
@@ -1108,29 +1108,29 @@ Forwarding edge 10->11 to 14 failed.
             (clobber (reg:HI 30 r30))
         ]) ./piruett.w:547 -1
      (nil))
-(insn 50 49 51 8 (set (reg:SI 90 [ D.1954 ])
-        (sign_extend:SI (reg:HI 50 [ D.1955 ]))) ./piruett.w:548 -1
+(insn 50 49 51 8 (set (reg:SI 90 [ D.1953 ])
+        (sign_extend:SI (reg:HI 50 [ D.1954 ]))) ./piruett.w:548 -1
      (nil))
 (insn 51 50 52 8 (parallel [
             (set (reg:SI 91 [ offset ])
-                (minus:SI (reg:SI 88 [ D.1954 ])
-                    (reg:SI 90 [ D.1954 ])))
+                (minus:SI (reg:SI 88 [ D.1953 ])
+                    (reg:SI 90 [ D.1953 ])))
             (clobber (scratch:QI))
         ]) ./piruett.w:547 -1
      (nil))
 (insn 52 51 53 8 (parallel [
-            (set (reg:HI 42 [ D.1951 ])
-                (minus:HI (subreg:HI (reg:SI 83 [ D.1954 ]) 0)
+            (set (reg:HI 42 [ D.1950 ])
+                (minus:HI (subreg:HI (reg:SI 83 [ D.1953 ]) 0)
                     (subreg:HI (reg:SI 91 [ offset ]) 0)))
             (clobber (scratch:QI))
         ]) ./piruett.w:550 -1
      (nil))
-(insn 53 52 54 8 (set (reg:HI 92 [ D.1955 ])
-        (reg:HI 42 [ D.1951 ])) ./piruett.w:553 -1
+(insn 53 52 54 8 (set (reg:HI 92 [ D.1954 ])
+        (reg:HI 42 [ D.1950 ])) ./piruett.w:553 -1
      (nil))
 (insn 54 53 55 8 (parallel [
             (set (cc0)
-                (compare (reg:HI 92 [ D.1955 ])
+                (compare (reg:HI 92 [ D.1954 ])
                     (const_int 0 [0])))
             (clobber (scratch:QI))
         ]) ./piruett.w:553 -1
@@ -1143,8 +1143,8 @@ Forwarding edge 10->11 to 14 failed.
      (int_list:REG_BR_PROB 7900 (nil))
  -> 57)
 (note 80 55 56 9 [bb 9] NOTE_INSN_BASIC_BLOCK)
-(insn 56 80 57 9 (set (reg:HI 92 [ D.1955 ])
-        (neg:HI (reg:HI 92 [ D.1955 ]))) ./piruett.w:553 -1
+(insn 56 80 57 9 (set (reg:HI 92 [ D.1954 ])
+        (neg:HI (reg:HI 92 [ D.1954 ]))) ./piruett.w:553 -1
      (nil))
 (code_label 57 56 81 10 34 "" [1 uses])
 (note 81 57 58 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
@@ -1152,13 +1152,13 @@ Forwarding edge 10->11 to 14 failed.
         (mem:QI (plus:HI (reg/v/f:HI 70 [ trans_s ])
                 (const_int 14 [0xe])) [0 trans_s_8(D)->deadBand+0 S1 A8])) ./piruett.w:553 -1
      (nil))
-(insn 59 58 60 10 (set (reg:HI 93 [ D.1955 ])
+(insn 59 58 60 10 (set (reg:HI 93 [ D.1954 ])
         (sign_extend:HI (reg:QI 94))) ./piruett.w:553 -1
      (nil))
 (insn 60 59 61 10 (parallel [
             (set (cc0)
-                (compare (reg:HI 92 [ D.1955 ])
-                    (reg:HI 93 [ D.1955 ])))
+                (compare (reg:HI 92 [ D.1954 ])
+                    (reg:HI 93 [ D.1954 ])))
             (clobber (scratch:QI))
         ]) ./piruett.w:553 -1
      (nil))
@@ -1177,7 +1177,7 @@ Forwarding edge 10->11 to 14 failed.
 (barrier 73 72 75)
 (code_label 75 73 74 12 35 "" [1 uses])
 (note 74 75 7 12 [bb 12] NOTE_INSN_BASIC_BLOCK)
-(insn 7 74 76 12 (set (reg:HI 42 [ D.1951 ])
+(insn 7 74 76 12 (set (reg:HI 42 [ D.1950 ])
         (const_int 0 [0])) ./piruett.w:521 -1
      (nil))
 (jump_insn 76 7 77 12 (set (pc)
@@ -1187,13 +1187,13 @@ Forwarding edge 10->11 to 14 failed.
 (barrier 77 76 79)
 (code_label 79 77 78 13 36 "" [1 uses])
 (note 78 79 6 13 [bb 13] NOTE_INSN_BASIC_BLOCK)
-(insn 6 78 63 13 (set (reg:HI 42 [ D.1951 ])
+(insn 6 78 63 13 (set (reg:HI 42 [ D.1950 ])
         (const_int 0 [0])) ./piruett.w:521 -1
      (nil))
 (code_label 63 6 64 14 31 "" [4 uses])
 (note 64 63 65 14 [bb 14] NOTE_INSN_BASIC_BLOCK)
 (insn 65 64 69 14 (set (reg:HI 68 [ <retval> ])
-        (reg:HI 42 [ D.1951 ])) -1
+        (reg:HI 42 [ D.1950 ])) -1
      (nil))
 (insn 69 65 70 14 (set (reg/i:HI 24 r24)
         (reg:HI 68 [ <retval> ])) ./piruett.w:555 -1
@@ -1233,17 +1233,12 @@ Forwarding edge 10->11 to 14 failed.
 ;; Generating RTL for gimple basic block 15
 
 ;; Generating RTL for gimple basic block 16
-Predictions for insn 16 bb 2
+Predictions for insn 14 bb 2
   DS theory heuristics: 79.0%
   first match heuristics (ignored): 79.0%
   combined heuristics: 79.0%
   opcode values positive heuristics: 79.0%
-Predictions for insn 26 bb 20
-  DS theory heuristics: 79.0%
-  first match heuristics (ignored): 79.0%
-  combined heuristics: 79.0%
-  opcode values positive heuristics: 79.0%
-Predictions for insn 34 bb 22
+Predictions for insn 25 bb 20
   DS theory heuristics: 79.0%
   first match heuristics (ignored): 79.0%
   combined heuristics: 79.0%
@@ -1255,12 +1250,12 @@ try_optimize_cfg iteration 1
 Merging block 3 into block 2...
 Merged blocks 2 and 3.
 Merged 2 and 3 without moving.
-Redirecting jump 75 from 23 to 24.
-Redirecting jump 84 from 23 to 24.
-Redirecting jump 93 from 23 to 24.
-Merging block 23 into block 22...
-Merged blocks 22 and 23.
-Merged 22 and 23 without moving.
+Redirecting jump 70 from 21 to 22.
+Redirecting jump 79 from 21 to 22.
+Redirecting jump 87 from 21 to 22.
+Merging block 21 into block 20...
+Merged blocks 20 and 21.
+Merged 20 and 21 without moving.
 
 
 try_optimize_cfg iteration 2
@@ -1272,375 +1267,351 @@ try_optimize_cfg iteration 2
 ;;
 (note 1 0 4 NOTE_INSN_DELETED)
 (note 4 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
-(insn 2 4 3 2 (set (reg/v/f:HI 58 [ trans_s ])
+(insn 2 4 3 2 (set (reg/v/f:HI 57 [ trans_s ])
         (reg:HI 24 r24 [ trans_s ])) ./piruett.w:572 -1
      (nil))
 (note 3 2 6 2 NOTE_INSN_FUNCTION_BEG)
 (insn 6 3 7 2 (set (reg/v:HI 42 [ speed ])
-        (mem:HI (reg/v/f:HI 58 [ trans_s ]) [3 trans_s_4(D)->thrust+0 S2 A8])) ./piruett.w:573 -1
+        (mem:HI (reg/v/f:HI 57 [ trans_s ]) [3 trans_s_4(D)->thrust+0 S2 A8])) ./piruett.w:573 -1
      (nil))
-(insn 7 6 8 2 (set (reg:HI 60)
-        (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+(insn 7 6 8 2 (set (reg:HI 43 [ D.1959 ])
+        (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 2 [0x2])) [3 trans_s_4(D)->radius+0 S2 A8])) ./piruett.w:586 -1
      (nil))
-(insn 8 7 9 2 (set (reg:HI 59 [ D.1960 ])
-        (ashift:HI (reg:HI 60)
+(insn 8 7 9 2 (set (reg:HI 58 [ D.1959 ])
+        (ashift:HI (reg:HI 43 [ D.1959 ])
             (const_int 7 [0x7]))) ./piruett.w:586 -1
      (nil))
-(insn 9 8 10 2 (set (reg:HI 63)
+(insn 9 8 10 2 (set (reg:HI 62)
         (const_int 255 [0xff])) ./piruett.w:586 -1
      (nil))
 (insn 10 9 11 2 (parallel [
+            (set (reg:HI 60 [ D.1959 ])
+                (div:HI (reg:HI 58 [ D.1959 ])
+                    (reg:HI 62)))
             (set (reg:HI 61)
-                (div:HI (reg:HI 59 [ D.1960 ])
-                    (reg:HI 63)))
-            (set (reg:HI 62)
-                (mod:HI (reg:HI 59 [ D.1960 ])
-                    (reg:HI 63)))
+                (mod:HI (reg:HI 58 [ D.1959 ])
+                    (reg:HI 62)))
             (clobber (reg:QI 21 r21))
             (clobber (reg:HI 22 r22))
             (clobber (reg:HI 24 r24))
             (clobber (reg:HI 26 r26))
         ]) ./piruett.w:586 -1
      (nil))
-(insn 11 10 12 2 (set (reg:HI 45 [ D.1960 ])
-        (reg:HI 61)) ./piruett.w:586 -1
-     (nil))
-(insn 12 11 13 2 (set (reg:HI 48 [ D.1960 ])
-        (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
-                (const_int 4 [0x4])) [3 trans_s_4(D)->track+0 S2 A8])) ./piruett.w:587 -1
-     (nil))
-(insn 13 12 14 2 (set (reg:HI 64 [ D.1960 ])
+(insn 11 10 12 2 (set (reg:HI 63 [ D.1959 ])
         (mult:HI (reg/v:HI 42 [ speed ])
-            (reg:HI 45 [ D.1960 ]))) ./piruett.w:586 -1
+            (reg:HI 60 [ D.1959 ]))) ./piruett.w:586 -1
      (nil))
-(insn 14 13 15 2 (set (reg:HI 66)
-        (reg:HI 64 [ D.1960 ])) ./piruett.w:586 -1
+(insn 12 11 13 2 (set (reg:HI 65)
+        (reg:HI 63 [ D.1959 ])) ./piruett.w:586 -1
      (nil))
-(insn 15 14 16 2 (parallel [
+(insn 13 12 14 2 (parallel [
             (set (cc0)
-                (compare (reg:HI 66)
+                (compare (reg:HI 65)
                     (const_int 0 [0])))
             (clobber (scratch:QI))
         ]) ./piruett.w:586 -1
      (nil))
-(jump_insn 16 15 102 2 (set (pc)
+(jump_insn 14 13 96 2 (set (pc)
         (if_then_else (ge (cc0)
                 (const_int 0 [0]))
-            (label_ref 18)
+            (label_ref 16)
             (pc))) ./piruett.w:586 -1
      (int_list:REG_BR_PROB 7900 (nil))
- -> 18)
-(note 102 16 17 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
-(insn 17 102 18 4 (parallel [
-            (set (reg:HI 66)
-                (plus:HI (reg:HI 66)
+ -> 16)
+(note 96 14 15 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
+(insn 15 96 16 4 (parallel [
+            (set (reg:HI 65)
+                (plus:HI (reg:HI 65)
                     (const_int 127 [0x7f])))
             (clobber (scratch:QI))
         ]) ./piruett.w:586 -1
      (nil))
-(code_label 18 17 103 5 38 "" [1 uses])
-(note 103 18 19 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
-(insn 19 103 20 5 (set (reg:HI 67 [ difference ])
-        (ashiftrt:HI (reg:HI 66)
+(code_label 16 15 97 5 38 "" [1 uses])
+(note 97 16 17 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
+(insn 17 97 18 5 (set (reg:HI 66 [ difference ])
+        (ashiftrt:HI (reg:HI 65)
             (const_int 7 [0x7]))) ./piruett.w:586 -1
-     (expr_list:REG_EQUAL (div:HI (reg:HI 64 [ D.1960 ])
+     (expr_list:REG_EQUAL (div:HI (reg:HI 63 [ D.1959 ])
             (const_int 128 [0x80]))
         (nil)))
-(insn 20 19 21 5 (set (reg:HI 68 [ D.1960 ])
-        (ashift:HI (reg:HI 67 [ difference ])
+(insn 18 17 19 5 (set (reg:HI 67 [ D.1959 ])
+        (ashift:HI (reg:HI 66 [ difference ])
             (const_int 7 [0x7]))) ./piruett.w:587 -1
      (nil))
-(insn 21 20 22 5 (set (reg:HI 72)
+(insn 19 18 20 5 (set (reg:HI 71)
         (const_int 255 [0xff])) ./piruett.w:587 -1
      (nil))
-(insn 22 21 23 5 (parallel [
-            (set (reg:HI 70 [ D.1960 ])
-                (div:HI (reg:HI 68 [ D.1960 ])
-                    (reg:HI 72)))
-            (set (reg:HI 71)
-                (mod:HI (reg:HI 68 [ D.1960 ])
-                    (reg:HI 72)))
+(insn 20 19 21 5 (parallel [
+            (set (reg:HI 69 [ D.1959 ])
+                (div:HI (reg:HI 67 [ D.1959 ])
+                    (reg:HI 71)))
+            (set (reg:HI 70)
+                (mod:HI (reg:HI 67 [ D.1959 ])
+                    (reg:HI 71)))
             (clobber (reg:QI 21 r21))
             (clobber (reg:HI 22 r22))
             (clobber (reg:HI 24 r24))
             (clobber (reg:HI 26 r26))
         ]) ./piruett.w:587 -1
      (nil))
-(insn 23 22 24 5 (set (reg:HI 73 [ D.1960 ])
-        (mult:HI (reg:HI 48 [ D.1960 ])
-            (reg:HI 70 [ D.1960 ]))) ./piruett.w:587 -1
+(insn 21 20 22 5 (set (reg:HI 73)
+        (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
+                (const_int 4 [0x4])) [3 trans_s_4(D)->track+0 S2 A8])) ./piruett.w:587 -1
      (nil))
-(insn 24 23 25 5 (set (reg:HI 74)
-        (reg:HI 73 [ D.1960 ])) ./piruett.w:587 -1
+(insn 22 21 23 5 (set (reg:HI 72 [ D.1959 ])
+        (mult:HI (reg:HI 69 [ D.1959 ])
+            (reg:HI 73))) ./piruett.w:587 -1
      (nil))
-(insn 25 24 26 5 (parallel [
+(insn 23 22 24 5 (set (reg:HI 74)
+        (reg:HI 72 [ D.1959 ])) ./piruett.w:587 -1
+     (nil))
+(insn 24 23 25 5 (parallel [
             (set (cc0)
                 (compare (reg:HI 74)
                     (const_int 0 [0])))
             (clobber (scratch:QI))
         ]) ./piruett.w:587 -1
      (nil))
-(jump_insn 26 25 104 5 (set (pc)
+(jump_insn 25 24 98 5 (set (pc)
         (if_then_else (ge (cc0)
                 (const_int 0 [0]))
-            (label_ref 28)
+            (label_ref 27)
             (pc))) ./piruett.w:587 -1
      (int_list:REG_BR_PROB 7900 (nil))
- -> 28)
-(note 104 26 27 6 [bb 6] NOTE_INSN_BASIC_BLOCK)
-(insn 27 104 28 6 (parallel [
+ -> 27)
+(note 98 25 26 6 [bb 6] NOTE_INSN_BASIC_BLOCK)
+(insn 26 98 27 6 (parallel [
             (set (reg:HI 74)
                 (plus:HI (reg:HI 74)
                     (const_int 127 [0x7f])))
             (clobber (scratch:QI))
         ]) ./piruett.w:587 -1
      (nil))
-(code_label 28 27 105 7 39 "" [1 uses])
-(note 105 28 29 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
-(insn 29 105 30 7 (set (reg:HI 75)
+(code_label 27 26 99 7 39 "" [1 uses])
+(note 99 27 28 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
+(insn 28 99 29 7 (set (reg:HI 75)
         (ashiftrt:HI (reg:HI 74)
             (const_int 7 [0x7]))) ./piruett.w:587 -1
-     (expr_list:REG_EQUAL (div:HI (reg:HI 73 [ D.1960 ])
+     (expr_list:REG_EQUAL (div:HI (reg:HI 72 [ D.1959 ])
             (const_int 128 [0x80]))
         (nil)))
-(insn 30 29 31 7 (set (reg/v:HI 52 [ rotation ])
+(insn 29 28 30 7 (set (reg/v:HI 52 [ rotation ])
         (reg:HI 75)) ./piruett.w:587 -1
      (nil))
-(insn 31 30 32 7 (set (reg:HI 76 [ D.1960 ])
-        (mult:HI (reg:HI 48 [ D.1960 ])
-            (reg:HI 45 [ D.1960 ]))) ./piruett.w:588 -1
+(insn 30 29 31 7 (set (reg:HI 78)
+        (const_int 255 [0xff])) ./piruett.w:588 -1
      (nil))
-(insn 32 31 33 7 (set (reg:HI 77)
-        (reg:HI 76 [ D.1960 ])) ./piruett.w:588 -1
+(insn 31 30 32 7 (parallel [
+            (set (reg:HI 76)
+                (div:HI (reg:HI 43 [ D.1959 ])
+                    (reg:HI 78)))
+            (set (reg:HI 77)
+                (mod:HI (reg:HI 43 [ D.1959 ])
+                    (reg:HI 78)))
+            (clobber (reg:QI 21 r21))
+            (clobber (reg:HI 22 r22))
+            (clobber (reg:HI 24 r24))
+            (clobber (reg:HI 26 r26))
+        ]) ./piruett.w:588 -1
+     (nil))
+(insn 32 31 33 7 (set (reg/v:HI 53 [ piruett ])
+        (reg:HI 76)) ./piruett.w:588 -1
      (nil))
 (insn 33 32 34 7 (parallel [
-            (set (cc0)
-                (compare (reg:HI 77)
-                    (const_int 0 [0])))
-            (clobber (scratch:QI))
-        ]) ./piruett.w:588 -1
-     (nil))
-(jump_insn 34 33 106 7 (set (pc)
-        (if_then_else (ge (cc0)
-                (const_int 0 [0]))
-            (label_ref 36)
-            (pc))) ./piruett.w:588 -1
-     (int_list:REG_BR_PROB 7900 (nil))
- -> 36)
-(note 106 34 35 8 [bb 8] NOTE_INSN_BASIC_BLOCK)
-(insn 35 106 36 8 (parallel [
-            (set (reg:HI 77)
-                (plus:HI (reg:HI 77)
-                    (const_int 127 [0x7f])))
-            (clobber (scratch:QI))
-        ]) ./piruett.w:588 -1
-     (nil))
-(code_label 36 35 107 9 40 "" [1 uses])
-(note 107 36 37 9 [bb 9] NOTE_INSN_BASIC_BLOCK)
-(insn 37 107 38 9 (set (reg:HI 78)
-        (ashiftrt:HI (reg:HI 77)
-            (const_int 7 [0x7]))) ./piruett.w:588 -1
-     (expr_list:REG_EQUAL (div:HI (reg:HI 76 [ D.1960 ])
-            (const_int 128 [0x80]))
-        (nil)))
-(insn 38 37 39 9 (set (reg/v:HI 54 [ piruett ])
-        (reg:HI 78)) ./piruett.w:588 -1
-     (nil))
-(insn 39 38 40 9 (parallel [
-            (set (reg:HI 55 [ D.1960 ])
+            (set (reg:HI 54 [ D.1959 ])
                 (minus:HI (reg/v:HI 42 [ speed ])
                     (reg/v:HI 52 [ rotation ])))
             (clobber (scratch:QI))
         ]) ./piruett.w:595 -1
      (nil))
-(insn 40 39 41 9 (parallel [
+(insn 34 33 35 7 (parallel [
             (set (cc0)
-                (compare (reg:HI 55 [ D.1960 ])
+                (compare (reg:HI 54 [ D.1959 ])
                     (const_int 248 [0xf8])))
             (clobber (scratch:QI))
         ]) ./piruett.w:595 -1
      (nil))
-(jump_insn 41 40 42 9 (set (pc)
+(jump_insn 35 34 36 7 (set (pc)
         (if_then_else (le (cc0)
                 (const_int 0 [0]))
-            (label_ref 47)
+            (label_ref 41)
             (pc))) ./piruett.w:595 -1
      (int_list:REG_BR_PROB 5000 (nil))
- -> 47)
-(note 42 41 43 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
-(insn 43 42 44 10 (set (reg:HI 79)
+ -> 41)
+(note 36 35 37 8 [bb 8] NOTE_INSN_BASIC_BLOCK)
+(insn 37 36 38 8 (set (reg:HI 79)
         (const_int 249 [0xf9])) ./piruett.w:596 -1
      (nil))
-(insn 44 43 45 10 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+(insn 38 37 39 8 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 8 [0x8])) [3 trans_s_4(D)->larboardOut+0 S2 A8])
         (reg:HI 79)) ./piruett.w:596 -1
      (nil))
-(jump_insn 45 44 46 10 (set (pc)
-        (label_ref 67)) -1
+(jump_insn 39 38 40 8 (set (pc)
+        (label_ref 62)) -1
      (nil)
- -> 67)
-(barrier 46 45 47)
-(code_label 47 46 48 11 41 "" [1 uses])
-(note 48 47 49 11 [bb 11] NOTE_INSN_BASIC_BLOCK)
-(insn 49 48 50 11 (parallel [
+ -> 62)
+(barrier 40 39 41)
+(code_label 41 40 42 9 40 "" [1 uses])
+(note 42 41 43 9 [bb 9] NOTE_INSN_BASIC_BLOCK)
+(insn 43 42 44 9 (parallel [
             (set (cc0)
-                (compare (reg:HI 55 [ D.1960 ])
+                (compare (reg:HI 54 [ D.1959 ])
                     (const_int -248 [0xffffffffffffff08])))
             (clobber (scratch:QI))
         ]) ./piruett.w:597 -1
      (nil))
-(jump_insn 50 49 51 11 (set (pc)
+(jump_insn 44 43 45 9 (set (pc)
         (if_then_else (ge (cc0)
                 (const_int 0 [0]))
-            (label_ref 56)
+            (label_ref 50)
             (pc))) ./piruett.w:597 -1
      (int_list:REG_BR_PROB 5000 (nil))
- -> 56)
-(note 51 50 52 12 [bb 12] NOTE_INSN_BASIC_BLOCK)
-(insn 52 51 53 12 (set (reg:HI 80)
+ -> 50)
+(note 45 44 46 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
+(insn 46 45 47 10 (set (reg:HI 80)
         (const_int -249 [0xffffffffffffff07])) ./piruett.w:598 -1
      (nil))
-(insn 53 52 54 12 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+(insn 47 46 48 10 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 8 [0x8])) [3 trans_s_4(D)->larboardOut+0 S2 A8])
         (reg:HI 80)) ./piruett.w:598 -1
      (nil))
-(jump_insn 54 53 55 12 (set (pc)
-        (label_ref 67)) -1
+(jump_insn 48 47 49 10 (set (pc)
+        (label_ref 62)) -1
      (nil)
- -> 67)
-(barrier 55 54 56)
-(code_label 56 55 57 13 43 "" [1 uses])
-(note 57 56 58 13 [bb 13] NOTE_INSN_BASIC_BLOCK)
-(insn 58 57 59 13 (parallel [
+ -> 62)
+(barrier 49 48 50)
+(code_label 50 49 51 11 42 "" [1 uses])
+(note 51 50 52 11 [bb 11] NOTE_INSN_BASIC_BLOCK)
+(insn 52 51 53 11 (parallel [
             (set (cc0)
                 (compare (reg/v:HI 42 [ speed ])
                     (const_int 0 [0])))
             (clobber (scratch:QI))
         ]) ./piruett.w:599 -1
      (nil))
-(jump_insn 59 58 60 13 (set (pc)
+(jump_insn 53 52 54 11 (set (pc)
         (if_then_else (ne (cc0)
                 (const_int 0 [0]))
-            (label_ref 64)
+            (label_ref 59)
             (pc))) ./piruett.w:599 -1
      (int_list:REG_BR_PROB 5000 (nil))
- -> 64)
-(note 60 59 61 14 [bb 14] NOTE_INSN_BASIC_BLOCK)
-(insn 61 60 62 14 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
-                (const_int 8 [0x8])) [3 trans_s_4(D)->larboardOut+0 S2 A8])
-        (reg/v:HI 54 [ piruett ])) ./piruett.w:600 -1
+ -> 59)
+(note 54 53 55 12 [bb 12] NOTE_INSN_BASIC_BLOCK)
+(insn 55 54 56 12 (set (reg:HI 81 [ D.1959 ])
+        (neg:HI (reg/v:HI 53 [ piruett ]))) ./piruett.w:600 -1
      (nil))
-(jump_insn 62 61 63 14 (set (pc)
-        (label_ref 67)) -1
+(insn 56 55 57 12 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
+                (const_int 8 [0x8])) [3 trans_s_4(D)->larboardOut+0 S2 A8])
+        (reg:HI 81 [ D.1959 ])) ./piruett.w:600 -1
+     (nil))
+(jump_insn 57 56 58 12 (set (pc)
+        (label_ref 62)) -1
      (nil)
- -> 67)
-(barrier 63 62 64)
-(code_label 64 63 65 15 44 "" [1 uses])
-(note 65 64 66 15 [bb 15] NOTE_INSN_BASIC_BLOCK)
-(insn 66 65 67 15 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+ -> 62)
+(barrier 58 57 59)
+(code_label 59 58 60 13 43 "" [1 uses])
+(note 60 59 61 13 [bb 13] NOTE_INSN_BASIC_BLOCK)
+(insn 61 60 62 13 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 8 [0x8])) [3 trans_s_4(D)->larboardOut+0 S2 A8])
-        (reg:HI 55 [ D.1960 ])) ./piruett.w:602 -1
+        (reg:HI 54 [ D.1959 ])) ./piruett.w:602 -1
      (nil))
-(code_label 67 66 68 16 42 "" [3 uses])
-(note 68 67 69 16 [bb 16] NOTE_INSN_BASIC_BLOCK)
-(insn 69 68 70 16 (set (reg:HI 56 [ D.1960 ])
+(code_label 62 61 63 14 41 "" [3 uses])
+(note 63 62 64 14 [bb 14] NOTE_INSN_BASIC_BLOCK)
+(insn 64 63 65 14 (set (reg:HI 56 [ D.1959 ])
         (plus:HI (reg/v:HI 42 [ speed ])
             (reg/v:HI 52 [ rotation ]))) ./piruett.w:605 -1
      (nil))
-(insn 70 69 71 16 (parallel [
+(insn 65 64 66 14 (parallel [
             (set (cc0)
-                (compare (reg:HI 56 [ D.1960 ])
+                (compare (reg:HI 56 [ D.1959 ])
                     (const_int 248 [0xf8])))
             (clobber (scratch:QI))
         ]) ./piruett.w:605 -1
      (nil))
-(jump_insn 71 70 72 16 (set (pc)
+(jump_insn 66 65 67 14 (set (pc)
         (if_then_else (le (cc0)
                 (const_int 0 [0]))
-            (label_ref 77)
+            (label_ref 72)
             (pc))) ./piruett.w:605 -1
      (int_list:REG_BR_PROB 6100 (nil))
- -> 77)
-(note 72 71 73 17 [bb 17] NOTE_INSN_BASIC_BLOCK)
-(insn 73 72 74 17 (set (reg:HI 81)
+ -> 72)
+(note 67 66 68 15 [bb 15] NOTE_INSN_BASIC_BLOCK)
+(insn 68 67 69 15 (set (reg:HI 82)
         (const_int 249 [0xf9])) ./piruett.w:606 -1
      (nil))
-(insn 74 73 75 17 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+(insn 69 68 70 15 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 6 [0x6])) [3 trans_s_4(D)->starboardOut+0 S2 A8])
-        (reg:HI 81)) ./piruett.w:606 -1
+        (reg:HI 82)) ./piruett.w:606 -1
      (nil))
-(jump_insn 75 74 76 17 (set (pc)
-        (label_ref:HI 100)) 432 {jump}
+(jump_insn 70 69 71 15 (set (pc)
+        (label_ref:HI 94)) 432 {jump}
      (nil)
- -> 100)
-(barrier 76 75 77)
-(code_label 77 76 78 18 45 "" [1 uses])
-(note 78 77 79 18 [bb 18] NOTE_INSN_BASIC_BLOCK)
-(insn 79 78 80 18 (parallel [
+ -> 94)
+(barrier 71 70 72)
+(code_label 72 71 73 16 44 "" [1 uses])
+(note 73 72 74 16 [bb 16] NOTE_INSN_BASIC_BLOCK)
+(insn 74 73 75 16 (parallel [
             (set (cc0)
-                (compare (reg:HI 56 [ D.1960 ])
+                (compare (reg:HI 56 [ D.1959 ])
                     (const_int -248 [0xffffffffffffff08])))
             (clobber (scratch:QI))
         ]) ./piruett.w:607 -1
      (nil))
-(jump_insn 80 79 81 18 (set (pc)
+(jump_insn 75 74 76 16 (set (pc)
         (if_then_else (ge (cc0)
                 (const_int 0 [0]))
-            (label_ref 86)
+            (label_ref 81)
             (pc))) ./piruett.w:607 -1
      (int_list:REG_BR_PROB 6100 (nil))
- -> 86)
-(note 81 80 82 19 [bb 19] NOTE_INSN_BASIC_BLOCK)
-(insn 82 81 83 19 (set (reg:HI 82)
+ -> 81)
+(note 76 75 77 17 [bb 17] NOTE_INSN_BASIC_BLOCK)
+(insn 77 76 78 17 (set (reg:HI 83)
         (const_int -249 [0xffffffffffffff07])) ./piruett.w:608 -1
      (nil))
-(insn 83 82 84 19 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+(insn 78 77 79 17 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 6 [0x6])) [3 trans_s_4(D)->starboardOut+0 S2 A8])
-        (reg:HI 82)) ./piruett.w:608 -1
+        (reg:HI 83)) ./piruett.w:608 -1
      (nil))
-(jump_insn 84 83 85 19 (set (pc)
-        (label_ref:HI 100)) 432 {jump}
+(jump_insn 79 78 80 17 (set (pc)
+        (label_ref:HI 94)) 432 {jump}
      (nil)
- -> 100)
-(barrier 85 84 86)
-(code_label 86 85 87 20 47 "" [1 uses])
-(note 87 86 88 20 [bb 20] NOTE_INSN_BASIC_BLOCK)
-(insn 88 87 89 20 (parallel [
+ -> 94)
+(barrier 80 79 81)
+(code_label 81 80 82 18 46 "" [1 uses])
+(note 82 81 83 18 [bb 18] NOTE_INSN_BASIC_BLOCK)
+(insn 83 82 84 18 (parallel [
             (set (cc0)
                 (compare (reg/v:HI 42 [ speed ])
                     (const_int 0 [0])))
             (clobber (scratch:QI))
         ]) ./piruett.w:609 -1
      (nil))
-(jump_insn 89 88 90 20 (set (pc)
+(jump_insn 84 83 85 18 (set (pc)
         (if_then_else (ne (cc0)
                 (const_int 0 [0]))
-            (label_ref 95)
+            (label_ref 89)
             (pc))) ./piruett.w:609 -1
      (int_list:REG_BR_PROB 6100 (nil))
- -> 95)
-(note 90 89 91 21 [bb 21] NOTE_INSN_BASIC_BLOCK)
-(insn 91 90 92 21 (set (reg:HI 83 [ D.1960 ])
-        (neg:HI (reg/v:HI 54 [ piruett ]))) ./piruett.w:610 -1
-     (nil))
-(insn 92 91 93 21 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+ -> 89)
+(note 85 84 86 19 [bb 19] NOTE_INSN_BASIC_BLOCK)
+(insn 86 85 87 19 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 6 [0x6])) [3 trans_s_4(D)->starboardOut+0 S2 A8])
-        (reg:HI 83 [ D.1960 ])) ./piruett.w:610 -1
+        (reg/v:HI 53 [ piruett ])) ./piruett.w:610 -1
      (nil))
-(jump_insn 93 92 94 21 (set (pc)
-        (label_ref:HI 100)) 432 {jump}
+(jump_insn 87 86 88 19 (set (pc)
+        (label_ref:HI 94)) 432 {jump}
      (nil)
- -> 100)
-(barrier 94 93 95)
-(code_label 95 94 96 22 48 "" [1 uses])
-(note 96 95 97 22 [bb 22] NOTE_INSN_BASIC_BLOCK)
-(insn 97 96 100 22 (set (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+ -> 94)
+(barrier 88 87 89)
+(code_label 89 88 90 20 47 "" [1 uses])
+(note 90 89 91 20 [bb 20] NOTE_INSN_BASIC_BLOCK)
+(insn 91 90 94 20 (set (mem:HI (plus:HI (reg/v/f:HI 57 [ trans_s ])
                 (const_int 6 [0x6])) [3 trans_s_4(D)->starboardOut+0 S2 A8])
-        (reg:HI 56 [ D.1960 ])) ./piruett.w:612 -1
+        (reg:HI 56 [ D.1959 ])) ./piruett.w:612 -1
      (nil))
-(code_label 100 97 101 24 37 "" [3 uses])
-(note 101 100 0 24 [bb 24] NOTE_INSN_BASIC_BLOCK)
+(code_label 94 91 95 22 37 "" [3 uses])
+(note 95 94 0 22 [bb 22] NOTE_INSN_BASIC_BLOCK)
 
 ;; Function setPwm (setPwm, funcdef_no=16, decl_uid=1581, symbol_order=17)
 
@@ -1686,17 +1657,17 @@ try_optimize_cfg iteration 2
 ;;
 (note 1 0 4 NOTE_INSN_DELETED)
 (note 4 1 2 2 [bb 2] NOTE_INSN_BASIC_BLOCK)
-(insn 2 4 3 2 (set (reg/v/f:HI 54 [ trans_s ])
+(insn 2 4 3 2 (set (reg/v/f:HI 58 [ trans_s ])
         (reg:HI 24 r24 [ trans_s ])) ./piruett.w:617 -1
      (nil))
 (note 3 2 6 2 NOTE_INSN_FUNCTION_BEG)
-(insn 6 3 7 2 (set (reg:HI 55)
-        (mem:HI (plus:HI (reg/v/f:HI 54 [ trans_s ])
+(insn 6 3 7 2 (set (reg:HI 59)
+        (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
                 (const_int 8 [0x8])) [3 trans_s_5(D)->larboardOut+0 S2 A8])) ./piruett.w:619 -1
      (nil))
 (insn 7 6 8 2 (parallel [
             (set (cc0)
-                (compare (reg:HI 55)
+                (compare (reg:HI 59)
                     (const_int 0 [0])))
             (clobber (scratch:QI))
         ]) ./piruett.w:619 -1
@@ -1704,191 +1675,211 @@ try_optimize_cfg iteration 2
 (jump_insn 8 7 9 2 (set (pc)
         (if_then_else (lt (cc0)
                 (const_int 0 [0]))
-            (label_ref 17)
+            (label_ref 20)
             (pc))) ./piruett.w:619 -1
      (int_list:REG_BR_PROB 2699 (nil))
- -> 17)
+ -> 20)
 (note 9 8 10 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
-(insn 10 9 11 4 (set (reg/f:HI 56)
+(insn 10 9 11 4 (set (reg/f:HI 60)
         (const_int 43 [0x2b])) ./piruett.w:477 -1
      (nil))
-(insn 11 10 12 4 (set (reg:QI 43 [ D.1969 ])
-        (mem/v:QI (reg/f:HI 56) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:477 -1
+(insn 11 10 12 4 (set (reg:QI 43 [ D.1968 ])
+        (mem/v:QI (reg/f:HI 60) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:477 -1
      (nil))
-(insn 12 11 13 4 (set (reg:QI 52 [ D.1969 ])
-        (ior:QI (reg:QI 43 [ D.1969 ])
+(insn 12 11 13 4 (set (reg:QI 56 [ D.1968 ])
+        (ior:QI (reg:QI 43 [ D.1968 ])
             (const_int 8 [0x8]))) ./piruett.w:477 -1
      (nil))
-(insn 13 12 14 4 (set (reg/f:HI 57)
+(insn 13 12 14 4 (set (reg/f:HI 61)
         (const_int 43 [0x2b])) ./piruett.w:477 -1
      (nil))
-(insn 14 13 15 4 (set (mem/v:QI (reg/f:HI 57) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
-        (reg:QI 52 [ D.1969 ])) ./piruett.w:477 -1
+(insn 14 13 15 4 (set (mem/v:QI (reg/f:HI 61) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
+        (reg:QI 56 [ D.1968 ])) ./piruett.w:477 -1
      (nil))
-(jump_insn 15 14 16 4 (set (pc)
-        (label_ref 21)) ./piruett.w:477 -1
+(insn 15 14 16 4 (set (reg:QI 45 [ D.1968 ])
+        (mem:QI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+                (const_int 8 [0x8])) [3 trans_s_5(D)->larboardOut+0 S1 A8])) ./piruett.w:622 -1
+     (nil))
+(insn 16 15 17 4 (set (reg/f:HI 62)
+        (const_int 71 [0x47])) ./piruett.w:622 -1
+     (nil))
+(insn 17 16 18 4 (set (mem/v:QI (reg/f:HI 62) [0 MEM[(volatile uint8_t *)71B]+0 S1 A8])
+        (reg:QI 45 [ D.1968 ])) ./piruett.w:622 -1
+     (nil))
+(jump_insn 18 17 19 4 (set (pc)
+        (label_ref 27)) -1
      (nil)
- -> 21)
-(barrier 16 15 17)
-(code_label 17 16 18 5 50 "" [1 uses])
-(note 18 17 19 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
-(insn 19 18 20 5 (set (reg:QI 24 r24)
-        (const_int 0 [0])) ./piruett.w:622 -1
+ -> 27)
+(barrier 19 18 20)
+(code_label 20 19 21 5 49 "" [1 uses])
+(note 21 20 22 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
+(insn 22 21 23 5 (set (reg:QI 24 r24)
+        (const_int 0 [0])) ./piruett.w:626 -1
      (nil))
-(call_insn 20 19 21 5 (parallel [
-            (call (mem:HI (symbol_ref:HI ("larboardDirection") [flags 0x3]  <function_decl 0x7fa078e7d500 larboardDirection>) [0 larboardDirection S2 A8])
+(call_insn 23 22 24 5 (parallel [
+            (call (mem:HI (symbol_ref:HI ("larboardDirection") [flags 0x3]  <function_decl 0x7fcb3c282500 larboardDirection>) [0 larboardDirection S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
-        ]) ./piruett.w:622 -1
+        ]) ./piruett.w:626 -1
      (expr_list:REG_EH_REGION (const_int 0 [0])
         (nil))
     (expr_list:QI (use (reg:QI 24 r24))
         (nil)))
-(code_label 21 20 22 6 51 "" [1 uses])
-(note 22 21 23 6 [bb 6] NOTE_INSN_BASIC_BLOCK)
-(insn 23 22 24 6 (set (reg:HI 58)
-        (mem:HI (plus:HI (reg/v/f:HI 54 [ trans_s ])
-                (const_int 6 [0x6])) [3 trans_s_5(D)->starboardOut+0 S2 A8])) ./piruett.w:625 -1
+(insn 24 23 25 5 (set (reg:QI 47 [ D.1968 ])
+        (mem:QI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+                (const_int 8 [0x8])) [3 trans_s_5(D)->larboardOut+0 S1 A8])) ./piruett.w:627 -1
      (nil))
-(insn 24 23 25 6 (parallel [
-            (set (cc0)
-                (compare (reg:HI 58)
-                    (const_int 0 [0])))
-            (clobber (scratch:QI))
-        ]) ./piruett.w:625 -1
+(insn 25 24 26 5 (set (reg/f:HI 63)
+        (const_int 71 [0x47])) ./piruett.w:627 -1
      (nil))
-(jump_insn 25 24 26 6 (set (pc)
-        (if_then_else (lt (cc0)
-                (const_int 0 [0]))
-            (label_ref 34)
-            (pc))) ./piruett.w:625 -1
-     (int_list:REG_BR_PROB 2699 (nil))
- -> 34)
-(note 26 25 27 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
-(insn 27 26 28 7 (set (reg/f:HI 59)
-        (const_int 43 [0x2b])) ./piruett.w:496 -1
+(insn 26 25 27 5 (set (mem/v:QI (reg/f:HI 63) [0 MEM[(volatile uint8_t *)71B]+0 S1 A8])
+        (reg:QI 47 [ D.1968 ])) ./piruett.w:627 -1
      (nil))
-(insn 28 27 29 7 (set (reg:QI 45 [ D.1969 ])
-        (mem/v:QI (reg/f:HI 59) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:496 -1
+(code_label 27 26 28 6 50 "" [1 uses])
+(note 28 27 29 6 [bb 6] NOTE_INSN_BASIC_BLOCK)
+(insn 29 28 30 6 (set (reg:HI 64)
+        (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+                (const_int 6 [0x6])) [3 trans_s_5(D)->starboardOut+0 S2 A8])) ./piruett.w:630 -1
      (nil))
-(insn 29 28 30 7 (set (reg:QI 53 [ D.1969 ])
-        (ior:QI (reg:QI 45 [ D.1969 ])
-            (const_int 16 [0x10]))) ./piruett.w:496 -1
-     (nil))
-(insn 30 29 31 7 (set (reg/f:HI 60)
-        (const_int 43 [0x2b])) ./piruett.w:496 -1
-     (nil))
-(insn 31 30 32 7 (set (mem/v:QI (reg/f:HI 60) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
-        (reg:QI 53 [ D.1969 ])) ./piruett.w:496 -1
-     (nil))
-(jump_insn 32 31 33 7 (set (pc)
-        (label_ref 38)) ./piruett.w:496 -1
-     (nil)
- -> 38)
-(barrier 33 32 34)
-(code_label 34 33 35 8 52 "" [1 uses])
-(note 35 34 36 8 [bb 8] NOTE_INSN_BASIC_BLOCK)
-(insn 36 35 37 8 (set (reg:QI 24 r24)
-        (const_int 0 [0])) ./piruett.w:628 -1
-     (nil))
-(call_insn 37 36 38 8 (parallel [
-            (call (mem:HI (symbol_ref:HI ("starboardDirection") [flags 0x3]  <function_decl 0x7fa078e7d600 starboardDirection>) [0 starboardDirection S2 A8])
-                (const_int 0 [0]))
-            (use (const_int 0 [0]))
-        ]) ./piruett.w:628 -1
-     (expr_list:REG_EH_REGION (const_int 0 [0])
-        (nil))
-    (expr_list:QI (use (reg:QI 24 r24))
-        (nil)))
-(code_label 38 37 39 9 53 "" [1 uses])
-(note 39 38 40 9 [bb 9] NOTE_INSN_BASIC_BLOCK)
-(insn 40 39 41 9 (set (reg:QI 47 [ D.1969 ])
-        (mem:QI (plus:HI (reg/v/f:HI 54 [ trans_s ])
-                (const_int 8 [0x8])) [3 trans_s_5(D)->larboardOut+0 S1 A8])) ./piruett.w:630 -1
-     (nil))
-(insn 41 40 42 9 (set (reg/f:HI 61)
-        (const_int 71 [0x47])) ./piruett.w:630 -1
-     (nil))
-(insn 42 41 43 9 (set (mem/v:QI (reg/f:HI 61) [0 MEM[(volatile uint8_t *)71B]+0 S1 A8])
-        (reg:QI 47 [ D.1969 ])) ./piruett.w:630 -1
-     (nil))
-(insn 43 42 44 9 (set (reg:QI 49 [ D.1969 ])
-        (mem:QI (plus:HI (reg/v/f:HI 54 [ trans_s ])
-                (const_int 6 [0x6])) [3 trans_s_5(D)->starboardOut+0 S1 A8])) ./piruett.w:631 -1
-     (nil))
-(insn 44 43 45 9 (set (reg/f:HI 62)
-        (const_int 72 [0x48])) ./piruett.w:631 -1
-     (nil))
-(insn 45 44 46 9 (set (mem/v:QI (reg/f:HI 62) [0 MEM[(volatile uint8_t *)72B]+0 S1 A8])
-        (reg:QI 49 [ D.1969 ])) ./piruett.w:631 -1
-     (nil))
-(insn 46 45 47 9 (set (reg:HI 63)
-        (mem:HI (plus:HI (reg/v/f:HI 54 [ trans_s ])
-                (const_int 8 [0x8])) [3 trans_s_5(D)->larboardOut+0 S2 A8])) ./piruett.w:635 -1
-     (nil))
-(insn 47 46 48 9 (parallel [
-            (set (cc0)
-                (compare (reg:HI 63)
-                    (const_int 0 [0])))
-            (clobber (scratch:QI))
-        ]) ./piruett.w:635 -1
-     (nil))
-(jump_insn 48 47 49 9 (set (pc)
-        (if_then_else (ne (cc0)
-                (const_int 0 [0]))
-            (label_ref 53)
-            (pc))) ./piruett.w:635 -1
-     (int_list:REG_BR_PROB 2071 (nil))
- -> 53)
-(note 49 48 50 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
-(insn 50 49 51 10 (set (reg:HI 64)
-        (mem:HI (plus:HI (reg/v/f:HI 54 [ trans_s ])
-                (const_int 6 [0x6])) [3 trans_s_5(D)->starboardOut+0 S2 A8])) ./piruett.w:635 -1
-     (nil))
-(insn 51 50 52 10 (parallel [
+(insn 30 29 31 6 (parallel [
             (set (cc0)
                 (compare (reg:HI 64)
                     (const_int 0 [0])))
             (clobber (scratch:QI))
-        ]) ./piruett.w:635 -1
+        ]) ./piruett.w:630 -1
      (nil))
-(jump_insn 52 51 53 10 (set (pc)
+(jump_insn 31 30 32 6 (set (pc)
+        (if_then_else (lt (cc0)
+                (const_int 0 [0]))
+            (label_ref 43)
+            (pc))) ./piruett.w:630 -1
+     (int_list:REG_BR_PROB 2699 (nil))
+ -> 43)
+(note 32 31 33 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
+(insn 33 32 34 7 (set (reg/f:HI 65)
+        (const_int 43 [0x2b])) ./piruett.w:496 -1
+     (nil))
+(insn 34 33 35 7 (set (reg:QI 49 [ D.1968 ])
+        (mem/v:QI (reg/f:HI 65) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])) ./piruett.w:496 -1
+     (nil))
+(insn 35 34 36 7 (set (reg:QI 57 [ D.1968 ])
+        (ior:QI (reg:QI 49 [ D.1968 ])
+            (const_int 16 [0x10]))) ./piruett.w:496 -1
+     (nil))
+(insn 36 35 37 7 (set (reg/f:HI 66)
+        (const_int 43 [0x2b])) ./piruett.w:496 -1
+     (nil))
+(insn 37 36 38 7 (set (mem/v:QI (reg/f:HI 66) [0 MEM[(volatile uint8_t *)43B]+0 S1 A8])
+        (reg:QI 57 [ D.1968 ])) ./piruett.w:496 -1
+     (nil))
+(insn 38 37 39 7 (set (reg:QI 51 [ D.1968 ])
+        (mem:QI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+                (const_int 6 [0x6])) [3 trans_s_5(D)->starboardOut+0 S1 A8])) ./piruett.w:633 -1
+     (nil))
+(insn 39 38 40 7 (set (reg/f:HI 67)
+        (const_int 72 [0x48])) ./piruett.w:633 -1
+     (nil))
+(insn 40 39 41 7 (set (mem/v:QI (reg/f:HI 67) [0 MEM[(volatile uint8_t *)72B]+0 S1 A8])
+        (reg:QI 51 [ D.1968 ])) ./piruett.w:633 -1
+     (nil))
+(jump_insn 41 40 42 7 (set (pc)
+        (label_ref 50)) -1
+     (nil)
+ -> 50)
+(barrier 42 41 43)
+(code_label 43 42 44 8 51 "" [1 uses])
+(note 44 43 45 8 [bb 8] NOTE_INSN_BASIC_BLOCK)
+(insn 45 44 46 8 (set (reg:QI 24 r24)
+        (const_int 0 [0])) ./piruett.w:637 -1
+     (nil))
+(call_insn 46 45 47 8 (parallel [
+            (call (mem:HI (symbol_ref:HI ("starboardDirection") [flags 0x3]  <function_decl 0x7fcb3c282600 starboardDirection>) [0 starboardDirection S2 A8])
+                (const_int 0 [0]))
+            (use (const_int 0 [0]))
+        ]) ./piruett.w:637 -1
+     (expr_list:REG_EH_REGION (const_int 0 [0])
+        (nil))
+    (expr_list:QI (use (reg:QI 24 r24))
+        (nil)))
+(insn 47 46 48 8 (set (reg:QI 53 [ D.1968 ])
+        (mem:QI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+                (const_int 6 [0x6])) [3 trans_s_5(D)->starboardOut+0 S1 A8])) ./piruett.w:638 -1
+     (nil))
+(insn 48 47 49 8 (set (reg/f:HI 68)
+        (const_int 72 [0x48])) ./piruett.w:638 -1
+     (nil))
+(insn 49 48 50 8 (set (mem/v:QI (reg/f:HI 68) [0 MEM[(volatile uint8_t *)72B]+0 S1 A8])
+        (reg:QI 53 [ D.1968 ])) ./piruett.w:638 -1
+     (nil))
+(code_label 50 49 51 9 52 "" [1 uses])
+(note 51 50 52 9 [bb 9] NOTE_INSN_BASIC_BLOCK)
+(insn 52 51 53 9 (set (reg:HI 69)
+        (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+                (const_int 8 [0x8])) [3 trans_s_5(D)->larboardOut+0 S2 A8])) ./piruett.w:643 -1
+     (nil))
+(insn 53 52 54 9 (parallel [
+            (set (cc0)
+                (compare (reg:HI 69)
+                    (const_int 0 [0])))
+            (clobber (scratch:QI))
+        ]) ./piruett.w:643 -1
+     (nil))
+(jump_insn 54 53 55 9 (set (pc)
+        (if_then_else (ne (cc0)
+                (const_int 0 [0]))
+            (label_ref 59)
+            (pc))) ./piruett.w:643 -1
+     (int_list:REG_BR_PROB 2071 (nil))
+ -> 59)
+(note 55 54 56 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
+(insn 56 55 57 10 (set (reg:HI 70)
+        (mem:HI (plus:HI (reg/v/f:HI 58 [ trans_s ])
+                (const_int 6 [0x6])) [3 trans_s_5(D)->starboardOut+0 S2 A8])) ./piruett.w:643 -1
+     (nil))
+(insn 57 56 58 10 (parallel [
+            (set (cc0)
+                (compare (reg:HI 70)
+                    (const_int 0 [0])))
+            (clobber (scratch:QI))
+        ]) ./piruett.w:643 -1
+     (nil))
+(jump_insn 58 57 59 10 (set (pc)
         (if_then_else (eq (cc0)
                 (const_int 0 [0]))
-            (label_ref 58)
-            (pc))) ./piruett.w:635 -1
+            (label_ref 64)
+            (pc))) ./piruett.w:643 -1
      (int_list:REG_BR_PROB 3898 (nil))
- -> 58)
-(code_label 53 52 54 11 54 "" [1 uses])
-(note 54 53 55 11 [bb 11] NOTE_INSN_BASIC_BLOCK)
-(insn 55 54 56 11 (set (reg:QI 24 r24)
-        (const_int 1 [0x1])) ./piruett.w:636 -1
+ -> 64)
+(code_label 59 58 60 11 53 "" [1 uses])
+(note 60 59 61 11 [bb 11] NOTE_INSN_BASIC_BLOCK)
+(insn 61 60 62 11 (set (reg:QI 24 r24)
+        (const_int 1 [0x1])) ./piruett.w:644 -1
      (nil))
-(call_insn/j 56 55 57 11 (parallel [
-            (call (mem:HI (symbol_ref:HI ("relayCntl") [flags 0x3]  <function_decl 0x7fa078e7d300 relayCntl>) [0 relayCntl S2 A8])
+(call_insn/j 62 61 63 11 (parallel [
+            (call (mem:HI (symbol_ref:HI ("relayCntl") [flags 0x3]  <function_decl 0x7fcb3c282300 relayCntl>) [0 relayCntl S2 A8])
                 (const_int 0 [0]))
             (use (const_int 1 [0x1]))
-        ]) ./piruett.w:636 -1
+        ]) ./piruett.w:644 -1
      (expr_list:REG_EH_REGION (const_int 0 [0])
         (nil))
     (expr_list:QI (use (reg:QI 24 r24))
         (nil)))
-(barrier 57 56 58)
-(code_label 58 57 59 12 55 "" [1 uses])
-(note 59 58 60 12 [bb 12] NOTE_INSN_BASIC_BLOCK)
-(insn 60 59 61 12 (set (reg:QI 24 r24)
-        (const_int 0 [0])) ./piruett.w:638 -1
+(barrier 63 62 64)
+(code_label 64 63 65 12 54 "" [1 uses])
+(note 65 64 66 12 [bb 12] NOTE_INSN_BASIC_BLOCK)
+(insn 66 65 67 12 (set (reg:QI 24 r24)
+        (const_int 0 [0])) ./piruett.w:646 -1
      (nil))
-(call_insn/j 61 60 62 12 (parallel [
-            (call (mem:HI (symbol_ref:HI ("relayCntl") [flags 0x3]  <function_decl 0x7fa078e7d300 relayCntl>) [0 relayCntl S2 A8])
+(call_insn/j 67 66 68 12 (parallel [
+            (call (mem:HI (symbol_ref:HI ("relayCntl") [flags 0x3]  <function_decl 0x7fcb3c282300 relayCntl>) [0 relayCntl S2 A8])
                 (const_int 0 [0]))
             (use (const_int 1 [0x1]))
-        ]) ./piruett.w:638 -1
+        ]) ./piruett.w:646 -1
      (expr_list:REG_EH_REGION (const_int 0 [0])
         (nil))
     (expr_list:QI (use (reg:QI 24 r24))
         (nil)))
-(barrier 62 61 0)
+(barrier 68 67 0)
 
 ;; Function main (main, funcdef_no=4, decl_uid=1587, symbol_order=5) (executed once)
 
@@ -2016,253 +2007,253 @@ try_optimize_cfg iteration 2
         ]) ./piruett.w:232 -1
      (nil))
 (insn 24 23 25 2 (set (reg/f:HI 108)
-        (const_int 122 [0x7a])) ./piruett.w:668 -1
+        (const_int 122 [0x7a])) ./piruett.w:676 -1
      (nil))
-(insn 25 24 26 2 (set (reg:QI 42 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 108) [0 MEM[(volatile uint8_t *)122B]+0 S1 A8])) ./piruett.w:668 -1
+(insn 25 24 26 2 (set (reg:QI 42 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 108) [0 MEM[(volatile uint8_t *)122B]+0 S1 A8])) ./piruett.w:676 -1
      (nil))
-(insn 26 25 27 2 (set (reg:QI 43 [ D.1972 ])
-        (and:QI (reg:QI 42 [ D.1972 ])
-            (const_int 127 [0x7f]))) ./piruett.w:668 -1
+(insn 26 25 27 2 (set (reg:QI 43 [ D.1971 ])
+        (and:QI (reg:QI 42 [ D.1971 ])
+            (const_int 127 [0x7f]))) ./piruett.w:676 -1
      (nil))
 (insn 27 26 28 2 (set (reg/f:HI 109)
-        (const_int 122 [0x7a])) ./piruett.w:668 -1
+        (const_int 122 [0x7a])) ./piruett.w:676 -1
      (nil))
 (insn 28 27 29 2 (set (mem/v:QI (reg/f:HI 109) [0 MEM[(volatile uint8_t *)122B]+0 S1 A8])
-        (reg:QI 43 [ D.1972 ])) ./piruett.w:668 -1
+        (reg:QI 43 [ D.1971 ])) ./piruett.w:676 -1
      (nil))
 (insn 29 28 30 2 (set (reg/f:HI 110)
-        (const_int 123 [0x7b])) ./piruett.w:671 -1
+        (const_int 123 [0x7b])) ./piruett.w:679 -1
      (nil))
-(insn 30 29 31 2 (set (reg:QI 44 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 110) [0 MEM[(volatile uint8_t *)123B]+0 S1 A8])) ./piruett.w:671 -1
+(insn 30 29 31 2 (set (reg:QI 44 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 110) [0 MEM[(volatile uint8_t *)123B]+0 S1 A8])) ./piruett.w:679 -1
      (nil))
-(insn 31 30 32 2 (set (reg:QI 45 [ D.1972 ])
-        (ior:QI (reg:QI 44 [ D.1972 ])
-            (const_int 64 [0x40]))) ./piruett.w:671 -1
+(insn 31 30 32 2 (set (reg:QI 45 [ D.1971 ])
+        (ior:QI (reg:QI 44 [ D.1971 ])
+            (const_int 64 [0x40]))) ./piruett.w:679 -1
      (nil))
 (insn 32 31 33 2 (set (reg/f:HI 111)
-        (const_int 123 [0x7b])) ./piruett.w:671 -1
+        (const_int 123 [0x7b])) ./piruett.w:679 -1
      (nil))
 (insn 33 32 34 2 (set (mem/v:QI (reg/f:HI 111) [0 MEM[(volatile uint8_t *)123B]+0 S1 A8])
-        (reg:QI 45 [ D.1972 ])) ./piruett.w:671 -1
+        (reg:QI 45 [ D.1971 ])) ./piruett.w:679 -1
      (nil))
 (insn 34 33 35 2 (set (reg/f:HI 112)
-        (const_int 126 [0x7e])) ./piruett.w:674 -1
+        (const_int 126 [0x7e])) ./piruett.w:682 -1
      (nil))
-(insn 35 34 36 2 (set (reg:QI 46 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 112) [0 MEM[(volatile uint8_t *)126B]+0 S1 A8])) ./piruett.w:674 -1
+(insn 35 34 36 2 (set (reg:QI 46 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 112) [0 MEM[(volatile uint8_t *)126B]+0 S1 A8])) ./piruett.w:682 -1
      (nil))
-(insn 36 35 37 2 (set (reg:QI 47 [ D.1972 ])
-        (ior:QI (reg:QI 46 [ D.1972 ])
-            (const_int 3 [0x3]))) ./piruett.w:674 -1
+(insn 36 35 37 2 (set (reg:QI 47 [ D.1971 ])
+        (ior:QI (reg:QI 46 [ D.1971 ])
+            (const_int 3 [0x3]))) ./piruett.w:682 -1
      (nil))
 (insn 37 36 38 2 (set (reg/f:HI 113)
-        (const_int 126 [0x7e])) ./piruett.w:674 -1
+        (const_int 126 [0x7e])) ./piruett.w:682 -1
      (nil))
 (insn 38 37 39 2 (set (mem/v:QI (reg/f:HI 113) [0 MEM[(volatile uint8_t *)126B]+0 S1 A8])
-        (reg:QI 47 [ D.1972 ])) ./piruett.w:674 -1
+        (reg:QI 47 [ D.1971 ])) ./piruett.w:682 -1
      (nil))
 (insn 39 38 40 2 (set (reg/f:HI 114)
-        (const_int 80 [0x50])) ./piruett.w:677 -1
+        (const_int 80 [0x50])) ./piruett.w:685 -1
      (nil))
-(insn 40 39 41 2 (set (reg:QI 48 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 114) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])) ./piruett.w:677 -1
+(insn 40 39 41 2 (set (reg:QI 48 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 114) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])) ./piruett.w:685 -1
      (nil))
-(insn 41 40 42 2 (set (reg:QI 49 [ D.1972 ])
-        (ior:QI (reg:QI 48 [ D.1972 ])
-            (const_int 64 [0x40]))) ./piruett.w:677 -1
+(insn 41 40 42 2 (set (reg:QI 49 [ D.1971 ])
+        (ior:QI (reg:QI 48 [ D.1971 ])
+            (const_int 64 [0x40]))) ./piruett.w:685 -1
      (nil))
 (insn 42 41 43 2 (set (reg/f:HI 115)
-        (const_int 80 [0x50])) ./piruett.w:677 -1
+        (const_int 80 [0x50])) ./piruett.w:685 -1
      (nil))
 (insn 43 42 44 2 (set (mem/v:QI (reg/f:HI 115) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])
-        (reg:QI 49 [ D.1972 ])) ./piruett.w:677 -1
+        (reg:QI 49 [ D.1971 ])) ./piruett.w:685 -1
      (nil))
 (insn 44 43 45 2 (set (reg/f:HI 116)
-        (const_int 80 [0x50])) ./piruett.w:678 -1
+        (const_int 80 [0x50])) ./piruett.w:686 -1
      (nil))
-(insn 45 44 46 2 (set (reg:QI 50 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 116) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])) ./piruett.w:678 -1
+(insn 45 44 46 2 (set (reg:QI 50 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 116) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])) ./piruett.w:686 -1
      (nil))
-(insn 46 45 47 2 (set (reg:QI 51 [ D.1972 ])
-        (ior:QI (reg:QI 50 [ D.1972 ])
-            (const_int 4 [0x4]))) ./piruett.w:678 -1
+(insn 46 45 47 2 (set (reg:QI 51 [ D.1971 ])
+        (ior:QI (reg:QI 50 [ D.1971 ])
+            (const_int 4 [0x4]))) ./piruett.w:686 -1
      (nil))
 (insn 47 46 48 2 (set (reg/f:HI 117)
-        (const_int 80 [0x50])) ./piruett.w:678 -1
+        (const_int 80 [0x50])) ./piruett.w:686 -1
      (nil))
 (insn 48 47 49 2 (set (mem/v:QI (reg/f:HI 117) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])
-        (reg:QI 51 [ D.1972 ])) ./piruett.w:678 -1
+        (reg:QI 51 [ D.1971 ])) ./piruett.w:686 -1
      (nil))
 (insn 49 48 50 2 (set (reg/f:HI 118)
-        (const_int 80 [0x50])) ./piruett.w:679 -1
+        (const_int 80 [0x50])) ./piruett.w:687 -1
      (nil))
-(insn 50 49 51 2 (set (reg:QI 52 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 118) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])) ./piruett.w:679 -1
+(insn 50 49 51 2 (set (reg:QI 52 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 118) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])) ./piruett.w:687 -1
      (nil))
-(insn 51 50 52 2 (set (reg:QI 53 [ D.1972 ])
-        (ior:QI (reg:QI 52 [ D.1972 ])
-            (const_int 2 [0x2]))) ./piruett.w:679 -1
+(insn 51 50 52 2 (set (reg:QI 53 [ D.1971 ])
+        (ior:QI (reg:QI 52 [ D.1971 ])
+            (const_int 2 [0x2]))) ./piruett.w:687 -1
      (nil))
 (insn 52 51 53 2 (set (reg/f:HI 119)
-        (const_int 80 [0x50])) ./piruett.w:679 -1
+        (const_int 80 [0x50])) ./piruett.w:687 -1
      (nil))
 (insn 53 52 54 2 (set (mem/v:QI (reg/f:HI 119) [0 MEM[(volatile uint8_t *)80B]+0 S1 A8])
-        (reg:QI 53 [ D.1972 ])) ./piruett.w:679 -1
+        (reg:QI 53 [ D.1971 ])) ./piruett.w:687 -1
      (nil))
 (insn 54 53 55 2 (set (reg/f:HI 120)
-        (const_int 111 [0x6f])) ./piruett.w:682 -1
+        (const_int 111 [0x6f])) ./piruett.w:690 -1
      (nil))
-(insn 55 54 56 2 (set (reg:QI 54 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 120) [0 MEM[(volatile uint8_t *)111B]+0 S1 A8])) ./piruett.w:682 -1
+(insn 55 54 56 2 (set (reg:QI 54 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 120) [0 MEM[(volatile uint8_t *)111B]+0 S1 A8])) ./piruett.w:690 -1
      (nil))
-(insn 56 55 57 2 (set (reg:QI 55 [ D.1972 ])
-        (ior:QI (reg:QI 54 [ D.1972 ])
-            (const_int 32 [0x20]))) ./piruett.w:682 -1
+(insn 56 55 57 2 (set (reg:QI 55 [ D.1971 ])
+        (ior:QI (reg:QI 54 [ D.1971 ])
+            (const_int 32 [0x20]))) ./piruett.w:690 -1
      (nil))
 (insn 57 56 58 2 (set (reg/f:HI 121)
-        (const_int 111 [0x6f])) ./piruett.w:682 -1
+        (const_int 111 [0x6f])) ./piruett.w:690 -1
      (nil))
 (insn 58 57 59 2 (set (mem/v:QI (reg/f:HI 121) [0 MEM[(volatile uint8_t *)111B]+0 S1 A8])
-        (reg:QI 55 [ D.1972 ])) ./piruett.w:682 -1
+        (reg:QI 55 [ D.1971 ])) ./piruett.w:690 -1
      (nil))
 (insn 59 58 60 2 (set (reg/f:HI 122)
-        (const_int 129 [0x81])) ./piruett.w:685 -1
+        (const_int 129 [0x81])) ./piruett.w:693 -1
      (nil))
-(insn 60 59 61 2 (set (reg:QI 56 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 122) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])) ./piruett.w:685 -1
+(insn 60 59 61 2 (set (reg:QI 56 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 122) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])) ./piruett.w:693 -1
      (nil))
-(insn 61 60 62 2 (set (reg:QI 57 [ D.1972 ])
-        (ior:QI (reg:QI 56 [ D.1972 ])
-            (const_int -128 [0xffffffffffffff80]))) ./piruett.w:685 -1
+(insn 61 60 62 2 (set (reg:QI 57 [ D.1971 ])
+        (ior:QI (reg:QI 56 [ D.1971 ])
+            (const_int -128 [0xffffffffffffff80]))) ./piruett.w:693 -1
      (nil))
 (insn 62 61 63 2 (set (reg/f:HI 123)
-        (const_int 129 [0x81])) ./piruett.w:685 -1
+        (const_int 129 [0x81])) ./piruett.w:693 -1
      (nil))
 (insn 63 62 64 2 (set (mem/v:QI (reg/f:HI 123) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])
-        (reg:QI 57 [ D.1972 ])) ./piruett.w:685 -1
+        (reg:QI 57 [ D.1971 ])) ./piruett.w:693 -1
      (nil))
 (insn 64 63 65 2 (set (reg/f:HI 124)
-        (const_int 129 [0x81])) ./piruett.w:686 -1
+        (const_int 129 [0x81])) ./piruett.w:694 -1
      (nil))
-(insn 65 64 66 2 (set (reg:QI 58 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 124) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])) ./piruett.w:686 -1
+(insn 65 64 66 2 (set (reg:QI 58 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 124) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])) ./piruett.w:694 -1
      (nil))
-(insn 66 65 67 2 (set (reg:QI 59 [ D.1972 ])
-        (ior:QI (reg:QI 58 [ D.1972 ])
-            (const_int 1 [0x1]))) ./piruett.w:686 -1
+(insn 66 65 67 2 (set (reg:QI 59 [ D.1971 ])
+        (ior:QI (reg:QI 58 [ D.1971 ])
+            (const_int 1 [0x1]))) ./piruett.w:694 -1
      (nil))
 (insn 67 66 68 2 (set (reg/f:HI 125)
-        (const_int 129 [0x81])) ./piruett.w:686 -1
+        (const_int 129 [0x81])) ./piruett.w:694 -1
      (nil))
 (insn 68 67 69 2 (set (mem/v:QI (reg/f:HI 125) [0 MEM[(volatile uint8_t *)129B]+0 S1 A8])
-        (reg:QI 59 [ D.1972 ])) ./piruett.w:686 -1
+        (reg:QI 59 [ D.1971 ])) ./piruett.w:694 -1
      (nil))
 (insn 69 68 70 2 (set (reg/f:HI 126)
-        (const_int 124 [0x7c])) ./piruett.w:689 -1
+        (const_int 124 [0x7c])) ./piruett.w:697 -1
      (nil))
-(insn 70 69 71 2 (set (reg:QI 60 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 126) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])) ./piruett.w:689 -1
+(insn 70 69 71 2 (set (reg:QI 60 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 126) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])) ./piruett.w:697 -1
      (nil))
-(insn 71 70 72 2 (set (reg:QI 61 [ D.1972 ])
-        (and:QI (reg:QI 60 [ D.1972 ])
-            (const_int -8 [0xfffffffffffffff8]))) ./piruett.w:689 -1
+(insn 71 70 72 2 (set (reg:QI 61 [ D.1971 ])
+        (and:QI (reg:QI 60 [ D.1971 ])
+            (const_int -8 [0xfffffffffffffff8]))) ./piruett.w:697 -1
      (nil))
 (insn 72 71 73 2 (set (reg/f:HI 127)
-        (const_int 124 [0x7c])) ./piruett.w:689 -1
+        (const_int 124 [0x7c])) ./piruett.w:697 -1
      (nil))
 (insn 73 72 74 2 (set (mem/v:QI (reg/f:HI 127) [0 MEM[(volatile uint8_t *)124B]+0 S1 A8])
-        (reg:QI 61 [ D.1972 ])) ./piruett.w:689 -1
+        (reg:QI 61 [ D.1971 ])) ./piruett.w:697 -1
      (nil))
 (insn 74 73 75 2 (set (reg/f:HI 128)
-        (const_int 36 [0x24])) ./piruett.w:644 -1
+        (const_int 36 [0x24])) ./piruett.w:652 -1
      (nil))
-(insn 75 74 76 2 (set (reg:QI 62 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 128) [0 MEM[(volatile uint8_t *)36B]+0 S1 A8])) ./piruett.w:644 -1
+(insn 75 74 76 2 (set (reg:QI 62 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 128) [0 MEM[(volatile uint8_t *)36B]+0 S1 A8])) ./piruett.w:652 -1
      (nil))
-(insn 76 75 77 2 (set (reg:QI 63 [ D.1972 ])
-        (ior:QI (reg:QI 62 [ D.1972 ])
-            (const_int 32 [0x20]))) ./piruett.w:644 -1
+(insn 76 75 77 2 (set (reg:QI 63 [ D.1971 ])
+        (ior:QI (reg:QI 62 [ D.1971 ])
+            (const_int 32 [0x20]))) ./piruett.w:652 -1
      (nil))
 (insn 77 76 78 2 (set (reg/f:HI 129)
-        (const_int 36 [0x24])) ./piruett.w:644 -1
+        (const_int 36 [0x24])) ./piruett.w:652 -1
      (nil))
 (insn 78 77 79 2 (set (mem/v:QI (reg/f:HI 129) [0 MEM[(volatile uint8_t *)36B]+0 S1 A8])
-        (reg:QI 63 [ D.1972 ])) ./piruett.w:644 -1
+        (reg:QI 63 [ D.1971 ])) ./piruett.w:652 -1
      (nil))
 (insn 79 78 80 2 (set (reg/f:HI 130)
-        (const_int 36 [0x24])) ./piruett.w:648 -1
+        (const_int 36 [0x24])) ./piruett.w:656 -1
      (nil))
-(insn 80 79 81 2 (set (reg:QI 64 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 130) [0 MEM[(volatile uint8_t *)36B]+0 S1 A8])) ./piruett.w:648 -1
+(insn 80 79 81 2 (set (reg:QI 64 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 130) [0 MEM[(volatile uint8_t *)36B]+0 S1 A8])) ./piruett.w:656 -1
      (nil))
-(insn 81 80 82 2 (set (reg:QI 65 [ D.1972 ])
-        (ior:QI (reg:QI 64 [ D.1972 ])
-            (const_int 1 [0x1]))) ./piruett.w:648 -1
+(insn 81 80 82 2 (set (reg:QI 65 [ D.1971 ])
+        (ior:QI (reg:QI 64 [ D.1971 ])
+            (const_int 1 [0x1]))) ./piruett.w:656 -1
      (nil))
 (insn 82 81 83 2 (set (reg/f:HI 131)
-        (const_int 36 [0x24])) ./piruett.w:648 -1
+        (const_int 36 [0x24])) ./piruett.w:656 -1
      (nil))
 (insn 83 82 84 2 (set (mem/v:QI (reg/f:HI 131) [0 MEM[(volatile uint8_t *)36B]+0 S1 A8])
-        (reg:QI 65 [ D.1972 ])) ./piruett.w:648 -1
+        (reg:QI 65 [ D.1971 ])) ./piruett.w:656 -1
      (nil))
 (insn 84 83 85 2 (set (reg/f:HI 132)
-        (const_int 42 [0x2a])) ./piruett.w:653 -1
+        (const_int 42 [0x2a])) ./piruett.w:661 -1
      (nil))
-(insn 85 84 86 2 (set (reg:QI 66 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 132) [0 MEM[(volatile uint8_t *)42B]+0 S1 A8])) ./piruett.w:653 -1
+(insn 85 84 86 2 (set (reg:QI 66 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 132) [0 MEM[(volatile uint8_t *)42B]+0 S1 A8])) ./piruett.w:661 -1
      (nil))
-(insn 86 85 87 2 (set (reg:QI 67 [ D.1972 ])
-        (ior:QI (reg:QI 66 [ D.1972 ])
-            (const_int 96 [0x60]))) ./piruett.w:653 -1
+(insn 86 85 87 2 (set (reg:QI 67 [ D.1971 ])
+        (ior:QI (reg:QI 66 [ D.1971 ])
+            (const_int 96 [0x60]))) ./piruett.w:661 -1
      (nil))
 (insn 87 86 88 2 (set (reg/f:HI 133)
-        (const_int 42 [0x2a])) ./piruett.w:653 -1
+        (const_int 42 [0x2a])) ./piruett.w:661 -1
      (nil))
 (insn 88 87 89 2 (set (mem/v:QI (reg/f:HI 133) [0 MEM[(volatile uint8_t *)42B]+0 S1 A8])
-        (reg:QI 67 [ D.1972 ])) ./piruett.w:653 -1
+        (reg:QI 67 [ D.1971 ])) ./piruett.w:661 -1
      (nil))
 (insn 89 88 90 2 (set (reg/f:HI 134)
-        (const_int 42 [0x2a])) ./piruett.w:656 -1
+        (const_int 42 [0x2a])) ./piruett.w:664 -1
      (nil))
-(insn 90 89 91 2 (set (reg:QI 68 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 134) [0 MEM[(volatile uint8_t *)42B]+0 S1 A8])) ./piruett.w:656 -1
+(insn 90 89 91 2 (set (reg:QI 68 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 134) [0 MEM[(volatile uint8_t *)42B]+0 S1 A8])) ./piruett.w:664 -1
      (nil))
-(insn 91 90 92 2 (set (reg:QI 69 [ D.1972 ])
-        (ior:QI (reg:QI 68 [ D.1972 ])
-            (const_int 24 [0x18]))) ./piruett.w:656 -1
+(insn 91 90 92 2 (set (reg:QI 69 [ D.1971 ])
+        (ior:QI (reg:QI 68 [ D.1971 ])
+            (const_int 24 [0x18]))) ./piruett.w:664 -1
      (nil))
 (insn 92 91 93 2 (set (reg/f:HI 135)
-        (const_int 42 [0x2a])) ./piruett.w:656 -1
+        (const_int 42 [0x2a])) ./piruett.w:664 -1
      (nil))
 (insn 93 92 94 2 (set (mem/v:QI (reg/f:HI 135) [0 MEM[(volatile uint8_t *)42B]+0 S1 A8])
-        (reg:QI 69 [ D.1972 ])) ./piruett.w:656 -1
+        (reg:QI 69 [ D.1971 ])) ./piruett.w:664 -1
      (nil))
 (insn 94 93 95 2 (set (reg/f:HI 136)
-        (const_int 96 [0x60])) ./piruett.w:698 -1
+        (const_int 96 [0x60])) ./piruett.w:706 -1
      (nil))
-(insn 95 94 96 2 (set (reg:QI 70 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 136) [0 MEM[(volatile uint8_t *)96B]+0 S1 A8])) ./piruett.w:698 -1
+(insn 95 94 96 2 (set (reg:QI 70 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 136) [0 MEM[(volatile uint8_t *)96B]+0 S1 A8])) ./piruett.w:706 -1
      (nil))
-(insn 96 95 97 2 (set (reg:QI 71 [ D.1972 ])
-        (ior:QI (reg:QI 70 [ D.1972 ])
-            (const_int 24 [0x18]))) ./piruett.w:698 -1
+(insn 96 95 97 2 (set (reg:QI 71 [ D.1971 ])
+        (ior:QI (reg:QI 70 [ D.1971 ])
+            (const_int 24 [0x18]))) ./piruett.w:706 -1
      (nil))
 (insn 97 96 98 2 (set (reg/f:HI 137)
-        (const_int 96 [0x60])) ./piruett.w:698 -1
+        (const_int 96 [0x60])) ./piruett.w:706 -1
      (nil))
 (insn 98 97 99 2 (set (mem/v:QI (reg/f:HI 137) [0 MEM[(volatile uint8_t *)96B]+0 S1 A8])
-        (reg:QI 71 [ D.1972 ])) ./piruett.w:698 -1
+        (reg:QI 71 [ D.1971 ])) ./piruett.w:706 -1
      (nil))
 (insn 99 98 100 2 (set (reg/f:HI 138)
-        (const_int 96 [0x60])) ./piruett.w:699 -1
+        (const_int 96 [0x60])) ./piruett.w:707 -1
      (nil))
 (insn 100 99 101 2 (set (reg:QI 139)
-        (const_int 68 [0x44])) ./piruett.w:699 -1
+        (const_int 68 [0x44])) ./piruett.w:707 -1
      (nil))
 (insn 101 100 102 2 (set (mem/v:QI (reg/f:HI 138) [0 MEM[(volatile uint8_t *)96B]+0 S1 A8])
-        (reg:QI 139)) ./piruett.w:699 -1
+        (reg:QI 139)) ./piruett.w:707 -1
      (nil))
 (insn 102 101 103 2 (parallel [
             (asm_operands/v ("sei") ("") 0 []
@@ -2272,122 +2263,122 @@ try_optimize_cfg iteration 2
         ]) ./piruett.w:242 -1
      (nil))
 (insn 103 102 104 2 (set (reg/f:HI 140)
-        (const_int 68 [0x44])) ./piruett.w:712 -1
+        (const_int 68 [0x44])) ./piruett.w:720 -1
      (nil))
-(insn 104 103 105 2 (set (reg:QI 72 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 140) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:712 -1
+(insn 104 103 105 2 (set (reg:QI 72 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 140) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:720 -1
      (nil))
-(insn 105 104 106 2 (set (reg:QI 73 [ D.1972 ])
-        (ior:QI (reg:QI 72 [ D.1972 ])
-            (const_int 1 [0x1]))) ./piruett.w:712 -1
+(insn 105 104 106 2 (set (reg:QI 73 [ D.1971 ])
+        (ior:QI (reg:QI 72 [ D.1971 ])
+            (const_int 1 [0x1]))) ./piruett.w:720 -1
      (nil))
 (insn 106 105 107 2 (set (reg/f:HI 141)
-        (const_int 68 [0x44])) ./piruett.w:712 -1
+        (const_int 68 [0x44])) ./piruett.w:720 -1
      (nil))
 (insn 107 106 108 2 (set (mem/v:QI (reg/f:HI 141) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])
-        (reg:QI 73 [ D.1972 ])) ./piruett.w:712 -1
+        (reg:QI 73 [ D.1971 ])) ./piruett.w:720 -1
      (nil))
 (insn 108 107 109 2 (set (reg/f:HI 142)
-        (const_int 68 [0x44])) ./piruett.w:713 -1
+        (const_int 68 [0x44])) ./piruett.w:721 -1
      (nil))
-(insn 109 108 110 2 (set (reg:QI 74 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 142) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:713 -1
+(insn 109 108 110 2 (set (reg:QI 74 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 142) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:721 -1
      (nil))
-(insn 110 109 111 2 (set (reg:QI 75 [ D.1972 ])
-        (ior:QI (reg:QI 74 [ D.1972 ])
-            (const_int -128 [0xffffffffffffff80]))) ./piruett.w:713 -1
+(insn 110 109 111 2 (set (reg:QI 75 [ D.1971 ])
+        (ior:QI (reg:QI 74 [ D.1971 ])
+            (const_int -128 [0xffffffffffffff80]))) ./piruett.w:721 -1
      (nil))
 (insn 111 110 112 2 (set (reg/f:HI 143)
-        (const_int 68 [0x44])) ./piruett.w:713 -1
+        (const_int 68 [0x44])) ./piruett.w:721 -1
      (nil))
 (insn 112 111 113 2 (set (mem/v:QI (reg/f:HI 143) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])
-        (reg:QI 75 [ D.1972 ])) ./piruett.w:713 -1
+        (reg:QI 75 [ D.1971 ])) ./piruett.w:721 -1
      (nil))
 (insn 113 112 114 2 (set (reg/f:HI 144)
-        (const_int 68 [0x44])) ./piruett.w:714 -1
+        (const_int 68 [0x44])) ./piruett.w:722 -1
      (nil))
-(insn 114 113 115 2 (set (reg:QI 76 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 144) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:714 -1
+(insn 114 113 115 2 (set (reg:QI 76 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 144) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:722 -1
      (nil))
-(insn 115 114 116 2 (set (reg:QI 77 [ D.1972 ])
-        (ior:QI (reg:QI 76 [ D.1972 ])
-            (const_int 32 [0x20]))) ./piruett.w:714 -1
+(insn 115 114 116 2 (set (reg:QI 77 [ D.1971 ])
+        (ior:QI (reg:QI 76 [ D.1971 ])
+            (const_int 32 [0x20]))) ./piruett.w:722 -1
      (nil))
 (insn 116 115 117 2 (set (reg/f:HI 145)
-        (const_int 68 [0x44])) ./piruett.w:714 -1
+        (const_int 68 [0x44])) ./piruett.w:722 -1
      (nil))
 (insn 117 116 118 2 (set (mem/v:QI (reg/f:HI 145) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])
-        (reg:QI 77 [ D.1972 ])) ./piruett.w:714 -1
+        (reg:QI 77 [ D.1971 ])) ./piruett.w:722 -1
      (nil))
 (insn 118 117 119 2 (set (reg/f:HI 146)
-        (const_int 68 [0x44])) ./piruett.w:715 -1
+        (const_int 68 [0x44])) ./piruett.w:723 -1
      (nil))
-(insn 119 118 120 2 (set (reg:QI 78 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 146) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:715 -1
+(insn 119 118 120 2 (set (reg:QI 78 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 146) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:723 -1
      (nil))
-(insn 120 119 121 2 (set (reg:QI 79 [ D.1972 ])
-        (ior:QI (reg:QI 78 [ D.1972 ])
-            (const_int 64 [0x40]))) ./piruett.w:715 -1
+(insn 120 119 121 2 (set (reg:QI 79 [ D.1971 ])
+        (ior:QI (reg:QI 78 [ D.1971 ])
+            (const_int 64 [0x40]))) ./piruett.w:723 -1
      (nil))
 (insn 121 120 122 2 (set (reg/f:HI 147)
-        (const_int 68 [0x44])) ./piruett.w:715 -1
+        (const_int 68 [0x44])) ./piruett.w:723 -1
      (nil))
 (insn 122 121 123 2 (set (mem/v:QI (reg/f:HI 147) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])
-        (reg:QI 79 [ D.1972 ])) ./piruett.w:715 -1
+        (reg:QI 79 [ D.1971 ])) ./piruett.w:723 -1
      (nil))
 (insn 123 122 124 2 (set (reg/f:HI 148)
-        (const_int 68 [0x44])) ./piruett.w:716 -1
+        (const_int 68 [0x44])) ./piruett.w:724 -1
      (nil))
-(insn 124 123 125 2 (set (reg:QI 80 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 148) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:716 -1
+(insn 124 123 125 2 (set (reg:QI 80 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 148) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])) ./piruett.w:724 -1
      (nil))
-(insn 125 124 126 2 (set (reg:QI 81 [ D.1972 ])
-        (ior:QI (reg:QI 80 [ D.1972 ])
-            (const_int 16 [0x10]))) ./piruett.w:716 -1
+(insn 125 124 126 2 (set (reg:QI 81 [ D.1971 ])
+        (ior:QI (reg:QI 80 [ D.1971 ])
+            (const_int 16 [0x10]))) ./piruett.w:724 -1
      (nil))
 (insn 126 125 127 2 (set (reg/f:HI 149)
-        (const_int 68 [0x44])) ./piruett.w:716 -1
+        (const_int 68 [0x44])) ./piruett.w:724 -1
      (nil))
 (insn 127 126 128 2 (set (mem/v:QI (reg/f:HI 149) [0 MEM[(volatile uint8_t *)68B]+0 S1 A8])
-        (reg:QI 81 [ D.1972 ])) ./piruett.w:716 -1
+        (reg:QI 81 [ D.1971 ])) ./piruett.w:724 -1
      (nil))
 (insn 128 127 129 2 (set (reg/f:HI 150)
-        (const_int 69 [0x45])) ./piruett.w:719 -1
+        (const_int 69 [0x45])) ./piruett.w:727 -1
      (nil))
-(insn 129 128 130 2 (set (reg:QI 82 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 150) [0 MEM[(volatile uint8_t *)69B]+0 S1 A8])) ./piruett.w:719 -1
+(insn 129 128 130 2 (set (reg:QI 82 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 150) [0 MEM[(volatile uint8_t *)69B]+0 S1 A8])) ./piruett.w:727 -1
      (nil))
-(insn 130 129 131 2 (set (reg:QI 83 [ D.1972 ])
-        (ior:QI (reg:QI 82 [ D.1972 ])
-            (const_int 2 [0x2]))) ./piruett.w:719 -1
+(insn 130 129 131 2 (set (reg:QI 83 [ D.1971 ])
+        (ior:QI (reg:QI 82 [ D.1971 ])
+            (const_int 2 [0x2]))) ./piruett.w:727 -1
      (nil))
 (insn 131 130 132 2 (set (reg/f:HI 151)
-        (const_int 69 [0x45])) ./piruett.w:719 -1
+        (const_int 69 [0x45])) ./piruett.w:727 -1
      (nil))
 (insn 132 131 133 2 (set (mem/v:QI (reg/f:HI 151) [0 MEM[(volatile uint8_t *)69B]+0 S1 A8])
-        (reg:QI 83 [ D.1972 ])) ./piruett.w:719 -1
+        (reg:QI 83 [ D.1971 ])) ./piruett.w:727 -1
      (nil))
 (insn 133 132 134 2 (set (reg/f:HI 152)
-        (const_int 83 [0x53])) ./piruett.w:660 -1
+        (const_int 83 [0x53])) ./piruett.w:668 -1
      (nil))
-(insn 134 133 135 2 (set (reg:QI 84 [ D.1972 ])
-        (mem/v:QI (reg/f:HI 152) [0 MEM[(volatile uint8_t *)83B]+0 S1 A8])) ./piruett.w:660 -1
+(insn 134 133 135 2 (set (reg:QI 84 [ D.1971 ])
+        (mem/v:QI (reg/f:HI 152) [0 MEM[(volatile uint8_t *)83B]+0 S1 A8])) ./piruett.w:668 -1
      (nil))
-(insn 135 134 136 2 (set (reg:QI 85 [ D.1972 ])
-        (and:QI (reg:QI 84 [ D.1972 ])
-            (const_int -15 [0xfffffffffffffff1]))) ./piruett.w:660 -1
+(insn 135 134 136 2 (set (reg:QI 85 [ D.1971 ])
+        (and:QI (reg:QI 84 [ D.1971 ])
+            (const_int -15 [0xfffffffffffffff1]))) ./piruett.w:668 -1
      (nil))
 (insn 136 135 137 2 (set (reg/f:HI 153)
-        (const_int 83 [0x53])) ./piruett.w:660 -1
+        (const_int 83 [0x53])) ./piruett.w:668 -1
      (nil))
 (insn 137 136 138 2 (set (mem/v:QI (reg/f:HI 153) [0 MEM[(volatile uint8_t *)83B]+0 S1 A8])
-        (reg:QI 85 [ D.1972 ])) ./piruett.w:660 -1
+        (reg:QI 85 [ D.1971 ])) ./piruett.w:668 -1
      (nil))
 (insn 138 137 139 2 (set (reg:QI 24 r24)
         (const_int 0 [0])) ./piruett.w:269 -1
      (nil))
 (call_insn 139 138 140 2 (parallel [
-            (call (mem:HI (symbol_ref:HI ("ledCntl") [flags 0x3]  <function_decl 0x7fa078e7d400 ledCntl>) [0 ledCntl S2 A8])
+            (call (mem:HI (symbol_ref:HI ("ledCntl") [flags 0x3]  <function_decl 0x7fcb3c282400 ledCntl>) [0 ledCntl S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
         ]) ./piruett.w:269 -1
@@ -2399,7 +2390,7 @@ try_optimize_cfg iteration 2
         (reg/f:HI 37 virtual-stack-vars)) ./piruett.w:276 -1
      (nil))
 (call_insn 141 140 142 2 (parallel [
-            (call (mem:HI (symbol_ref:HI ("edgeSelect") [flags 0x3]  <function_decl 0x7fa078e7d800 edgeSelect>) [0 edgeSelect S2 A8])
+            (call (mem:HI (symbol_ref:HI ("edgeSelect") [flags 0x3]  <function_decl 0x7fcb3c282800 edgeSelect>) [0 edgeSelect S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
         ]) ./piruett.w:276 -1
@@ -2412,9 +2403,9 @@ try_optimize_cfg iteration 2
      (nil)
  -> 145)
 (barrier 143 142 202)
-(code_label 202 143 144 4 62 "" [2 uses])
+(code_label 202 143 144 4 63 "" [2 uses])
 (note 144 202 145 4 [bb 4] NOTE_INSN_BASIC_BLOCK)
-(code_label 145 144 146 5 58 "" [1 uses])
+(code_label 145 144 146 5 59 "" [1 uses])
 (note 146 145 147 5 [bb 5] NOTE_INSN_BASIC_BLOCK)
 (insn 147 146 148 5 (parallel [
             (set (reg:HI 154)
@@ -2427,7 +2418,7 @@ try_optimize_cfg iteration 2
         (reg:HI 154)) ./piruett.w:295 -1
      (nil))
 (call_insn 149 148 150 5 (parallel [
-            (call (mem:HI (symbol_ref:HI ("setPwm") [flags 0x3]  <function_decl 0x7fa078e7db00 setPwm>) [0 setPwm S2 A8])
+            (call (mem:HI (symbol_ref:HI ("setPwm") [flags 0x3]  <function_decl 0x7fcb3c282b00 setPwm>) [0 setPwm S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
         ]) ./piruett.w:295 -1
@@ -2438,18 +2429,18 @@ try_optimize_cfg iteration 2
 (insn 150 149 151 5 (set (reg/f:HI 155)
         (const_int 83 [0x53])) ./piruett.w:297 -1
      (nil))
-(insn 151 150 152 5 (set (reg:QI 86 [ D.1972 ])
+(insn 151 150 152 5 (set (reg:QI 86 [ D.1971 ])
         (mem/v:QI (reg/f:HI 155) [0 MEM[(volatile uint8_t *)83B]+0 S1 A8])) ./piruett.w:297 -1
      (nil))
-(insn 152 151 153 5 (set (reg:QI 87 [ D.1972 ])
-        (ior:QI (reg:QI 86 [ D.1972 ])
+(insn 152 151 153 5 (set (reg:QI 87 [ D.1971 ])
+        (ior:QI (reg:QI 86 [ D.1971 ])
             (const_int 1 [0x1]))) ./piruett.w:297 -1
      (nil))
 (insn 153 152 154 5 (set (reg/f:HI 156)
         (const_int 83 [0x53])) ./piruett.w:297 -1
      (nil))
 (insn 154 153 155 5 (set (mem/v:QI (reg/f:HI 156) [0 MEM[(volatile uint8_t *)83B]+0 S1 A8])
-        (reg:QI 87 [ D.1972 ])) ./piruett.w:297 -1
+        (reg:QI 87 [ D.1971 ])) ./piruett.w:297 -1
      (nil))
 (insn 155 154 156 5 (asm_operands/v ("sleep
 	") ("") 0 []
@@ -2459,25 +2450,25 @@ try_optimize_cfg iteration 2
 (insn 156 155 157 5 (set (reg/f:HI 157)
         (const_int 83 [0x53])) ./piruett.w:297 -1
      (nil))
-(insn 157 156 158 5 (set (reg:QI 88 [ D.1972 ])
+(insn 157 156 158 5 (set (reg:QI 88 [ D.1971 ])
         (mem/v:QI (reg/f:HI 157) [0 MEM[(volatile uint8_t *)83B]+0 S1 A8])) ./piruett.w:297 -1
      (nil))
-(insn 158 157 159 5 (set (reg:QI 89 [ D.1972 ])
-        (and:QI (reg:QI 88 [ D.1972 ])
+(insn 158 157 159 5 (set (reg:QI 89 [ D.1971 ])
+        (and:QI (reg:QI 88 [ D.1971 ])
             (const_int -2 [0xfffffffffffffffe]))) ./piruett.w:297 -1
      (nil))
 (insn 159 158 160 5 (set (reg/f:HI 158)
         (const_int 83 [0x53])) ./piruett.w:297 -1
      (nil))
 (insn 160 159 161 5 (set (mem/v:QI (reg/f:HI 158) [0 MEM[(volatile uint8_t *)83B]+0 S1 A8])
-        (reg:QI 89 [ D.1972 ])) ./piruett.w:297 -1
+        (reg:QI 89 [ D.1971 ])) ./piruett.w:297 -1
      (nil))
-(insn 161 160 162 5 (set (reg/f:HI 90 [ D.1973 ])
-        (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fa078e7e130 handleIrq>) [1 handleIrq+0 S2 A8])) ./piruett.w:309 -1
+(insn 161 160 162 5 (set (reg/f:HI 90 [ D.1972 ])
+        (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fcb3c283130 handleIrq>) [1 handleIrq+0 S2 A8])) ./piruett.w:309 -1
      (nil))
 (insn 162 161 163 5 (parallel [
             (set (cc0)
-                (compare (reg/f:HI 90 [ D.1973 ])
+                (compare (reg/f:HI 90 [ D.1972 ])
                     (const_int 0 [0])))
             (clobber (scratch:QI))
         ]) ./piruett.w:309 -1
@@ -2494,17 +2485,17 @@ try_optimize_cfg iteration 2
         (reg/f:HI 37 virtual-stack-vars)) ./piruett.w:311 -1
      (nil))
 (call_insn 166 165 167 6 (parallel [
-            (call (mem:HI (reg/f:HI 90 [ D.1973 ]) [0 *_90 S2 A8])
+            (call (mem:HI (reg/f:HI 90 [ D.1972 ]) [0 *_90 S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
         ]) ./piruett.w:311 -1
      (nil)
     (expr_list:HI (use (reg:HI 24 r24))
         (nil)))
-(insn 167 166 168 6 (set (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fa078e7e130 handleIrq>) [1 handleIrq+0 S2 A8])
+(insn 167 166 168 6 (set (mem/f/c:HI (symbol_ref:HI ("handleIrq") [flags 0x2]  <var_decl 0x7fcb3c283130 handleIrq>) [1 handleIrq+0 S2 A8])
         (const_int 0 [0])) ./piruett.w:312 -1
      (nil))
-(code_label 168 167 169 7 59 "" [1 uses])
+(code_label 168 167 169 7 60 "" [1 uses])
 (note 169 168 170 7 [bb 7] NOTE_INSN_BASIC_BLOCK)
 (insn 170 169 171 7 (set (reg:HI 159)
         (mem/c:HI (plus:HI (reg/f:HI 37 virtual-stack-vars)
@@ -2528,7 +2519,7 @@ try_optimize_cfg iteration 2
      (nil))
 (call_insn/i 175 174 176 7 (parallel [
             (set (reg:HI 24 r24)
-                (call (mem:HI (symbol_ref:HI ("scaler") [flags 0x3]  <function_decl 0x7fa078e7d900 scaler>) [0 scaler S2 A8])
+                (call (mem:HI (symbol_ref:HI ("scaler") [flags 0x3]  <function_decl 0x7fcb3c282900 scaler>) [0 scaler S2 A8])
                     (const_int 0 [0])))
             (use (const_int 0 [0]))
         ]) ./piruett.w:317 -1
@@ -2538,12 +2529,12 @@ try_optimize_cfg iteration 2
         (expr_list:HI (use (reg:HI 22 r22))
             (expr_list:HI (use (reg:HI 20 r20))
                 (nil)))))
-(insn 176 175 177 7 (set (reg:HI 92 [ D.1975 ])
+(insn 176 175 177 7 (set (reg:HI 92 [ D.1974 ])
         (reg:HI 24 r24)) ./piruett.w:317 -1
      (nil))
 (insn 177 176 178 7 (set (mem/c:HI (plus:HI (reg/f:HI 37 virtual-stack-vars)
                 (const_int 18 [0x12])) [3 translation_s.radius+0 S2 A8])
-        (reg:HI 92 [ D.1975 ])) ./piruett.w:317 -1
+        (reg:HI 92 [ D.1974 ])) ./piruett.w:317 -1
      (nil))
 (insn 178 177 179 7 (set (reg:HI 161)
         (mem/c:HI (plus:HI (reg/f:HI 37 virtual-stack-vars)
@@ -2567,7 +2558,7 @@ try_optimize_cfg iteration 2
      (nil))
 (call_insn/i 183 182 184 7 (parallel [
             (set (reg:HI 24 r24)
-                (call (mem:HI (symbol_ref:HI ("scaler") [flags 0x3]  <function_decl 0x7fa078e7d900 scaler>) [0 scaler S2 A8])
+                (call (mem:HI (symbol_ref:HI ("scaler") [flags 0x3]  <function_decl 0x7fcb3c282900 scaler>) [0 scaler S2 A8])
                     (const_int 0 [0])))
             (use (const_int 0 [0]))
         ]) ./piruett.w:318 -1
@@ -2577,12 +2568,12 @@ try_optimize_cfg iteration 2
         (expr_list:HI (use (reg:HI 22 r22))
             (expr_list:HI (use (reg:HI 20 r20))
                 (nil)))))
-(insn 184 183 185 7 (set (reg:HI 94 [ D.1975 ])
+(insn 184 183 185 7 (set (reg:HI 94 [ D.1974 ])
         (reg:HI 24 r24)) ./piruett.w:318 -1
      (nil))
 (insn 185 184 186 7 (set (mem/c:HI (plus:HI (reg/f:HI 37 virtual-stack-vars)
                 (const_int 16 [0x10])) [3 translation_s.thrust+0 S2 A8])
-        (reg:HI 94 [ D.1975 ])) ./piruett.w:318 -1
+        (reg:HI 94 [ D.1974 ])) ./piruett.w:318 -1
      (nil))
 (insn 186 185 187 7 (set (reg:HI 163)
         (const_int 100 [0x64])) ./piruett.w:319 -1
@@ -2602,7 +2593,7 @@ try_optimize_cfg iteration 2
         (reg:HI 164)) ./piruett.w:321 -1
      (nil))
 (call_insn 190 189 191 7 (parallel [
-            (call (mem:HI (symbol_ref:HI ("translate") [flags 0x3]  <function_decl 0x7fa078e7da00 translate>) [0 translate S2 A8])
+            (call (mem:HI (symbol_ref:HI ("translate") [flags 0x3]  <function_decl 0x7fcb3c282a00 translate>) [0 translate S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
         ]) ./piruett.w:321 -1
@@ -2647,13 +2638,13 @@ try_optimize_cfg iteration 2
             (pc))) ./piruett.w:326 -1
      (int_list:REG_BR_PROB 2900 (nil))
  -> 205)
-(code_label 198 197 199 9 60 "" [1 uses])
+(code_label 198 197 199 9 61 "" [1 uses])
 (note 199 198 200 9 [bb 9] NOTE_INSN_BASIC_BLOCK)
 (insn 200 199 201 9 (set (reg:QI 24 r24)
         (const_int 0 [0])) ./piruett.w:327 -1
      (nil))
 (call_insn 201 200 203 9 (parallel [
-            (call (mem:HI (symbol_ref:HI ("ledCntl") [flags 0x3]  <function_decl 0x7fa078e7d400 ledCntl>) [0 ledCntl S2 A8])
+            (call (mem:HI (symbol_ref:HI ("ledCntl") [flags 0x3]  <function_decl 0x7fcb3c282400 ledCntl>) [0 ledCntl S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
         ]) ./piruett.w:327 -1
@@ -2666,13 +2657,13 @@ try_optimize_cfg iteration 2
      (nil)
  -> 202)
 (barrier 204 203 205)
-(code_label 205 204 206 10 61 "" [1 uses])
+(code_label 205 204 206 10 62 "" [1 uses])
 (note 206 205 207 10 [bb 10] NOTE_INSN_BASIC_BLOCK)
 (insn 207 206 208 10 (set (reg:QI 24 r24)
         (const_int 1 [0x1])) ./piruett.w:329 -1
      (nil))
 (call_insn 208 207 209 10 (parallel [
-            (call (mem:HI (symbol_ref:HI ("ledCntl") [flags 0x3]  <function_decl 0x7fa078e7d400 ledCntl>) [0 ledCntl S2 A8])
+            (call (mem:HI (symbol_ref:HI ("ledCntl") [flags 0x3]  <function_decl 0x7fcb3c282400 ledCntl>) [0 ledCntl S2 A8])
                 (const_int 0 [0]))
             (use (const_int 0 [0]))
         ]) ./piruett.w:329 -1

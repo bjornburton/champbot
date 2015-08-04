@@ -585,7 +585,7 @@ The radius sensitivity is adjusted by changing the value of |"track"|.
 @c
  difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
  rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
- piruett = (trans_s->track * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
+ piruett = (((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
 @
 Any rotation involves one motor turning faster than the other.
 At some point, faster is not possible and so the requiered clipping is here.
@@ -597,7 +597,7 @@ At some point, faster is not possible and so the requiered clipping is here.
  else if((speed-rotation) <= -max)
     trans_s->larboardOut = -max;
  else if(trans_s->thrust == STOPPED) /* here we switch to piruett mode */
-    trans_s->larboardOut = piruett;
+    trans_s->larboardOut = -piruett;
  else
     trans_s->larboardOut = speed-rotation;
 
@@ -607,9 +607,9 @@ At some point, faster is not possible and so the requiered clipping is here.
  else if ((speed+rotation) <= -max)
     trans_s->starboardOut = -max;
  else if(trans_s->thrust == STOPPED)
-    trans_s->starboardOut = -piruett;
+    trans_s->starboardOut = piruett;
  else
-   trans_s->starboardOut = speed+rotation;
+    trans_s->starboardOut = speed+rotation;
 
 @#}@#
 
@@ -617,18 +617,26 @@ void setPwm(transStruct *trans_s)
 @#{@#
 
  if (trans_s->larboardOut >= 0)
+    {  
      larboardDirection(FORWARD);
+     OCR0A = (uint8_t)trans_s->larboardOut;
+     }
   else
+    {
      larboardDirection(REVERSE);
-
+     OCR0A = (uint8_t)trans_s->larboardOut;
+     }
 
  if (trans_s->starboardOut >= 0)
+    {
      starboardDirection(FORWARD);
+     OCR0B = (uint8_t)trans_s->starboardOut;
+     }
   else
+    {
      starboardDirection(REVERSE);
-
- OCR0A = (uint8_t)trans_s->larboardOut;
- OCR0B = (uint8_t)trans_s->starboardOut;
+     OCR0B = (uint8_t)trans_s->starboardOut;
+     }
 @
 We must see if the fail-safe relay needs to be closed.
 @c

@@ -19,19 +19,20 @@ The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
-The port-side motor pulse will be available at Pin 5, starboard will be at
-Pin 6. The port-side motor direction control will be available at Pin 3,
-starboard will be at Pin 4. A fail-safe relay output will be at pin 8.
+We are using the Wingxing DBH-01C.
+The Inputs are unique on this as the PWM logic input is a two bit value at IN1
+ and IN2. Values 0 and 3 are logic LOW.
 
-We are using the Wingxing DBH-01C. The Inputs are unique on this as the PWM
-logic input inverts with reversal. Actualy, there isn't really a dedicated
-PWM or reverse inputs; either can be either. The example in the datasheet has
-PWM on IN1 and LOW on IN2 for forward. For reverse, LOW on IN1 and PWM on IN2.
-We don't want PWM hopping between pins so we keep PWM on IN1. IN2 is reserved
-for direction. The result of this mode is that PWM as IN1 is inverted when
-IN2 is HIGH. This means we need to flip the PWM when the direction pin goes
-HIGH. 
+The example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
+For reverse, LOW on IN1 and PWM on IN2.
+We don't want PWM hopping between pins so we keep PWM on IN1.
+The result of this mode is that PWM as IN1 is inverted when IN2 is HIGH.
+This means we need to flip the PWM when the direction pin goes HIGH. 
 
+The larboard motor PWM word will be available at Pins 3 and 5.
+The starboard motor PWM word will be at 4 and 6.
+OC0A and OC0B is on pins 5 and 6  (D8 and D6) and are the PWM.
+A fail-safe relay output will be at pin 8.
 
 @* Implementation.
 The Futaba receiver has two PWC channels.
@@ -244,7 +245,7 @@ is set; usually done through calling |"sei()"|.
 @
 
 The PWM is used to control larboard and starboard motors through OC0A (D5) and
-OC0B (D6), respectivly.
+OC0B (D6), respectivly. 
 @c
 @<Initialize the Timer Counter 0 for PWM...@>
 
@@ -416,8 +417,8 @@ void lostSignal(inputStruct *input_s)
 
 @
 
-The procedure edgeSelect configures the |"Input Capture"| unit to capture on the
-expected edge type.
+The procedure edgeSelect configures the |"Input Capture"| unit to capture on
+the expected edge type.
 
 @c
 void edgeSelect(inputStruct *input_s)
@@ -463,48 +464,47 @@ void relayCntl(int8_t state)
 @#}@#
 
 @
-Here is a simple procedure to reverse thrust on the port motor.
-It includes inverting PWM in support of the H-Bridge direction input's
-inverting side effect.
+Here is a simple procedure to set thrust direction on the larboard motor.
+It includes inverting PWM in support of the H-Bridge direction by binary value. 
+In forward, the PWM value is 2 for high and 3 for low.
+In reverse, the PWM value is 1 for high and 0 for low.
+
 @c
 void larboardDirection(int8_t state)
 @#{@#
  if(state)
    {
     PORTD |= (1<<PORTD3);
-    TCCR0A |= (1<<COM0A0); // Set on Comparator A match (table 15-4)
     }
   else
    {
     PORTD &= ~(1<<PORTD3);
-    TCCR0A &= ~(1<<COM0A0); // Clear on Comparator A match (table 15-4)
     }
 
 @#}@#
 
 @
-Here is a simple procedure to reverse thrust on the starboard motor.
-It includes inverting PWM in support of the H-Bridge direction input's
-inverting side effect.
+Here is a simple procedure to set thrust direction on the starboard motor.
+It includes inverting PWM in support of the H-Bridge direction by binary value. 
+In forward, the PWM value is 2 for high and 3 for low.
+In reverse, the PWM value is 1 for high and 0 for low.
 @c
 void starboardDirection(int8_t state)
 @#{@#
  if(state)
    {
     PORTD |= (1<<PORTD4);
-    TCCR0A |= (1<<COM0B0); // Set on Comparator B match (table 15-7)
     }
   else
    {
     PORTD &= ~(1<<PORTD4);
-    TCCR0A &= ~(1<<COM0B0); // Clear on Comparator B match (table 15-7)
     }
 @#}@#
 
 @
 
 @
-The scaler function takes an input, as in times from the Input Capture
+The scaler function takes an input, in time, from the Input Capture
 Register and returns a value scaled by the parameters in structure
 |"inputScale_s"|.
 @c
@@ -513,7 +513,7 @@ int16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
 uint16_t solution;
 @
 First, we can solve for the obvious cases.
-One is where there is no signal; when |"lostSignal"| i |"TRUE"|.
+One is where there is no signal; when |"lostSignal"| is |"TRUE"|.
 The other is where the input exceeds the range.
 This can easily happen if the trim is shifted.
 @c
@@ -530,7 +530,7 @@ This can easily happen if the trim is shifted.
 @
 If it's not that simple, then compute the gain and offset and then continue in
 the usual way.
-This is not really an effecient method, recomputing gain and offset every time
+This is not really an efficient method, recomputing gain and offset every time
 but we are not in a rush and it makes it easier since, if something changes,
 I don't have to manualy compute and enter these value.
 
@@ -563,6 +563,7 @@ It should steer OK as long as the speed is constant and small changes in speed
 should not be too disruptive.
 
 The constant |"ampFact"| amplifies it so I can take advantage of the extra
+ bits.
 
 This procedure is intended for values from -255 to 255.
 @c
@@ -596,7 +597,7 @@ At some point, faster is not possible and so the requiered clipping is here.
  else if((speed-rotation) <= -max)
     trans_s->larboardOut = -max;
  else if(trans_s->thrust == STOPPED) /* here we switch to piruett mode */
-    trans_s->larboardOut = -piruett;
+    trans_s->larboardOut = piruett;
  else
     trans_s->larboardOut = speed-rotation;
 
@@ -606,7 +607,7 @@ At some point, faster is not possible and so the requiered clipping is here.
  else if ((speed+rotation) <= -max)
     trans_s->starboardOut = -max;
  else if(trans_s->thrust == STOPPED)
-    trans_s->starboardOut = piruett;
+    trans_s->starboardOut = -piruett;
  else
    trans_s->starboardOut = speed+rotation;
 
@@ -616,28 +617,18 @@ void setPwm(transStruct *trans_s)
 @#{@#
 
  if (trans_s->larboardOut >= 0)
-    {
-     OCR0A = (uint8_t)trans_s->larboardOut;
      larboardDirection(FORWARD);
-     }
   else
-    {
-     OCR0A = (uint8_t)-trans_s->larboardOut;
      larboardDirection(REVERSE);
-     }
 
 
  if (trans_s->starboardOut >= 0)
-    {
-     OCR0B = (uint8_t)trans_s->starboardOut;
      starboardDirection(FORWARD);
-     }
   else
-    {
-     OCR0B = (uint8_t)-trans_s->starboardOut;
      starboardDirection(REVERSE);
-     }
 
+ OCR0A = (uint8_t)trans_s->larboardOut;
+ OCR0B = (uint8_t)trans_s->starboardOut;
 @
 We must see if the fail-safe relay needs to be closed.
 @c
@@ -718,12 +709,14 @@ The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
 @ @<Initialize the Timer Counter 0 for PWM...@>=
 {
  // 15.9.1 TCCR0A – Timer/Counter Control Register A
- TCCR0A |= (1<<WGM00);  // Phase correct mode of PWM (table 15-9)
- TCCR0A |= (1<<COM0A1); // Clear on Comparator A match (table 15-4)
+ TCCR0A |= (1<<WGM00);  // Phase correct, mode 1 of PWM (table 15-9)
+ TCCR0A |= (1<<COM0A1); // Set/Clear on Comparator A match (table 15-4)
+ TCCR0A |= (1<<COM0B1); // Set/Clear on Comparator B match (table 15-7)
+ TCCR0A |= (1<<COM0A0); // Clear on Comparator A match (table 15-4)
+ TCCR0A |= (1<<COM0B0); // Clear on Comparator B match (table 15-7)
  
 // 15.9.2 TCCR0B – Timer/Counter Control Register B
  TCCR0B |= (1<<CS01);   // Prescaler set to clk/8 (table 15-9)
- TCCR0A |= (1<<COM0B1); // Clear on Comparator B match (table 15-7)
 }
 
 

@@ -22,19 +22,20 @@ The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
-The port-side motor pulse will be available at Pin 5, starboard will be at
-Pin 6. The port-side motor direction control will be available at Pin 3,
-starboard will be at Pin 4. A fail-safe relay output will be at pin 8.
+We are using the Wingxing DBH-01C.
+The Inputs are unique on this as the PWM logic input is a two bit value at IN1
+and IN2. Values 0 and 3 are logic LOW.
 
-We are using the Wingxing DBH-01C. The Inputs are unique on this as the PWM
-logic input inverts with reversal. Actualy, there isn't really a dedicated
-PWM or reverse inputs; either can be either. The example in the datasheet has
-PWM on IN1 and LOW on IN2 for forward. For reverse, LOW on IN1 and PWM on IN2.
-We don't want PWM hopping between pins so we keep PWM on IN1. IN2 is reserved
-for direction. The result of this mode is that PWM as IN1 is inverted when
-IN2 is HIGH. This means we need to flip the PWM when the direction pin goes
-HIGH.
+The example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
+For reverse, LOW on IN1 and PWM on IN2.
+We don't want PWM hopping between pins so we keep PWM on IN1.
+The result of this mode is that PWM as IN1 is inverted when IN2 is HIGH.
+This means we need to flip the PWM when the direction pin goes HIGH.
 
+The larboard motor PWM word will be available at Pins 3 and 5.
+The starboard motor PWM word will be at 4 and 6.
+OC0A and OC0B is on pins 5 and 6  (D8 and D6) and are the PWM.
+A fail-safe relay output will be at pin 8.
 
 \fi
 
@@ -424,8 +425,8 @@ ${}\\{input\_s}\MG\\{edge}\K\.{CH2RISE};{}$\6
 \M{28}
 
 The procedure edgeSelect configures the \PB{\.{"Input\ Capture"}} unit to
-capture on the
-expected edge type.
+capture on
+the expected edge type.
 
 \Y\B\&{void} \\{edgeSelect}(\&{inputStruct} ${}{*}\\{input\_s}{}$)\1\1\7
 $\{{}$\7
@@ -473,43 +474,38 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
 \fi
 
 \M{32}
-Here is a simple procedure to reverse thrust on the port motor.
-It includes inverting PWM in support of the H-Bridge direction input's
-inverting side effect.
+Here is a simple procedure to set thrust direction on the larboard motor.
+It includes inverting PWM in support of the H-Bridge direction by binary value.
+In forward, the PWM value is 2 for high and 3 for low.
+In reverse, the PWM value is 1 for high and 0 for low.
+
 \Y\B\&{void} \\{larboardDirection}(\\{int8\_t}\\{state})\7
 ${}\{{}$\1\7
 \&{if} (\\{state})\5
 ${}\{{}$\1\6
 ${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3});{}$\6
-${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0A0}){}$;\SHC{ Set on Comparator A
-match (table 15-4) }\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
 ${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD3});{}$\6
-${}\.{TCCR0A}\MRL{\AND{\K}}\CM(\T{1}\LL\.{COM0A0}){}$;\SHC{ Clear on Comparator
-A match (table 15-4) }\6
 \4${}\}{}$\2\7
 \4${}\}{}$\2\Y\par
 \fi
 
 \M{33}
-Here is a simple procedure to reverse thrust on the starboard motor.
-It includes inverting PWM in support of the H-Bridge direction input's
-inverting side effect.
+Here is a simple procedure to set thrust direction on the starboard motor.
+It includes inverting PWM in support of the H-Bridge direction by binary value.
+In forward, the PWM value is 2 for high and 3 for low.
+In reverse, the PWM value is 1 for high and 0 for low.
 \Y\B\&{void} \\{starboardDirection}(\\{int8\_t}\\{state})\7
 ${}\{{}$\1\7
 \&{if} (\\{state})\5
 ${}\{{}$\1\6
 ${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD4});{}$\6
-${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0B0}){}$;\SHC{ Set on Comparator B
-match (table 15-7) }\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
 ${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD4});{}$\6
-${}\.{TCCR0A}\MRL{\AND{\K}}\CM(\T{1}\LL\.{COM0B0}){}$;\SHC{ Clear on Comparator
-B match (table 15-7) }\6
 \4${}\}{}$\2\7
 \4${}\}{}$\2\Y\par
 \fi
@@ -519,7 +515,7 @@ B match (table 15-7) }\6
 \fi
 
 \M{35}
-The scaler function takes an input, as in times from the Input Capture
+The scaler function takes an input, in time, from the Input Capture
 Register and returns a value scaled by the parameters in structure
 \PB{\.{"inputScale\_s"}}.
 \Y\B\\{int16\_t}\\{scaler}(\&{inputStruct} ${}{*}\\{input\_s},\39{}$%
@@ -530,7 +526,7 @@ $\{{}$\7
 
 \M{36}
 First, we can solve for the obvious cases.
-One is where there is no signal; when \PB{\.{"lostSignal"}} i \PB{\.{"TRUE"}}.
+One is where there is no signal; when \PB{\.{"lostSignal"}} is \PB{\.{"TRUE"}}.
 The other is where the input exceeds the range.
 This can easily happen if the trim is shifted.
 \Y\B\&{if} ${}(\\{input\_s}\MG\\{lostSignal}\E\.{TRUE}){}$\1\5
@@ -544,7 +540,7 @@ This can easily happen if the trim is shifted.
 \M{37}
 If it's not that simple, then compute the gain and offset and then continue in
 the usual way.
-This is not really an effecient method, recomputing gain and offset every time
+This is not really an efficient method, recomputing gain and offset every time
 but we are not in a rush and it makes it easier since, if something changes,
 I don't have to manualy compute and enter these value.
 
@@ -577,6 +573,7 @@ should not be too disruptive.
 
 The constant \PB{\.{"ampFact"}} amplifies it so I can take advantage of the
 extra
+bits.
 
 This procedure is intended for values from -255 to 255.
 \Y\B\&{void} \\{translate}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
@@ -616,7 +613,7 @@ ${}\\{trans\_s}\MG\\{larboardOut}\K\\{max};{}$\2\6
 ${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{max};{}$\2\6
 \&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\.{STOPPED}{}$)\C{ here we
 switch to piruett mode }\1\6
-${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{piruett};{}$\2\6
+${}\\{trans\_s}\MG\\{larboardOut}\K\\{piruett};{}$\2\6
 \&{else}\1\5
 ${}\\{trans\_s}\MG\\{larboardOut}\K\\{speed}-\\{rotation};{}$\2\6
 \&{if} ${}((\\{speed}+\\{rotation})\G\\{max}){}$\1\5
@@ -624,32 +621,22 @@ ${}\\{trans\_s}\MG\\{starboardOut}\K\\{max};{}$\2\6
 \&{else} \&{if} ${}((\\{speed}+\\{rotation})\Z{-}\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{max};{}$\2\6
 \&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\.{STOPPED}){}$\1\5
-${}\\{trans\_s}\MG\\{starboardOut}\K\\{piruett};{}$\2\6
+${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{piruett};{}$\2\6
 \&{else}\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{speed}+\\{rotation}{}$;\2\7
 $\}{}$\7
 \&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
 $\{{}$\7
-\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\5
-${}\{{}$\1\6
+\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\1\5
+\\{larboardDirection}(\.{FORWARD});\2\6
+\&{else}\1\5
+\\{larboardDirection}(\.{REVERSE});\2\6
+\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\1\5
+\\{starboardDirection}(\.{FORWARD});\2\6
+\&{else}\1\5
+\\{starboardDirection}(\.{REVERSE});\2\6
 ${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{larboardOut};{}$\6
-\\{larboardDirection}(\.{FORWARD});\6
-\4${}\}{}$\2\6
-\&{else}\5
-${}\{{}$\1\6
-${}\.{OCR0A}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{larboardOut};{}$\6
-\\{larboardDirection}(\.{REVERSE});\6
-\4${}\}{}$\2\6
-\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\5
-${}\{{}$\1\6
-${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut};{}$\6
-\\{starboardDirection}(\.{FORWARD});\6
-\4${}\}{}$\2\6
-\&{else}\5
-${}\{{}$\1\6
-${}\.{OCR0B}\K(\\{uint8\_t})-\\{trans\_s}\MG\\{starboardOut};{}$\6
-\\{starboardDirection}(\.{REVERSE});\6
-\4${}\}{}$\2\par
+${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut}{}$;\par
 \fi
 
 \M{41}
@@ -741,14 +728,18 @@ The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
 
 \M{49}\B\X49:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
 ${}\{{}$\SHC{ 15.9.1 TCCR0A – Timer/Counter Control Register A }\1\6
-${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{WGM00}){}$;\SHC{ Phase correct mode of
-PWM (table 15-9) }\6
-${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0A1}){}$;\SHC{ Clear on Comparator A
-match (table 15-4) }\SHC{ 15.9.2 TCCR0B – Timer/Counter Control Register B }\6
+${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{WGM00}){}$;\SHC{ Phase correct, mode 1
+of PWM (table 15-9) }\6
+${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0A1}){}$;\SHC{ Set/Clear on
+Comparator A match (table 15-4) }\6
+${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0B1}){}$;\SHC{ Set/Clear on
+Comparator B match (table 15-7) }\6
+${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0A0}){}$;\SHC{ Clear on Comparator A
+match (table 15-4) }\6
+${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0B0}){}$;\SHC{ Clear on Comparator B
+match (table 15-7) }\SHC{ 15.9.2 TCCR0B – Timer/Counter Control Register B }\6
 ${}\.{TCCR0B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS01}){}$;\SHC{ Prescaler set to clk/8
 (table 15-9) }\6
-${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0B1}){}$;\SHC{ Clear on Comparator B
-match (table 15-7) }\6
 \4${}\}{}$\2\par
 
 \U15.\fi

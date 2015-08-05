@@ -22,15 +22,18 @@ The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
-We are using the Wingxing DBH-01C.
-The Inputs are unique on this as the PWM logic input is a two bit value at IN1
-and IN2. Values 0 and 3 are logic LOW.
+We are using the Wingxing DBH-01 (B/C).
+The Inputs are unique on this as the PWM logic input is a two bit value applied
+at terminals IN1 and IN2.
+Taking IN1 as LSb and IN2 as MSb values 0 and 3 are logic LOW for the PWM.
+A value of 1 is logic high in one direction and a value of 2 is logic high in
+the other.
 
-The example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
+The odd example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
 For reverse, LOW on IN1 and PWM on IN2.
 We don't want PWM hopping between pins so we keep PWM on IN1.
 The result of this mode is that PWM as IN1 is inverted when IN2 is HIGH.
-This means we need to flip the PWM when the direction pin goes HIGH.
+This means we need to invert the PWM when the direction pin goes HIGH.
 
 The larboard motor PWM word will be available at Pins 3 and 5.
 The starboard motor PWM word will be at 4 and 6.
@@ -250,8 +253,8 @@ $,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $\\{deadBand}\K\T{10}$ $\}$  ;\par
 \M{13}
 Here the interrupts are disabled so that configuring them doesn't set it off.
 \Y\B\\{cli}(\,);\7
-\X45:Initialize the inputs and capture mode\X\X42:Initialize pin outputs\X%
-\X47:Initialize watchdog timer\X\Y\par
+\X46:Initialize the inputs and capture mode\X\X43:Initialize pin outputs\X%
+\X48:Initialize watchdog timer\X\Y\par
 \fi
 
 \M{14}
@@ -264,7 +267,7 @@ is set; usually done through calling \PB{\.{"sei()"}}.
 
 The PWM is used to control larboard and starboard motors through OC0A (D5) and
 OC0B (D6), respectivly.
-\Y\B\X49:Initialize the Timer Counter 0 for PWM\X\par
+\Y\B\X50:Initialize the Timer Counter 0 for PWM\X\par
 \fi
 
 \M{16}
@@ -279,7 +282,7 @@ wake it up.
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement, even if it is empty.
 This stumped me for a good while.
-\Y\B\X43:Configure to idle on sleep\X\7
+\Y\B\X44:Configure to idle on sleep\X\7
 \\{ledCntl}(\.{OFF});\par
 \fi
 
@@ -327,13 +330,13 @@ ${}\\{translation\_s}.\\{radius}\K\\{scaler}({\AND}\\{input\_s},\39{\AND}%
 \\{translation\_s},\39\\{input\_s}.\\{ch1duration});{}$\6
 ${}\\{translation\_s}.\\{thrust}\K\\{scaler}({\AND}\\{input\_s},\39{\AND}%
 \\{translation\_s},\39\\{input\_s}.\\{ch2duration});{}$\6
-${}\\{translation\_s}.\\{track}\K\T{100}{}$;\C{ represent unit-less
+${}\\{translation\_s}.\\{track}\K\T{100}{}$;\C{ represents unit-less
 prop-to-prop distance }\6
 ${}\\{translate}({\AND}\\{translation\_s}){}$;\par
 \fi
 
 \M{21}
-The LED is used to indicate PWM zeros.
+The LED is used to indicate both channels PWM's are zeros.
 \Y\B\&{if} ${}(\\{translation\_s}.\\{larboardOut}\V\\{translation\_s}.%
 \\{starboardOut}){}$\1\5
 \\{ledCntl}(\.{OFF});\2\6
@@ -450,7 +453,7 @@ ${}\.{TCCR1B}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ICES1}){}$;\C{ Falling edge (23.3.2)
 
 \M{29}
 Since the edge has been changed, the Input Capture Flag should be cleared.
-It's odd but clearing it involves writing a one to it.
+It seems odd but clearing it involves writing a one to it.
 \Y\B$\.{TIFR1}\MRL{{\OR}{\K}}(\T{1}\LL\.{ICF1}){}$;\C{ (per 16.6.3) }\7
 $\}{}$\Y\par
 \fi
@@ -475,38 +478,31 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
 
 \M{32}
 Here is a simple procedure to set thrust direction on the larboard motor.
-It includes inverting PWM in support of the H-Bridge direction by binary value.
+Direction is effectivly the MSb of the two bit value at the H-bridge.
 In forward, the PWM value is 2 for high and 3 for low.
 In reverse, the PWM value is 1 for high and 0 for low.
-
+The LSb is the PWM itself.
 \Y\B\&{void} \\{larboardDirection}(\\{int8\_t}\\{state})\7
 ${}\{{}$\1\7
-\&{if} (\\{state})\5
-${}\{{}$\1\6
-${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3});{}$\6
-\4${}\}{}$\2\6
-\&{else}\5
-${}\{{}$\1\6
-${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD3});{}$\6
-\4${}\}{}$\2\7
+\&{if} (\\{state})\1\5
+${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3});{}$\2\6
+\&{else}\1\5
+${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD3}){}$;\2\7
 \4${}\}{}$\2\Y\par
 \fi
 
 \M{33}
 Here is a simple procedure to set thrust direction on the starboard motor.
-It includes inverting PWM in support of the H-Bridge direction by binary value.
+Direction is effectivly the MSb of the two bit value at the H-bridge.
 In forward, the PWM value is 2 for high and 3 for low.
 In reverse, the PWM value is 1 for high and 0 for low.
+The LSb is the PWM itself.
 \Y\B\&{void} \\{starboardDirection}(\\{int8\_t}\\{state})\7
 ${}\{{}$\1\7
-\&{if} (\\{state})\5
-${}\{{}$\1\6
-${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD4});{}$\6
-\4${}\}{}$\2\6
-\&{else}\5
-${}\{{}$\1\6
-${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD4});{}$\6
-\4${}\}{}$\2\7
+\&{if} (\\{state})\1\5
+${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD4});{}$\2\6
+\&{else}\1\5
+${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD4}){}$;\2\7
 \4${}\}{}$\2\Y\par
 \fi
 
@@ -597,8 +593,8 @@ The radius sensitivity is adjusted by changing the value of \PB{\.{"track"}}.
 \.{UINT8\_MAX}))/\\{ampFact};{}$\6
 ${}\\{rotation}\K(\\{trans\_s}\MG\\{track}*((\\{ampFact}*\\{difference})/%
 \.{UINT8\_MAX}))/\\{ampFact};{}$\6
-${}\\{piruett}\K(((\\{ampFact}*\\{trans\_s}\MG\\{radius})/\.{UINT8\_MAX}))/%
-\\{ampFact}{}$;\par
+${}\\{piruett}\K(\\{trans\_s}\MG\\{track}*((\\{ampFact}*\\{trans\_s}\MG%
+\\{radius})/\.{UINT8\_MAX}))/\\{ampFact}{}$;\par
 \fi
 
 \M{40}
@@ -607,49 +603,53 @@ At some point, faster is not possible and so the requiered clipping is here.
 
 \PB{\.{"max"}} is set at to support the limit of the bridge-driver's
 charge-pump.
-\Y\B\&{if} ${}((\\{speed}-\\{rotation})\G\\{max}){}$\1\5
+
+If there is no thrust then it is in piruett mode and spins CW or CCW.
+\Y\B\&{if} ${}(\\{trans\_s}\MG\\{thrust}\I\.{STOPPED}){}$\5
+${}\{{}$\1\6
+\&{if} ${}((\\{speed}-\\{rotation})\G\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{larboardOut}\K\\{max};{}$\2\6
 \&{else} \&{if} ${}((\\{speed}-\\{rotation})\Z{-}\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{max};{}$\2\6
-\&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\.{STOPPED}{}$)\C{ here we
-switch to piruett mode }\1\6
-${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{piruett};{}$\2\6
 \&{else}\1\5
 ${}\\{trans\_s}\MG\\{larboardOut}\K\\{speed}-\\{rotation};{}$\2\6
 \&{if} ${}((\\{speed}+\\{rotation})\G\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{max};{}$\2\6
 \&{else} \&{if} ${}((\\{speed}+\\{rotation})\Z{-}\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{max};{}$\2\6
-\&{else} \&{if} ${}(\\{trans\_s}\MG\\{thrust}\E\.{STOPPED}){}$\1\5
-${}\\{trans\_s}\MG\\{starboardOut}\K\\{piruett};{}$\2\6
 \&{else}\1\5
-${}\\{trans\_s}\MG\\{starboardOut}\K\\{speed}+\\{rotation}{}$;\2\7
-$\}{}$\7
-\&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
-$\{{}$\7
-\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\5
-${}\{{}$\1\6
-\\{larboardDirection}(\.{FORWARD});\6
-${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{larboardOut};{}$\6
+${}\\{trans\_s}\MG\\{starboardOut}\K\\{speed}+\\{rotation};{}$\2\6
 \4${}\}{}$\2\6
-\&{else}\5
+\&{else}\C{ piruett mode }\6
 ${}\{{}$\1\6
-\\{larboardDirection}(\.{REVERSE});\6
-${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{larboardOut};{}$\6
-\4${}\}{}$\2\6
-\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\5
-${}\{{}$\1\6
-\\{starboardDirection}(\.{FORWARD});\6
-${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut};{}$\6
-\4${}\}{}$\2\6
-\&{else}\5
-${}\{{}$\1\6
-\\{starboardDirection}(\.{REVERSE});\6
-${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut};{}$\6
-\4${}\}{}$\2\par
+${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{piruett};{}$\6
+${}\\{trans\_s}\MG\\{starboardOut}\K\\{piruett};{}$\6
+\4${}\}{}$\2\7
+$\}{}$\Y\par
 \fi
 
 \M{41}
+This simple procedure sets the signal to the H-Bridge.
+The MSb at termonal IN1 sets the direction.
+The LSb is the PWM.
+For the PWM we load the positive or negative value into the unsigned registers.
+If it is negative the PWM is inverted, which happens to work well for this
+H-Bridge.
+\Y\B\&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
+$\{{}$\7
+\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\1\5
+\\{larboardDirection}(\.{FORWARD});\2\6
+\&{else}\1\5
+\\{larboardDirection}(\.{REVERSE});\2\6
+\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\1\5
+\\{starboardDirection}(\.{FORWARD});\2\6
+\&{else}\1\5
+\\{starboardDirection}(\.{REVERSE});\2\6
+${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{larboardOut};{}$\6
+${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut}{}$;\par
+\fi
+
+\M{42}
 We must see if the fail-safe relay needs to be closed.
 \Y\B\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\V\\{trans\_s}\MG%
 \\{starboardOut}){}$\1\5
@@ -659,7 +659,7 @@ We must see if the fail-safe relay needs to be closed.
 $\}{}$\Y\par
 \fi
 
-\M{42}\B\X42:Initialize pin outputs\X${}\E{}$\SHC{ set the led port direction;
+\M{43}\B\X43:Initialize pin outputs\X${}\E{}$\SHC{ set the led port direction;
 This is pin \#17 }\6
 $\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5}){}$;\SHC{ set the relay port
 direction; This is pin \#8 }\6
@@ -672,18 +672,18 @@ ${}\.{DDRD}\MRL{{\OR}{\K}}((\T{1}\LL\.{DDD3})\OR(\T{1}\LL\.{DDD4})){}$;\SHC{
 Data direction to output (sec 14.3.3) }\par
 \U13.\fi
 
-\M{43}\B\X43:Configure to idle on sleep\X${}\E{}$\6
+\M{44}\B\X44:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
 \U16.\fi
 
-\M{44}
+\M{45}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{45}\B\X45:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{46}\B\X46:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status
@@ -714,12 +714,12 @@ ${}\.{ADMUX}\MRL{\AND{\K}}\CM((\T{1}\LL\.{MUX2})\OR(\T{1}\LL\.{MUX1})\OR(\T{1}%
 \4${}\}{}$\2\par
 \U13.\fi
 
-\M{46}
+\M{47}
 See section 11.8 in the datasheet for details on the Watchdog Timer.
 This is in the ``Interrupt Mode''.
 \fi
 
-\M{47}\B\X47:Initialize watchdog timer\X${}\E{}$\6
+\M{48}\B\X48:Initialize watchdog timer\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{WDTCSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{WDCE})\OR(\T{1}\LL\.{WDE});{}$\6
 ${}\.{WDTCSR}\K(\T{1}\LL\.{WDIE})\OR(\T{1}\LL\.{WDP2}){}$;\SHC{ reset after
@@ -727,7 +727,7 @@ about 0.25 seconds }\6
 \4${}\}{}$\2\par
 \U13.\fi
 
-\M{48}
+\M{49}
 PWM setup isn't too scary.
 Timer Count 0 is configured for ``Phase Correct'' PWM which, according to the
 datasheet, is preferred for motor control.
@@ -736,7 +736,7 @@ non-inverting PWM.
 The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
 \fi
 
-\M{49}\B\X49:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
+\M{50}\B\X50:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
 ${}\{{}$\SHC{ 15.9.1 TCCR0A – Timer/Counter Control Register A }\1\6
 ${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{WGM00}){}$;\SHC{ Phase correct, mode 1
 of PWM (table 15-9) }\6

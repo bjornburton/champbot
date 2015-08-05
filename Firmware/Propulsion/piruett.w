@@ -3,7 +3,7 @@
 %\input graphicx.tex
 \input miniltx
 \input graphicx
- 
+
 \nocon % omit table of contents
 \datethis % print date on listing
 
@@ -19,15 +19,18 @@ The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
-We are using the Wingxing DBH-01C.
-The Inputs are unique on this as the PWM logic input is a two bit value at IN1
- and IN2. Values 0 and 3 are logic LOW.
+We are using the Wingxing DBH-01 (B/C).
+The Inputs are unique on this as the PWM logic input is a two bit value applied
+at terminals IN1 and IN2.
+Taking IN1 as LSb and IN2 as MSb values 0 and 3 are logic LOW for the PWM.
+A value of 1 is logic high in one direction and a value of 2 is logic high in
+the other.
 
-The example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
+The odd example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
 For reverse, LOW on IN1 and PWM on IN2.
 We don't want PWM hopping between pins so we keep PWM on IN1.
 The result of this mode is that PWM as IN1 is inverted when IN2 is HIGH.
-This means we need to flip the PWM when the direction pin goes HIGH. 
+This means we need to invert the PWM when the direction pin goes HIGH.
 
 The larboard motor PWM word will be available at Pins 3 and 5.
 The starboard motor PWM word will be at 4 and 6.
@@ -114,7 +117,6 @@ chose the older word ``larboard''.
 @d CLOSED 1
 @d OPEN 0
 @d STOPPED 0
-
 
 @ Here are some other definitions.
 @d CH2RISE 0
@@ -218,7 +220,7 @@ inputStruct input_s = {
 
 @
 This is the structure that holds output parameters.
-It's instantiated with the endpoint constants. 
+It's instantiated with the endpoint constants.
 @c
 transStruct translation_s = {
     .minOut = -255,
@@ -229,7 +231,7 @@ transStruct translation_s = {
 @
 Here the interrupts are disabled so that configuring them doesn't set it off.
 @c
- cli(); 
+ cli();
 @#
 @<Initialize the inputs and capture mode...@>
 @<Initialize pin outputs...@>
@@ -245,7 +247,7 @@ is set; usually done through calling |"sei()"|.
 @
 
 The PWM is used to control larboard and starboard motors through OC0A (D5) and
-OC0B (D6), respectivly. 
+OC0B (D6), respectivly.
 @c
 @<Initialize the Timer Counter 0 for PWM...@>
 
@@ -316,12 +318,12 @@ if (handleIrq != NULL)
 
 translation_s.radius = scaler(&input_s, &translation_s, input_s.ch1duration);
 translation_s.thrust = scaler(&input_s, &translation_s, input_s.ch2duration);
-translation_s.track = 100; /* represent unit-less prop-to-prop distance */
+translation_s.track = 100; /* represents unit-less prop-to-prop distance */
 
 translate(&translation_s);
 
 @
-The LED is used to indicate PWM zeros.
+The LED is used to indicate both channels PWM's are zeros.
 @c
 if(translation_s.larboardOut || translation_s.starboardOut)
     ledCntl(OFF);
@@ -333,7 +335,7 @@ if(translation_s.larboardOut || translation_s.starboardOut)
 @#
 
 
-return 0; 
+return 0;
 @#
 }@# /* end main() */
 
@@ -397,7 +399,7 @@ the flag and resets the watchdog timer.
          input_s->ch1fall = ICR1;
          input_s->ch1duration = input_s->ch1fall - input_s->ch2fall;
          input_s->edge = CH2RISE;
-         input_s->lostSignal = FALSE; 
+         input_s->lostSignal = FALSE;
          wdt_reset(); /* watchdog timer is reset at each edge capture */
 @t\hskip 1in@>  }
 
@@ -440,7 +442,7 @@ void edgeSelect(inputStruct *input_s)
    }
 @
 Since the edge has been changed, the Input Capture Flag should be cleared.
-It's odd but clearing it involves writing a one to it.
+It seems odd but clearing it involves writing a one to it.
 @c
 
  TIFR1 |= (1<<ICF1); /* (per 16.6.3) */
@@ -465,40 +467,33 @@ void relayCntl(int8_t state)
 
 @
 Here is a simple procedure to set thrust direction on the larboard motor.
-It includes inverting PWM in support of the H-Bridge direction by binary value. 
+Direction is effectivly the MSb of the two bit value at the H-bridge. 
 In forward, the PWM value is 2 for high and 3 for low.
 In reverse, the PWM value is 1 for high and 0 for low.
-
+The LSb is the PWM itself.
 @c
 void larboardDirection(int8_t state)
 @#{@#
  if(state)
-   {
     PORTD |= (1<<PORTD3);
-    }
   else
-   {
     PORTD &= ~(1<<PORTD3);
-    }
 
 @#}@#
 
 @
 Here is a simple procedure to set thrust direction on the starboard motor.
-It includes inverting PWM in support of the H-Bridge direction by binary value. 
+Direction is effectivly the MSb of the two bit value at the H-bridge. 
 In forward, the PWM value is 2 for high and 3 for low.
 In reverse, the PWM value is 1 for high and 0 for low.
+The LSb is the PWM itself.
 @c
 void starboardDirection(int8_t state)
 @#{@#
  if(state)
-   {
     PORTD |= (1<<PORTD4);
-    }
   else
-   {
     PORTD &= ~(1<<PORTD4);
-    }
 @#}@#
 
 @
@@ -517,7 +512,7 @@ One is where there is no signal; when |"lostSignal"| is |"TRUE"|.
 The other is where the input exceeds the range.
 This can easily happen if the trim is shifted.
 @c
-  if (input_s->lostSignal == TRUE) 
+  if (input_s->lostSignal == TRUE)
      return 0;
 
   if (input > input_s->maxIn)
@@ -539,7 +534,7 @@ bits for precision.
 
 Dead-band is applied when it returns.
 @c
-const int32_t ampFact = 128L; 
+const int32_t ampFact = 128L;
 
 int32_t gain = (ampFact*(int32_t)(input_s->maxIn-input_s->minIn))/
                     (int32_t)(trans_s->maxOut-trans_s->minOut);
@@ -585,58 +580,65 @@ The radius sensitivity is adjusted by changing the value of |"track"|.
 @c
  difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
  rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
- piruett = (((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
+ piruett = (trans_s->track * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
 @
 Any rotation involves one motor turning faster than the other.
 At some point, faster is not possible and so the requiered clipping is here.
 
 |"max"| is set at to support the limit of the bridge-driver's charge-pump.
+
+If there is no thrust then it is in piruett mode and spins CW or CCW.
 @c
- if((speed-rotation) >= max)
-    trans_s->larboardOut = max;
- else if((speed-rotation) <= -max)
-    trans_s->larboardOut = -max;
- else if(trans_s->thrust == STOPPED) /* here we switch to piruett mode */
+
+
+ if(trans_s->thrust != STOPPED)
+   {
+    if((speed-rotation) >= max)
+       trans_s->larboardOut = max;
+     else if((speed-rotation) <= -max)
+       trans_s->larboardOut = -max;
+     else
+       trans_s->larboardOut = speed-rotation;
+
+    if((speed+rotation) >= max)
+       trans_s->starboardOut = max;
+     else if ((speed+rotation) <= -max)
+       trans_s->starboardOut = -max;
+     else
+       trans_s->starboardOut = speed+rotation;
+    }
+  else /* piruett mode */
+   {
     trans_s->larboardOut = -piruett;
- else
-    trans_s->larboardOut = speed-rotation;
-
-
- if((speed+rotation) >= max)
-    trans_s->starboardOut = max;
- else if ((speed+rotation) <= -max)
-    trans_s->starboardOut = -max;
- else if(trans_s->thrust == STOPPED)
     trans_s->starboardOut = piruett;
- else
-    trans_s->starboardOut = speed+rotation;
+    }
 
 @#}@#
 
+@
+This simple procedure sets the signal to the H-Bridge.
+The MSb at termonal IN1 sets the direction.
+The LSb is the PWM.
+For the PWM we load the positive or negative value into the unsigned registers.
+If it is negative the PWM is inverted, which happens to work well for this
+H-Bridge. 
+@c
 void setPwm(transStruct *trans_s)
 @#{@#
 
  if (trans_s->larboardOut >= 0)
-    {  
      larboardDirection(FORWARD);
-     OCR0A = (uint8_t)trans_s->larboardOut;
-     }
   else
-    {
      larboardDirection(REVERSE);
-     OCR0A = (uint8_t)trans_s->larboardOut;
-     }
 
  if (trans_s->starboardOut >= 0)
-    {
      starboardDirection(FORWARD);
-     OCR0B = (uint8_t)trans_s->starboardOut;
-     }
   else
-    {
      starboardDirection(REVERSE);
-     OCR0B = (uint8_t)trans_s->starboardOut;
-     }
+     
+
+ OCR0A = (uint8_t)trans_s->larboardOut;
+ OCR0B = (uint8_t)trans_s->starboardOut;
 @
 We must see if the fail-safe relay needs to be closed.
 @c
@@ -722,7 +724,7 @@ The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
  TCCR0A |= (1<<COM0B1); // Set/Clear on Comparator B match (table 15-7)
  TCCR0A |= (1<<COM0A0); // Clear on Comparator A match (table 15-4)
  TCCR0A |= (1<<COM0B0); // Clear on Comparator B match (table 15-7)
- 
+
 // 15.9.2 TCCR0B – Timer/Counter Control Register B
  TCCR0B |= (1<<CS01);   // Prescaler set to clk/8 (table 15-9)
 }

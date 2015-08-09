@@ -384,7 +384,7 @@ On the falling edges we can compute the durations using modulus subtraction
 and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
 
-Arrival at the last case establishes that there was a signal and clears
+Arrival at the last case establishes that there was a signal, clears
 the flag and resets the watchdog timer.
 @c
 
@@ -472,33 +472,25 @@ void relayCntl(int8_t state)
 
 @
 Here is a simple procedure to set thrust direction on the larboard motor.
-Direction is effectivly the MSb of the two bit value at the H-bridge. 
-In forward, the PWM value is 2 for high and 3 for low.
-In reverse, the PWM value is 1 for high and 0 for low.
-The LSb is the PWM itself.
 @c
 void larboardDirection(int8_t state)
 @#{@#
  if(state)
-    PORTD |= (1<<PORTD3);
-  else
     PORTD &= ~(1<<PORTD3);
+  else
+    PORTD |= (1<<PORTD3);
 
 @#}@#
 
 @
 Here is a simple procedure to set thrust direction on the starboard motor.
-Direction is effectivly the MSb of the two bit value at the H-bridge. 
-In forward, the PWM value is 2 for high and 3 for low.
-In reverse, the PWM value is 1 for high and 0 for low.
-The LSb is the PWM itself.
 @c
 void starboardDirection(int8_t state)
 @#{@#
  if(state)
-    PORTD |= (1<<PORTD4);
-  else
     PORTD &= ~(1<<PORTD4);
+  else
+    PORTD |= (1<<PORTD4);
 @#}@#
 
 @
@@ -634,11 +626,7 @@ If there is no thrust then it is in piruett mode and spins CW or CCW.
 
 @
 This simple procedure sets the signal to the H-Bridge.
-The MSb at termonal IN1 sets the direction.
-The LSb is the PWM.
-For the PWM we load the positive or negative value into the unsigned registers.
-If it is negative the PWM is inverted, which happens to work well for this
-H-Bridge. 
+For the PWM we load the value into the unsigned registers.
 @c
 void setPwm(transStruct *trans_s)
 @#{@#
@@ -647,24 +635,22 @@ void setPwm(transStruct *trans_s)
      {
       larboardDirection(FORWARD);
       OCR0A = abs(trans_s->larboardOut);
-      larboardDirection(FORWARD);
      }
   else
       {
-       OCR0A = UINT8_MAX - abs(trans_s->larboardOut);
        larboardDirection(REVERSE);
+       OCR0A = abs(trans_s->larboardOut);
       }
 
  if (trans_s->starboardOut >= 0)
      { 
       starboardDirection(FORWARD);
       OCR0B = abs(trans_s->starboardOut);
-      starboardDirection(FORWARD);
      }
   else
       {
-       OCR0B = UINT8_MAX - abs(trans_s->starboardOut);
        starboardDirection(REVERSE);
+       OCR0B = abs(trans_s->starboardOut);
       }
 
 @
@@ -744,14 +730,16 @@ datasheet, is preferred for motor control.
 OC0A (port) and OC0B (starboard) are set to clear on a match which creates a
 non-inverting PWM.
 The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
+We are using |"Set"| on comparator match to invert the PWM, suiting the
+glue-logic  which drives the H-Bridge.
 @ @<Initialize the Timer Counter 0 for PWM...@>=
 {
  // 15.9.1 TCCR0A – Timer/Counter Control Register A
  TCCR0A |= (1<<WGM00);  // Phase correct, mode 1 of PWM (table 15-9)
  TCCR0A |= (1<<COM0A1); // Set/Clear on Comparator A match (table 15-4)
  TCCR0A |= (1<<COM0B1); // Set/Clear on Comparator B match (table 15-7)
- TCCR0A |= (1<<COM0A0); // Clear on Comparator A match (table 15-4)
- TCCR0A |= (1<<COM0B0); // Clear on Comparator B match (table 15-7)
+ TCCR0A &= ~(1<<COM0A0); // Set on Comparator A match (table 15-4)
+ TCCR0A &= ~(1<<COM0B0); // Set on Comparator B match (table 15-7)
 
 // 15.9.2 TCCR0B – Timer/Counter Control Register B
  TCCR0B |= (1<<CS01);   // Prescaler set to clk/8 (table 15-9)

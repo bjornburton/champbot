@@ -22,18 +22,23 @@ The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
-We are using the Wingxing DBH-01 (B/C).
-The Inputs are unique on this as the PWM logic input is a two bit value applied
-at terminals IN1 and IN2.
-Taking IN1 as LSb and IN2 as MSb values 0 and 3 are logic LOW for the PWM.
-A value of 1 is logic high in one direction and a value of 2 is logic high in
-the other.
+We are using the Wingxing DBH-01 (B/C) and the Inputs are unique on this.
+The PWM logic input goes to two different pins, depending on direction!
+The non-PWM pin must be held low.
+This is a big problem since PWM outputs have dedicated pins.
+Two AVR timers would be needed to control two motors; waistful.
 
 The odd example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
 For reverse, LOW on IN1 and PWM on IN2.
-We don't want PWM hopping between pins so we keep PWM on IN1.
-The result of this mode is that PWM as IN1 is inverted when IN2 is HIGH.
-This means we need to invert the PWM when the direction pin goes HIGH.
+
+Rulling out multiple timers, additional outputs, or a PLD, the best solution
+we could find was a adding glue logic.
+A single 74F02 was chosen; a quad NOR.
+Keeping is this simple, one gate-type and one chip, required that the outputs
+be inverted.
+\includegraphics[width=35 pc]{glue.png}
+This one chip handle the logic for both motors.
+
 
 The larboard motor PWM word will be available at Pins 3 and 5.
 The starboard motor PWM word will be at 4 and 6.
@@ -389,7 +394,7 @@ On the falling edges we can compute the durations using modulus subtraction
 and then set the edge index for the next edge.
 Channel 2 leads so that rise is first.
 
-Arrival at the last case establishes that there was a signal and clears
+Arrival at the last case establishes that there was a signal, clears
 the flag and resets the watchdog timer.
 \Y\B\&{switch} ${}(\\{input\_s}\MG\\{edge}){}$\5
 ${}\{{}$\1\6
@@ -478,31 +483,23 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
 
 \M{32}
 Here is a simple procedure to set thrust direction on the larboard motor.
-Direction is effectivly the MSb of the two bit value at the H-bridge.
-In forward, the PWM value is 2 for high and 3 for low.
-In reverse, the PWM value is 1 for high and 0 for low.
-The LSb is the PWM itself.
 \Y\B\&{void} \\{larboardDirection}(\\{int8\_t}\\{state})\7
 ${}\{{}$\1\7
 \&{if} (\\{state})\1\5
-${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3});{}$\2\6
+${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD3});{}$\2\6
 \&{else}\1\5
-${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD3}){}$;\2\7
+${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD3}){}$;\2\7
 \4${}\}{}$\2\Y\par
 \fi
 
 \M{33}
 Here is a simple procedure to set thrust direction on the starboard motor.
-Direction is effectivly the MSb of the two bit value at the H-bridge.
-In forward, the PWM value is 2 for high and 3 for low.
-In reverse, the PWM value is 1 for high and 0 for low.
-The LSb is the PWM itself.
 \Y\B\&{void} \\{starboardDirection}(\\{int8\_t}\\{state})\7
 ${}\{{}$\1\7
 \&{if} (\\{state})\1\5
-${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD4});{}$\2\6
+${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD4});{}$\2\6
 \&{else}\1\5
-${}\.{PORTD}\MRL{\AND{\K}}\CM(\T{1}\LL\.{PORTD4}){}$;\2\7
+${}\.{PORTD}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTD4}){}$;\2\7
 \4${}\}{}$\2\Y\par
 \fi
 
@@ -639,34 +636,28 @@ $\}{}$\Y\par
 
 \M{41}
 This simple procedure sets the signal to the H-Bridge.
-The MSb at termonal IN1 sets the direction.
-The LSb is the PWM.
-For the PWM we load the positive or negative value into the unsigned registers.
-If it is negative the PWM is inverted, which happens to work well for this
-H-Bridge.
+For the PWM we load the value into the unsigned registers.
 \Y\B\&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
 $\{{}$\7
 \&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\5
 ${}\{{}$\1\6
 \\{larboardDirection}(\.{FORWARD});\6
 ${}\.{OCR0A}\K\\{abs}(\\{trans\_s}\MG\\{larboardOut});{}$\6
-\\{larboardDirection}(\.{FORWARD});\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
-${}\.{OCR0A}\K\.{UINT8\_MAX}-\\{abs}(\\{trans\_s}\MG\\{larboardOut});{}$\6
 \\{larboardDirection}(\.{REVERSE});\6
+${}\.{OCR0A}\K\\{abs}(\\{trans\_s}\MG\\{larboardOut});{}$\6
 \4${}\}{}$\2\6
 \&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\5
 ${}\{{}$\1\6
 \\{starboardDirection}(\.{FORWARD});\6
 ${}\.{OCR0B}\K\\{abs}(\\{trans\_s}\MG\\{starboardOut});{}$\6
-\\{starboardDirection}(\.{FORWARD});\6
 \4${}\}{}$\2\6
 \&{else}\5
 ${}\{{}$\1\6
-${}\.{OCR0B}\K\.{UINT8\_MAX}-\\{abs}(\\{trans\_s}\MG\\{starboardOut});{}$\6
 \\{starboardDirection}(\.{REVERSE});\6
+${}\.{OCR0B}\K\\{abs}(\\{trans\_s}\MG\\{starboardOut});{}$\6
 \4${}\}{}$\2\par
 \fi
 
@@ -755,6 +746,8 @@ datasheet, is preferred for motor control.
 OC0A (port) and OC0B (starboard) are set to clear on a match which creates a
 non-inverting PWM.
 The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
+We are using \PB{\.{"Set"}} on comparator match to invert the PWM, suiting the
+glue-logic  which drives the H-Bridge.
 \fi
 
 \M{50}\B\X50:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
@@ -765,9 +758,9 @@ ${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0A1}){}$;\SHC{ Set/Clear on
 Comparator A match (table 15-4) }\6
 ${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0B1}){}$;\SHC{ Set/Clear on
 Comparator B match (table 15-7) }\6
-${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0A0}){}$;\SHC{ Clear on Comparator A
+${}\.{TCCR0A}\MRL{\AND{\K}}\CM(\T{1}\LL\.{COM0A0}){}$;\SHC{ Set on Comparator A
 match (table 15-4) }\6
-${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{COM0B0}){}$;\SHC{ Clear on Comparator B
+${}\.{TCCR0A}\MRL{\AND{\K}}\CM(\T{1}\LL\.{COM0B0}){}$;\SHC{ Set on Comparator B
 match (table 15-7) }\SHC{ 15.9.2 TCCR0B – Timer/Counter Control Register B }\6
 ${}\.{TCCR0B}\MRL{{\OR}{\K}}(\T{1}\LL\.{CS01}){}$;\SHC{ Prescaler set to clk/8
 (table 15-9) }\6

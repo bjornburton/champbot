@@ -19,18 +19,14 @@ The action will be similar to driving an RC car or boat.
 By keeping it natural, it should be easier to navigate the course than with a
 skid-steer style control.
 
-We are using the Wingxing DBH-01 (B/C).
-The Inputs are unique on this as the PWM logic input is a two bit value applied
-at terminals IN1 and IN2.
-Taking IN1 as LSb and IN2 as MSb values 0 and 3 are logic LOW for the PWM.
-A value of 1 is logic high in one direction and a value of 2 is logic high in
-the other.
+We are using the Wingxing DBH-01 (B/C) and the Inputs are unique on this.
+The PWM logic input goes to two different pins, depending on direction!
+The non-PWM pin must be held low.
+This is a big problem since PWM outputs have dedicated pins.
+Two AVR timers would be needed to control two motors; waistful. 
 
 The odd example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
 For reverse, LOW on IN1 and PWM on IN2.
-We don't want PWM hopping between pins so we keep PWM on IN1.
-The result of this mode is that PWM as IN1 is inverted when IN2 is HIGH.
-This means we need to invert the PWM when the direction pin goes HIGH.
 
 The larboard motor PWM word will be available at Pins 3 and 5.
 The starboard motor PWM word will be at 4 and 6.
@@ -580,7 +576,8 @@ The radius sensitivity is adjusted by changing the value of |"track"|.
 @c
  difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
  rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
- piruett = (trans_s->track * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
+ piruett = trans_s->radius; 
+
 @
 Any rotation involves one motor turning faster than the other.
 At some point, faster is not possible and so the requiered clipping is here.
@@ -589,7 +586,6 @@ At some point, faster is not possible and so the requiered clipping is here.
 
 If there is no thrust then it is in piruett mode and spins CW or CCW.
 @c
-
 
  if(trans_s->thrust != STOPPED)
    {
@@ -609,8 +605,20 @@ If there is no thrust then it is in piruett mode and spins CW or CCW.
     }
   else /* piruett mode */
    {
-    trans_s->larboardOut = -piruett;
-    trans_s->starboardOut = piruett;
+    if(piruett >= max)
+       trans_s->larboardOut = max;
+     else if(piruett <= -max)
+       trans_s->larboardOut = -max;
+     else 
+       trans_s->larboardOut = piruett;
+
+    if(piruett >= max)
+       trans_s->starboardOut = max;
+     else if (piruett <= -max)
+       trans_s->starboardOut = -max;
+     else
+       trans_s->starboardOut = piruett;
+    
     }
 
 @#}@#
@@ -627,18 +635,29 @@ void setPwm(transStruct *trans_s)
 @#{@#
 
  if (trans_s->larboardOut >= 0)
-     larboardDirection(FORWARD);
+     {
+      larboardDirection(FORWARD);
+      OCR0A = abs(trans_s->larboardOut);
+      larboardDirection(FORWARD);
+     }
   else
-     larboardDirection(REVERSE);
+      {
+       OCR0A = UINT8_MAX - abs(trans_s->larboardOut);
+       larboardDirection(REVERSE);
+      }
 
  if (trans_s->starboardOut >= 0)
-     starboardDirection(FORWARD);
+     { 
+      starboardDirection(FORWARD);
+      OCR0B = abs(trans_s->starboardOut);
+      starboardDirection(FORWARD);
+     }
   else
-     starboardDirection(REVERSE);
-     
+      {
+       OCR0B = UINT8_MAX - abs(trans_s->starboardOut);
+       starboardDirection(REVERSE);
+      }
 
- OCR0A = (uint8_t)trans_s->larboardOut;
- OCR0B = (uint8_t)trans_s->starboardOut;
 @
 We must see if the fail-safe relay needs to be closed.
 @c

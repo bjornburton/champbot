@@ -593,8 +593,7 @@ The radius sensitivity is adjusted by changing the value of \PB{\.{"track"}}.
 \.{UINT8\_MAX}))/\\{ampFact};{}$\6
 ${}\\{rotation}\K(\\{trans\_s}\MG\\{track}*((\\{ampFact}*\\{difference})/%
 \.{UINT8\_MAX}))/\\{ampFact};{}$\6
-${}\\{piruett}\K(\\{trans\_s}\MG\\{track}*((\\{ampFact}*\\{trans\_s}\MG%
-\\{radius})/\.{UINT8\_MAX}))/\\{ampFact}{}$;\par
+${}\\{piruett}\K\\{trans\_s}\MG\\{radius}{}$;\par
 \fi
 
 \M{40}
@@ -622,8 +621,18 @@ ${}\\{trans\_s}\MG\\{starboardOut}\K\\{speed}+\\{rotation};{}$\2\6
 \4${}\}{}$\2\6
 \&{else}\C{ piruett mode }\6
 ${}\{{}$\1\6
-${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{piruett};{}$\6
-${}\\{trans\_s}\MG\\{starboardOut}\K\\{piruett};{}$\6
+\&{if} ${}(\\{piruett}\G\\{max}){}$\1\5
+${}\\{trans\_s}\MG\\{larboardOut}\K\\{max};{}$\2\6
+\&{else} \&{if} ${}(\\{piruett}\Z{-}\\{max}){}$\1\5
+${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{max};{}$\2\6
+\&{else}\1\5
+${}\\{trans\_s}\MG\\{larboardOut}\K\\{piruett};{}$\2\6
+\&{if} ${}(\\{piruett}\G\\{max}){}$\1\5
+${}\\{trans\_s}\MG\\{starboardOut}\K\\{max};{}$\2\6
+\&{else} \&{if} ${}(\\{piruett}\Z{-}\\{max}){}$\1\5
+${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{max};{}$\2\6
+\&{else}\1\5
+${}\\{trans\_s}\MG\\{starboardOut}\K\\{piruett};{}$\2\6
 \4${}\}{}$\2\7
 $\}{}$\Y\par
 \fi
@@ -637,16 +646,28 @@ If it is negative the PWM is inverted, which happens to work well for this
 H-Bridge.
 \Y\B\&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
 $\{{}$\7
-\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\1\5
-\\{larboardDirection}(\.{FORWARD});\2\6
-\&{else}\1\5
-\\{larboardDirection}(\.{REVERSE});\2\6
-\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\1\5
-\\{starboardDirection}(\.{FORWARD});\2\6
-\&{else}\1\5
-\\{starboardDirection}(\.{REVERSE});\2\6
-${}\.{OCR0A}\K(\\{uint8\_t})\\{trans\_s}\MG\\{larboardOut};{}$\6
-${}\.{OCR0B}\K(\\{uint8\_t})\\{trans\_s}\MG\\{starboardOut}{}$;\par
+\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\G\T{0}){}$\5
+${}\{{}$\1\6
+\\{larboardDirection}(\.{FORWARD});\6
+${}\.{OCR0A}\K\\{abs}(\\{trans\_s}\MG\\{larboardOut});{}$\6
+\\{larboardDirection}(\.{FORWARD});\6
+\4${}\}{}$\2\6
+\&{else}\5
+${}\{{}$\1\6
+${}\.{OCR0A}\K\.{UINT8\_MAX}-\\{abs}(\\{trans\_s}\MG\\{larboardOut});{}$\6
+\\{larboardDirection}(\.{REVERSE});\6
+\4${}\}{}$\2\6
+\&{if} ${}(\\{trans\_s}\MG\\{starboardOut}\G\T{0}){}$\5
+${}\{{}$\1\6
+\\{starboardDirection}(\.{FORWARD});\6
+${}\.{OCR0B}\K\\{abs}(\\{trans\_s}\MG\\{starboardOut});{}$\6
+\\{starboardDirection}(\.{FORWARD});\6
+\4${}\}{}$\2\6
+\&{else}\5
+${}\{{}$\1\6
+${}\.{OCR0B}\K\.{UINT8\_MAX}-\\{abs}(\\{trans\_s}\MG\\{starboardOut});{}$\6
+\\{starboardDirection}(\.{REVERSE});\6
+\4${}\}{}$\2\par
 \fi
 
 \M{42}

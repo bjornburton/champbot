@@ -28,6 +28,15 @@ Two AVR timers would be needed to control two motors; waistful.
 The odd example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
 For reverse, LOW on IN1 and PWM on IN2.
 
+Rulling out multiple timers, additional outputs, or a PLD, the best solution
+we could find was a adding glue logic.
+A single 74F02 was chosen; a quad NOR.
+Keeping is this simple, one gate-type and one chip, required that the outputs
+be inverted. 
+\includegraphics[width=35 pc]{glue.png} 
+This one chip handle the logic for both motors.
+
+
 The larboard motor PWM word will be available at Pins 3 and 5.
 The starboard motor PWM word will be at 4 and 6.
 OC0A and OC0B is on pins 5 and 6  (D8 and D6) and are the PWM.

@@ -1,14 +1,14 @@
 digraph callgraph {
-"lostSignal" -> "edgeSelect" [style=solid];
-"setPwm" -> "relayCntl" [style=solid];
-"setPwm" -> "larboardDirection" [style=solid];
-"setPwm" -> "starboardDirection" [style=solid];
-"main" -> "edgeSelect" [style=solid];
-"main" -> "setPwm" [style=solid];
-"main" -> "ledCntl" [style=solid];
 "main" -> "scaler" [style=solid];
 "main" -> "translate" [style=solid];
-"pwcCalc" -> "edgeSelect" [style=solid];
+"main" -> "ledCntl" [style=solid];
+"main" -> "edgeSelect" [style=solid];
+"main" -> "setPwm" [style=solid];
+"lostSignal" -> "edgeSelect" [style=solid];
 "TIMER1_CAPT_vect" -> "pwcCalc" [style=dotted];
+"pwcCalc" -> "edgeSelect" [style=solid];
+"setPwm" -> "relayCntl" [style=solid];
+"setPwm" -> "starboardDirection" [style=solid];
+"setPwm" -> "larboardDirection" [style=solid];
 "WDT_vect" -> "lostSignal" [style=dotted];
 }

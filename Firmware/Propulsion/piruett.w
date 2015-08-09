@@ -23,18 +23,21 @@ We are using the Wingxing DBH-01 (B/C) and the Inputs are unique on this.
 The PWM logic input goes to two different pins, depending on direction!
 The non-PWM pin must be held low.
 This is a big problem since PWM outputs have dedicated pins.
-Two AVR timers would be needed to control two motors; waistful. 
+Two AVR timers would be needed to control two motors; waistful.
 
 The odd example in the datasheet has PWM on IN1 and LOW on IN2 for forward.
 For reverse, LOW on IN1 and PWM on IN2.
 
-Rulling out multiple timers, additional outputs, or a PLD, the best solution
-we could find was a adding glue logic.
+Rulling out multiple timers (four comparators), additional outputs, or a PLD,
+the best solution we could find was a adding glue logic.
 A single 74F02 was chosen; a quad NOR.
-Keeping is this simple, one gate-type and one chip, required that the outputs
-be inverted. 
-\includegraphics[width=35 pc]{glue.png} 
-This one chip handle the logic for both motors.
+Keeping is this simple, one gate-type and one chip, required that the AVR
+outputs be inverted.
+\includegraphics[width=25 pc]{glue.png}a
+This one chip handles the logic for both motors. With this, the AVR outputs
+direction on one pin and PWM on the other.
+At the H-Bridge, the pin receiving PWM is selected based on motor direction.
+The remaining, non-PWM pin, is held low.
 
 
 The larboard motor PWM word will be available at Pins 3 and 5.
@@ -94,7 +97,7 @@ This will provide ample time to do math and set the motor PWMs.
 Extensive use was made of the datasheet, Atmel
 ``Atmel-8271I-AVR- ATmega-Datasheet\_10/2014''.
 
-
+\vskip 4 pc
 \includegraphics[width=35 pc]{piruett.png}
 
 I originaly wanted to use the word "Port" for the left-hand side, when facing
@@ -577,7 +580,7 @@ The radius sensitivity is adjusted by changing the value of |"track"|.
 @c
  difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
  rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
- piruett = trans_s->radius; 
+ piruett = trans_s->radius;
 
 @
 Any rotation involves one motor turning faster than the other.
@@ -610,7 +613,7 @@ If there is no thrust then it is in piruett mode and spins CW or CCW.
        trans_s->larboardOut = max;
      else if(piruett <= -max)
        trans_s->larboardOut = -max;
-     else 
+     else
        trans_s->larboardOut = piruett;
 
     if(piruett >= max)
@@ -619,7 +622,7 @@ If there is no thrust then it is in piruett mode and spins CW or CCW.
        trans_s->starboardOut = -max;
      else
        trans_s->starboardOut = piruett;
-    
+
     }
 
 @#}@#
@@ -643,7 +646,7 @@ void setPwm(transStruct *trans_s)
       }
 
  if (trans_s->starboardOut >= 0)
-     { 
+     {
       starboardDirection(FORWARD);
       OCR0B = abs(trans_s->starboardOut);
      }

@@ -40,8 +40,6 @@ At the H-Bridge, the pin receiving PWM is selected based on motor direction.
 The remaining, non-PWM pin, is held low.
 
 
-The larboard motor PWM word will be available at Pins 3 and 5.
-The starboard motor PWM word will be at 4 and 6.
 OC0A and OC0B is on pins 5 and 6  (D8 and D6) and are the PWM.
 A fail-safe relay output will be at pin 8.
 
@@ -741,8 +739,8 @@ glue-logic  which drives the H-Bridge.
  TCCR0A |= (1<<WGM00);  // Phase correct, mode 1 of PWM (table 15-9)
  TCCR0A |= (1<<COM0A1); // Set/Clear on Comparator A match (table 15-4)
  TCCR0A |= (1<<COM0B1); // Set/Clear on Comparator B match (table 15-7)
- TCCR0A &= ~(1<<COM0A0); // Set on Comparator A match (table 15-4)
- TCCR0A &= ~(1<<COM0B0); // Set on Comparator B match (table 15-7)
+ TCCR0A |= (1<<COM0A0); // Set on Comparator A match (table 15-4)
+ TCCR0A |= (1<<COM0B0); // Set on Comparator B match (table 15-7)
 
 // 15.9.2 TCCR0B – Timer/Counter Control Register B
  TCCR0B |= (1<<CS01);   // Prescaler set to clk/8 (table 15-9)

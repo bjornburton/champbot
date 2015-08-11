@@ -567,6 +567,8 @@ int16_t speed = trans_s->thrust; /* we are assuming it's close */
 int16_t rotation;
 int16_t difference;
 int16_t piruett;
+static int8_t lock = OFF;
+const int8_t PirLockLevel = 15;
 const int16_t max = (MAX_DUTYCYCLE * UINT8_MAX)/100;
 const int16_t ampFact = 128;
 
@@ -587,9 +589,12 @@ At some point, faster is not possible and so the requiered clipping is here.
 |"max"| is set at to support the limit of the bridge-driver's charge-pump.
 
 If there is no thrust then it is in piruett mode and spins CW or CCW.
+While there is thrust piruett mode is locked out.
+Piruett mode has a lock function to keep it from hopping into directly into 
+thrust mode while it is spinning. This is partly for noise immunity and partly
+to help avoid colisions.
 @c
-
- if(trans_s->thrust != STOPPED)
+ if(trans_s->thrust != STOPPED && lock == OFF)
    {
     if((speed-rotation) >= max)
        trans_s->larboardOut = max;
@@ -607,13 +612,21 @@ If there is no thrust then it is in piruett mode and spins CW or CCW.
     }
   else /* piruett mode */
    {
+    if(piruett > PirLockLevel)
+      lock = ON;
+     else
+      lock = OFF;
+
     if(piruett >= max)
        trans_s->larboardOut = max;
      else if(piruett <= -max)
        trans_s->larboardOut = -max;
      else
        trans_s->larboardOut = piruett;
-
+@
+For starboard, piruett is reversed, making it rotate counter to larboard.
+@c
+    piruett *= -1; 
     if(piruett >= max)
        trans_s->starboardOut = max;
      else if (piruett <= -max)

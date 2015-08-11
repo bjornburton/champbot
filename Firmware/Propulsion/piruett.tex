@@ -43,8 +43,6 @@ At the H-Bridge, the pin receiving PWM is selected based on motor direction.
 The remaining, non-PWM pin, is held low.
 
 
-The larboard motor PWM word will be available at Pins 3 and 5.
-The starboard motor PWM word will be at 4 and 6.
 OC0A and OC0B is on pins 5 and 6  (D8 and D6) and are the PWM.
 A fail-safe relay output will be at pin 8.
 
@@ -261,8 +259,8 @@ $,$ $.$ $\\{maxOut}\K\T{255}$ $,$ $.$ $\\{deadBand}\K\T{10}$ $\}$  ;\par
 \M{13}
 Here the interrupts are disabled so that configuring them doesn't set it off.
 \Y\B\\{cli}(\,);\7
-\X46:Initialize the inputs and capture mode\X\X43:Initialize pin outputs\X%
-\X48:Initialize watchdog timer\X\Y\par
+\X47:Initialize the inputs and capture mode\X\X44:Initialize pin outputs\X%
+\X49:Initialize watchdog timer\X\Y\par
 \fi
 
 \M{14}
@@ -275,7 +273,7 @@ is set; usually done through calling \PB{\.{"sei()"}}.
 
 The PWM is used to control larboard and starboard motors through OC0A (D5) and
 OC0B (D6), respectivly.
-\Y\B\X50:Initialize the Timer Counter 0 for PWM\X\par
+\Y\B\X51:Initialize the Timer Counter 0 for PWM\X\par
 \fi
 
 \M{16}
@@ -290,7 +288,7 @@ wake it up.
 It's important to note that an ISR procedure must be defined to allow the
 program to step past the sleep statement, even if it is empty.
 This stumped me for a good while.
-\Y\B\X44:Configure to idle on sleep\X\7
+\Y\B\X45:Configure to idle on sleep\X\7
 \\{ledCntl}(\.{OFF});\par
 \fi
 
@@ -579,6 +577,8 @@ close }\6
 \\{int16\_t}\\{rotation};\6
 \\{int16\_t}\\{difference};\6
 \\{int16\_t}\\{piruett};\7
+\&{static} \\{int8\_t}\\{lock}${}\K\.{OFF};{}$\6
+\&{const} \\{int8\_t}\\{PirLockLevel}${}\K\T{15};{}$\6
 \&{const} \\{int16\_t}\\{max}${}\K(\.{MAX\_DUTYCYCLE}*\.{UINT8\_MAX})/%
 \T{100};{}$\6
 \&{const} \\{int16\_t}\\{ampFact}${}\K\T{128}{}$;\par
@@ -604,7 +604,11 @@ At some point, faster is not possible and so the requiered clipping is here.
 charge-pump.
 
 If there is no thrust then it is in piruett mode and spins CW or CCW.
-\Y\B\&{if} ${}(\\{trans\_s}\MG\\{thrust}\I\.{STOPPED}){}$\5
+While there is thrust piruett mode is locked out.
+Piruett mode has a lock function to keep it from hopping into directly into
+thrust mode while it is spinning. This is partly for noise immunity and partly
+to help avoid colisions.
+\Y\B\&{if} ${}(\\{trans\_s}\MG\\{thrust}\I\.{STOPPED}\W\\{lock}\E\.{OFF}){}$\5
 ${}\{{}$\1\6
 \&{if} ${}((\\{speed}-\\{rotation})\G\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{larboardOut}\K\\{max};{}$\2\6
@@ -620,24 +624,33 @@ ${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{max};{}$\2\6
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{speed}+\\{rotation};{}$\2\6
 \4${}\}{}$\2\6
 \&{else}\C{ piruett mode }\6
-${}\{{}$\1\6
+$\{$ \6
+\&{if} ${}(\\{piruett}>\\{PirLockLevel}){}$\1\5
+${}\\{lock}\K\.{ON};{}$\2\6
+\&{else}\1\5
+${}\\{lock}\K\.{OFF};{}$\2\6
 \&{if} ${}(\\{piruett}\G\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{larboardOut}\K\\{max};{}$\2\6
 \&{else} \&{if} ${}(\\{piruett}\Z{-}\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{larboardOut}\K{-}\\{max};{}$\2\6
 \&{else}\1\5
-${}\\{trans\_s}\MG\\{larboardOut}\K\\{piruett};{}$\2\6
+${}\\{trans\_s}\MG\\{larboardOut}\K\\{piruett}{}$;\2\par
+\fi
+
+\M{41}
+For starboard, piruett is reversed, making it rotate counter to larboard.
+\Y\B$\\{piruett}\MRL{*{\K}}{-}\T{1};{}$\6
 \&{if} ${}(\\{piruett}\G\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{max};{}$\2\6
 \&{else} \&{if} ${}(\\{piruett}\Z{-}\\{max}){}$\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K{-}\\{max};{}$\2\6
 \&{else}\1\5
 ${}\\{trans\_s}\MG\\{starboardOut}\K\\{piruett};{}$\2\6
-\4${}\}{}$\2\7
+$\}{}$\7
 $\}{}$\Y\par
 \fi
 
-\M{41}
+\M{42}
 This simple procedure sets the signal to the H-Bridge.
 For the PWM we load the value into the unsigned registers.
 \Y\B\&{void} \\{setPwm}(\&{transStruct} ${}{*}\\{trans\_s}{}$)\1\1\7
@@ -664,7 +677,7 @@ ${}\.{OCR0B}\K\\{abs}(\\{trans\_s}\MG\\{starboardOut});{}$\6
 \4${}\}{}$\2\par
 \fi
 
-\M{42}
+\M{43}
 We must see if the fail-safe relay needs to be closed.
 \Y\B\&{if} ${}(\\{trans\_s}\MG\\{larboardOut}\V\\{trans\_s}\MG%
 \\{starboardOut}){}$\1\5
@@ -674,7 +687,7 @@ We must see if the fail-safe relay needs to be closed.
 $\}{}$\Y\par
 \fi
 
-\M{43}\B\X43:Initialize pin outputs\X${}\E{}$\SHC{ set the led port direction;
+\M{44}\B\X44:Initialize pin outputs\X${}\E{}$\SHC{ set the led port direction;
 This is pin \#17 }\6
 $\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB5}){}$;\SHC{ set the relay port
 direction; This is pin \#8 }\6
@@ -687,18 +700,18 @@ ${}\.{DDRD}\MRL{{\OR}{\K}}((\T{1}\LL\.{DDD3})\OR(\T{1}\LL\.{DDD4})){}$;\SHC{
 Data direction to output (sec 14.3.3) }\par
 \U13.\fi
 
-\M{44}\B\X44:Configure to idle on sleep\X${}\E{}$\6
+\M{45}\B\X45:Configure to idle on sleep\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{SMCR}\MRL{\AND{\K}}\CM((\T{1}\LL\.{SM2})\OR(\T{1}\LL\.{SM1})\OR(\T{1}\LL%
 \.{SM0}));{}$\6
 \4${}\}{}$\2\par
 \U16.\fi
 
-\M{45}
+\M{46}
 To enable this interrupt, set the ACIE bit of register ACSR.
 \fi
 
-\M{46}\B\X46:Initialize the inputs and capture mode\X${}\E{}$\6
+\M{47}\B\X47:Initialize the inputs and capture mode\X${}\E{}$\6
 ${}\{{}$\SHC{ ADCSRA – ADC Control and Status Register A }\1\6
 ${}\.{ADCSRA}\MRL{\AND{\K}}\CM(\T{1}\LL\.{ADEN}){}$;\SHC{ Conn the MUX to (-)
 input of comparator (sec 23.2) }\SHC{ 23.3.1 ADCSRB – ADC Control and Status
@@ -729,12 +742,12 @@ ${}\.{ADMUX}\MRL{\AND{\K}}\CM((\T{1}\LL\.{MUX2})\OR(\T{1}\LL\.{MUX1})\OR(\T{1}%
 \4${}\}{}$\2\par
 \U13.\fi
 
-\M{47}
+\M{48}
 See section 11.8 in the datasheet for details on the Watchdog Timer.
 This is in the ``Interrupt Mode''.
 \fi
 
-\M{48}\B\X48:Initialize watchdog timer\X${}\E{}$\6
+\M{49}\B\X49:Initialize watchdog timer\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{WDTCSR}\MRL{{\OR}{\K}}(\T{1}\LL\.{WDCE})\OR(\T{1}\LL\.{WDE});{}$\6
 ${}\.{WDTCSR}\K(\T{1}\LL\.{WDIE})\OR(\T{1}\LL\.{WDP2}){}$;\SHC{ reset after
@@ -742,7 +755,7 @@ about 0.25 seconds }\6
 \4${}\}{}$\2\par
 \U13.\fi
 
-\M{49}
+\M{50}
 PWM setup isn't too scary.
 Timer Count 0 is configured for ``Phase Correct'' PWM which, according to the
 datasheet, is preferred for motor control.
@@ -753,7 +766,7 @@ We are using \PB{\.{"Set"}} on comparator match to invert the PWM, suiting the
 glue-logic  which drives the H-Bridge.
 \fi
 
-\M{50}\B\X50:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
+\M{51}\B\X51:Initialize the Timer Counter 0 for PWM\X${}\E{}$\6
 ${}\{{}$\SHC{ 15.9.1 TCCR0A – Timer/Counter Control Register A }\1\6
 ${}\.{TCCR0A}\MRL{{\OR}{\K}}(\T{1}\LL\.{WGM00}){}$;\SHC{ Phase correct, mode 1
 of PWM (table 15-9) }\6

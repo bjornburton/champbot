@@ -47,7 +47,7 @@ WEB      := $(TARGET).w
 DOC      := $(TARGET).pdf
 TEXSRC   := $(TARGET).tex
 DOTSRC   := $(TARGET).dot
-EGYPTSRC := $(TARGET).c.170r.expand
+EGYPTSRC := $(TARGET).c.*r.expand
 GRAPH    := $(TARGET).png
 
 

@@ -130,6 +130,7 @@ chose the older word ``larboard''.
 @d CH1FALL 2
 @d MAX_DUTYCYCLE 98 // 98\% to support charge pump of bridge-driver
 
+
 @ @<Include...@>=
 # include <avr/io.h> // need some port access
 # include <avr/interrupt.h> // have need of an interrupt
@@ -176,10 +177,11 @@ void larboardDirection(int8_t state);
 void starboardDirection(int8_t state);
 void pwcCalc(inputStruct *);
 void edgeSelect(inputStruct *);
-int16_t scaler(inputStruct *, transStruct *, uint16_t input);
 void translate(transStruct *);
 void setPwm(transStruct *);
 void lostSignal(inputStruct *);
+int16_t scaler(inputStruct *, transStruct *, uint16_t input);
+int16_t int16clamp(int16_t value, int16_t min, int16_t max);
 
 @
 My lone global variable is a function pointer.
@@ -361,7 +363,9 @@ ISR (TIMER1_CAPT_vect)
 @#}@#
 
 @
-This is a variant of |pwcCalc| that only flips the |lostSignal| flag.
+When the watchdog timer expires, this vector is called.
+This is what happens if the remote's transmitter signal is not received.
+It calls a variant of |pwcCalc| that only flips the |lostSignal| flag.
 @c
 ISR (WDT_vect)
 @#{@#
@@ -456,6 +460,166 @@ It seems odd but clearing it involves writing a one to it.
 
 
 @
+
+@
+The scaler function takes an input, in time, from the Input Capture
+Register and returns a value scaled by the parameters in structure
+|"inputScale_s"|.
+@c
+int16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
+@#{@#
+uint16_t solution;
+@
+First, we can solve for the obvious cases.
+One is where there is no signal; when |"lostSignal"| is |"TRUE"|.
+The other is where the input exceeds the range.
+This can easily happen if the trim is shifted.
+@c
+  if (input_s->lostSignal == TRUE)
+     return 0;
+
+  if (input > input_s->maxIn)
+     return trans_s->maxOut;
+
+  if (input < input_s->minIn)
+     return trans_s->minOut;
+
+
+@
+If it's not that simple, then compute the gain and offset and then continue in
+the usual way.
+This is not really an efficient method, recomputing gain and offset every time
+but we are not in a rush and it makes it easier since, if something changes,
+I don't have to manualy compute and enter these value.
+
+The constant |"ampFact"| amplifies values for math so I can take advantage of
+the extra bits for precision.
+
+Dead-band is applied when it returns.
+@c
+const int32_t ampFact = 128L;
+
+int32_t gain = (ampFact*(int32_t)(input_s->maxIn-input_s->minIn))/
+                    (int32_t)(trans_s->maxOut-trans_s->minOut);
+
+int32_t offset = ((ampFact*(int32_t)input_s->minIn)/gain)
+                 -(int32_t)trans_s->minOut;
+
+solution = (ampFact*(int32_t)input/gain)-offset;
+
+
+return (abs(solution) > trans_s->deadBand)?solution:0;
+
+@#}@#
+
+@
+We need a way to translate |"thrust"| and |"radius"| in order to carve a
+ |"turn"|. This procedure should do this but it's not going to be perfect as
+drag and slippage make thrust increase progressivly more than speed.
+Since |speed| is not known, we will use |thrust|.
+It should steer OK as long as the speed is constant and small changes in speed
+should not be too disruptive.
+The sign of larboardOut and starboardOut indicates direction.
+The constant |"ampFact"| amplifies values for math so I can take advantage of
+the extra bits for precision.
+ bits.
+
+This procedure is intended for values from -255 to 255.
+
+|"max"| is set to support the limit of the bridge-driver's charge-pump.
+@c
+
+void translate(transStruct *trans_s)
+@#{@#
+int16_t speed = trans_s->thrust; /* we are assuming it's close */
+int16_t rotation;
+int16_t difference;
+int16_t piruett;
+static int8_t lock = OFF;
+const int8_t PirLockLevel = 15;
+const int16_t max = (MAX_DUTYCYCLE * UINT8_MAX)/100;
+const int16_t ampFact = 128;
+
+
+@
+Here we convert desired radius to thrust-difference by scaling to speed.
+Then that difference is converted to rotation by scaling it with |"track"|.
+The radius sensitivity is adjusted by changing the value of |"track"|.
+@c
+ difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
+ rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
+ piruett = trans_s->radius;
+
+@
+Any rotation involves one motor turning faster than the other.
+At some point, faster is not possible and so the leading motor's thrust is
+clipped.
+
+
+If there is no thrust then it is in piruett mode and spins CW or CCW.
+While thrust is present, piruett mode is locked out.
+Piruett mode has a lock function too, to keep it from hopping into directly
+into thrust mode while it is spinning around.
+This is partly for noise immunity and partly to help avoid collisions.
+@c
+ if(trans_s->thrust != STOPPED && lock == OFF)
+   {
+    trans_s->larboardOut = int16clamp(speed-rotation, -max, max);
+    trans_s->starboardOut = int16clamp(speed+rotation, -max, max);
+    }
+  else /* piruett mode */
+   {
+    lock = (abs(piruett) > PirLockLevel)?ON:OFF;
+
+    trans_s->larboardOut = int16clamp(piruett, -max, max);
+@
+For starboard, piruett is reversed, making it rotate counter to larboard.
+@c
+    piruett = -piruett;
+    trans_s->starboardOut = int16clamp(piruett, -max, max);
+    }
+@#}@#
+
+@
+This procedure sets the signal to the H-Bridge.
+For the PWM we load the value into the unsigned registers.
+@c
+void setPwm(transStruct *trans_s)
+@#{@#
+
+ if (trans_s->larboardOut >= 0)
+     {
+      larboardDirection(FORWARD);
+      OCR0A = abs(trans_s->larboardOut);
+     }
+  else
+      {
+       larboardDirection(REVERSE);
+       OCR0A = abs(trans_s->larboardOut);
+      }
+
+ if (trans_s->starboardOut >= 0)
+     {
+      starboardDirection(FORWARD);
+      OCR0B = abs(trans_s->starboardOut);
+     }
+  else
+      {
+       starboardDirection(REVERSE);
+       OCR0B = abs(trans_s->starboardOut);
+      }
+
+@
+We must see if the fail-safe relay needs to be closed.
+@c
+ if (trans_s->larboardOut || trans_s->starboardOut)
+    relayCntl(CLOSED);
+  else
+    relayCntl(OPEN);
+
+@#}@#
+
+@
 Here is a simple procedure to flip the LED on or off.
 @c
 void ledCntl(int8_t state)
@@ -495,188 +659,13 @@ void starboardDirection(int8_t state)
 @#}@#
 
 @
-
-@
-The scaler function takes an input, in time, from the Input Capture
-Register and returns a value scaled by the parameters in structure
-|"inputScale_s"|.
+A simple 16 bit clamp function.
 @c
-int16_t scaler(inputStruct *input_s, transStruct *trans_s, uint16_t input)
+int16_t int16clamp(int16_t value, int16_t min, int16_t max)
 @#{@#
-uint16_t solution;
-@
-First, we can solve for the obvious cases.
-One is where there is no signal; when |"lostSignal"| is |"TRUE"|.
-The other is where the input exceeds the range.
-This can easily happen if the trim is shifted.
-@c
-  if (input_s->lostSignal == TRUE)
-     return 0;
-
-  if (input > input_s->maxIn)
-     return trans_s->maxOut;
-
-  if (input < input_s->minIn)
-     return trans_s->minOut;
-
-
-@
-If it's not that simple, then compute the gain and offset and then continue in
-the usual way.
-This is not really an efficient method, recomputing gain and offset every time
-but we are not in a rush and it makes it easier since, if something changes,
-I don't have to manualy compute and enter these value.
-
-The constant |"ampFact"| amplifies it so I can take advantage of the extra
-bits for precision.
-
-Dead-band is applied when it returns.
-@c
-const int32_t ampFact = 128L;
-
-int32_t gain = (ampFact*(int32_t)(input_s->maxIn-input_s->minIn))/
-                    (int32_t)(trans_s->maxOut-trans_s->minOut);
-
-int32_t offset = ((ampFact*(int32_t)input_s->minIn)/gain)
-                 -(int32_t)trans_s->minOut;
-
-solution = (ampFact*(int32_t)input/gain)-offset;
-
-
-return (abs(solution) > trans_s->deadBand)?solution:0;
-
+ return (value > max)?max:(value < min)?min:value;
 @#}@#
 
-@
-We need a way to translate |"thrust"| and |"radius"| in order to carve a
- |"turn"|. This procedure should do this but it's not going to be perfect as
-drag and slippage make thrust increase progressivly more than speed.
-Since |speed| is not known, we will use |thrust|.
-It should steer OK as long as the speed is constant and small changes in speed
-should not be too disruptive.
-
-The constant |"ampFact"| amplifies it so I can take advantage of the extra
- bits.
-
-This procedure is intended for values from -255 to 255.
-@c
-
-void translate(transStruct *trans_s)
-@#{@#
-int16_t speed = trans_s->thrust; /* we are assuming it's close */
-int16_t rotation;
-int16_t difference;
-int16_t piruett;
-static int8_t lock = OFF;
-const int8_t PirLockLevel = 15;
-const int16_t max = (MAX_DUTYCYCLE * UINT8_MAX)/100;
-const int16_t ampFact = 128;
-
-
-@
-Here we convert desired radius to thrust-difference by scaling to speed.
-Then that difference is converted to rotation by scaling it with |"track"|.
-The radius sensitivity is adjusted by changing the value of |"track"|.
-@c
- difference = (speed * ((ampFact * trans_s->radius)/UINT8_MAX))/ampFact;
- rotation = (trans_s->track * ((ampFact * difference)/UINT8_MAX))/ampFact;
- piruett = trans_s->radius;
-
-@
-Any rotation involves one motor turning faster than the other.
-At some point, faster is not possible and so the requiered clipping is here.
-
-|"max"| is set at to support the limit of the bridge-driver's charge-pump.
-
-If there is no thrust then it is in piruett mode and spins CW or CCW.
-While there is thrust piruett mode is locked out.
-Piruett mode has a lock function to keep it from hopping into directly into 
-thrust mode while it is spinning. This is partly for noise immunity and partly
-to help avoid colisions.
-@c
- if(trans_s->thrust != STOPPED && lock == OFF)
-   {
-    if((speed-rotation) >= max)
-       trans_s->larboardOut = max;
-     else if((speed-rotation) <= -max)
-       trans_s->larboardOut = -max;
-     else
-       trans_s->larboardOut = speed-rotation;
-
-    if((speed+rotation) >= max)
-       trans_s->starboardOut = max;
-     else if ((speed+rotation) <= -max)
-       trans_s->starboardOut = -max;
-     else
-       trans_s->starboardOut = speed+rotation;
-    }
-  else /* piruett mode */
-   {
-    if(piruett > PirLockLevel)
-      lock = ON;
-     else
-      lock = OFF;
-
-    if(piruett >= max)
-       trans_s->larboardOut = max;
-     else if(piruett <= -max)
-       trans_s->larboardOut = -max;
-     else
-       trans_s->larboardOut = piruett;
-@
-For starboard, piruett is reversed, making it rotate counter to larboard.
-@c
-    piruett *= -1; 
-    if(piruett >= max)
-       trans_s->starboardOut = max;
-     else if (piruett <= -max)
-       trans_s->starboardOut = -max;
-     else
-       trans_s->starboardOut = piruett;
-
-    }
-
-@#}@#
-
-@
-This simple procedure sets the signal to the H-Bridge.
-For the PWM we load the value into the unsigned registers.
-@c
-void setPwm(transStruct *trans_s)
-@#{@#
-
- if (trans_s->larboardOut >= 0)
-     {
-      larboardDirection(FORWARD);
-      OCR0A = abs(trans_s->larboardOut);
-     }
-  else
-      {
-       larboardDirection(REVERSE);
-       OCR0A = abs(trans_s->larboardOut);
-      }
-
- if (trans_s->starboardOut >= 0)
-     {
-      starboardDirection(FORWARD);
-      OCR0B = abs(trans_s->starboardOut);
-     }
-  else
-      {
-       starboardDirection(REVERSE);
-       OCR0B = abs(trans_s->starboardOut);
-      }
-
-@
-We must see if the fail-safe relay needs to be closed.
-@c
- if (trans_s->larboardOut || trans_s->starboardOut)
-    relayCntl(CLOSED);
-  else
-    relayCntl(OPEN);
-
-
-@#}@#
 @ @<Initialize pin outputs...@>=
  // set the led port direction; This is pin \#17
   DDRB |= (1<<DDB5);

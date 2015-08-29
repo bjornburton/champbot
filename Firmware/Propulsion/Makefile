@@ -9,9 +9,6 @@ BOARD:=atmega328p
 # Which microcontroller
 MCU:=atmega328p
 
-# Which programmer to use
-PROGHW:=usbtiny
-
 # Which avrdude to use
 PROGSW:=avrdude
 
@@ -22,7 +19,7 @@ EFUSE:= efuse:w:0x05:m
 
 
 # Apps and Flags
-PROGSWFLAGS:= -c $(PROGHW) -p $(BOARD)
+PROGSWFLAGS:= -p $(BOARD)
 CC        := avr-gcc 
 DOT       := dot 
 EGYPT     := egypt 
@@ -90,7 +87,10 @@ clean:
 	-rm -f $(EGYPTSRC)
 	
 install:
-	$(PROGSW) $(PROGSWFLAGS) -U flash:w:$(HEX)
+	$(PROGSW) $(PROGSWFLAGS) -c usbtiny -U flash:w:$(HEX)
+
+installasp:
+	$(PROGSW) $(PROGSWFLAGS) -c usbasp -U flash:w:$(HEX)
 
 size:
 	avr-size --format=avr --mcu=$(MCU) $(ELF)

@@ -1,0 +1,281 @@
+\input cwebmac
+
+% jafco
+
+\nocon % omit table of contents
+\datethis % print date on listing
+
+
+\N{1}{1}Introduction. This is the firmware portion of Jaw and Fire control.
+
+This will facilitate two actions: opening the jaw to release the floating
+object and light the target on fire.
+
+The jaw will close by return-spring so the action will to open it.
+
+Fire is a  sequence of opening the jaw, releasing the butane and firing the
+ignitor.
+
+place-holder code below
+==========================
+
+Extensive use was made of the datasheet, Atmel ``Atmel ATtiny25, ATtiny45,
+ATtiny85 Datasheet'' Rev. 2586Q–AVR–08/2013 (Tue 06 Aug 2013 03:19:12 PM
+EDT)
+and ``AVR130: Setup and Use the AVR Timers'' Rev. 2505A–AVR–02/02.
+\Y\B\X4:Include\X\6
+\X5:Types\X\6
+\X6:Prototypes\X\6
+\X7:Global variables\X\par
+\fi
+
+\M{2}\PB{\.{"F\_CPU"}} is used to convey the Trinket clock rate.
+\Y\B\4\D$\.{F\_CPU}$ \5
+\T{8000000\$U\$L}\par
+\fi
+
+\M{3}Here are some Boolean definitions that are used.
+\Y\B\4\D$\.{ON}$ \5
+\T{1}\par
+\B\4\D$\.{OFF}$ \5
+\T{0}\par
+\B\4\D$\.{OPEN}$ \5
+\T{1}\par
+\B\4\D$\.{CLOSE}$ \5
+\T{0}\par
+\B\4\D$\.{SET}$ \5
+\T{1}\par
+\B\4\D$\.{CLEAR}$ \5
+\T{0}\par
+\fi
+
+\M{4}\B\X4:Include\X${}\E{}$\6
+\8\#\&{include} \.{<avr/io.h>}\SHC{ need some port access }\6
+\8\#\&{include} \.{<util/delay.h>}\SHC{ need to delay }\6
+\8\#\&{include} \.{<avr/interrupt.h>}\SHC{ have need of an interrupt }\6
+\8\#\&{include} \.{<avr/sleep.h>}\SHC{ have need of sleep }\6
+\8\#\&{include} \.{<stdlib.h>}\6
+\8\#\&{include} \.{<stdint.h>}\par
+\U1.\fi
+
+\M{5}Here is a structure to keep track of the state of things.
+
+\Y\B\4\X5:Types\X${}\E{}$\6
+\&{typedef} \&{struct} ${}\{{}$\1\6
+\\{uint8\_t}\\{count};\2\6
+${}\}{}$ \&{statestruct};\par
+\U1.\fi
+
+\M{6}\B\X6:Prototypes\X${}\E{}$\6
+\&{void} \\{jawcntl}(\\{uint8\_t}\\{state});\SHC{ Jaw open and close }\6
+\&{void} \\{fuelcntl}(\\{uint8\_t}\\{state});\SHC{ Fuel on and off }\6
+\&{void} \\{igncntl}(\\{uint8\_t}\\{state});\SHC{ on and off }\6
+\&{void} \\{fireseq}(\&{statestruct} ${}{*});{}$\6
+\&{void} \\{releaseseq}(\&{statestruct} ${}{*}){}$;\par
+\U1.\fi
+
+\M{7}
+My lone global variable is a function pointer.
+This lets me pass arguments to the actual interrupt handlers.
+This pointer gets the appropriate function attached by one of the \PB{%
+\.{"ISR()"}}
+functions.
+
+\Y\B\4\X7:Global variables\X${}\E{}$\6
+$\&{void}({*}\\{handleirq}){}$(\&{statestruct} ${}{*})\K\NULL{}$;\par
+\U1.\fi
+
+\M{8}
+Here is \PB{\\{main}(\,)}.
+\Y\B\&{int} \\{main}(\&{void})\1\1 $\{{}$\Y\par
+\fi
+
+\M{9}The prescaler is set to clk/16484 by \PB{$\X27:Initialize the timer\X$}.
+With \PB{\.{"F\_CPU"}} at 8~MHz, the math goes: $\lfloor{0.5 seconds \times (8 %
+\times 10^6 \over 16384}\rfloor = 244$.
+Then, the remainder is $256-244 = 12$, thus leaving 244 counts or about 500 ms
+until time-out, unless it's reset.
+
+\Y\B\&{statestruct} \\{s\_state}; \X23:Initialize pin inputs\X\X22:Initialize
+pin outputs\X\par
+\fi
+
+\M{10}
+\Y\B\\{jawcntl}(\.{CLOSE});\C{ PB0 }\6
+\\{fuelcntl}(\.{OFF});\C{ PB1 }\6
+\\{igncntl}(\.{OFF});\C{ PB2 }\par
+\fi
+
+\M{11}
+Here the timer is setup.
+\Y\B\X27:Initialize the timer\X\par
+\fi
+
+\M{12}
+Of course, any interrupt function requires that bit ``Global Interrupt Enable''
+is set; usually done through calling sei().
+\Y\B\\{sei}(\,);\par
+\fi
+
+\M{13}
+Rather than burning loops, waiting 16~ms for something to happen,
+the ``sleep'' mode is used.
+The specific type of sleep is `idle'.
+In idle, execution stops but timers continue.
+Interrupts are used to wake it.
+\Y\B\X28:Configure to wake upon interrupt\X\par
+\fi
+
+\M{14}
+This is the loop that does the work.
+It should spend most of its time in \PB{\\{sleep\_mode}},
+comming out at each interrupt event.
+
+\Y\B\&{for} ( ;  ; \,) $\{{}$\Y\par
+\fi
+
+\M{15}
+Now we wait in ``idle'' for any interrupt event.
+\Y\B\\{sleep\_mode}(\,);\par
+\fi
+
+\M{16}
+If execution arrives here, some interrupt has been detected.
+\Y\B\&{if} ${}(\\{handleirq}\I\NULL{}$)\SHC{ not sure why it would be, but to
+be safe }\6
+${}\{{}$\1\7
+${}\\{handleirq}({\AND}\\{s\_state}){}$;\SHC{ process the irq through it's
+function }\6
+${}\\{handleirq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
+\4${}\}{}$\SHC{ end if handleirq }\2\7
+$\}{}$\SHC{ end for }\7
+\&{return} \T{0};\SHC{ it's the right thing to do! }\7
+$\}{}$\SHC{ end main() }\par
+\fi
+
+\N{1}{17}Interrupt Handling.
+
+\Y\B\&{void} \\{releaseseq}(\&{statestruct} ${}{*}\\{s\_now}){}$\1\1\2\2\6
+${}\{\,\}{}$\par
+\fi
+
+\M{18}
+
+
+\Y\B\&{void} \\{fireseq}(\&{statestruct} ${}{*}\\{s\_now}){}$\1\1\2\2\6
+${}\{\,\}{}$\par
+\fi
+
+\M{19}The ISRs are pretty skimpy as they are only used to point \PB{%
+\\{handleirq}(\,)} to
+the correct function.
+The need for global variables is minimized.
+
+
+This is the vector for the main timer.
+When this overflows it generally means the ASE has been off for as long as it
+took \PB{\.{TCINT1}} to overflow from it's start at \PB{\.{NOWAVETIME}}.
+\Y\B\C{ Timer ISR }\6
+\.{ISR}(\\{TIMER1\_OVF\_vect})\1\1\2\2\6
+${}\{{}$\1\6
+${}\\{handleirq}\K\NULL;{}$\6
+\4${}\}{}$\2\par
+\fi
+
+\M{20}
+This vector responds to the jaw input at pin PB4 or PB4.
+\Y\B\C{ Clear Button ISR }\6
+\.{ISR}(\\{PCINT0\_vect})\1\1\2\2\6
+${}\{{}$\1\6
+${}\\{handleirq}\K{\AND}\\{releaseseq};{}$\6
+\4${}\}{}$\2\par
+\fi
+
+\N{1}{21}These are the supporting routines, procedures and configuration
+blocks.
+
+
+Here is the block that sets-up the digital I/O pins.
+\fi
+
+\M{22}\B\X22:Initialize pin outputs\X${}\E{}$\6
+${}\{{}$\C{ set the jaw port direction }\1\6
+${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB0}){}$;\C{ set the fuel port direction
+}\6
+${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB1}){}$;\C{ set the ignition port
+direction }\6
+${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB2});{}$\6
+\4${}\}{}$\2\par
+\U9.\fi
+
+\M{23}\B\X23:Initialize pin inputs\X${}\E{}$\6
+${}\{{}$\C{ set the jaw input pull-up }\1\6
+${}\.{PORTB}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTB3}){}$;\C{ set the fire input
+pull-up }\6
+${}\.{PORTB}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTB4}){}$;\C{ enable  change interrupt
+for jaw input }\6
+${}\.{PCMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{PCINT3}){}$;\C{ enable  change interrupt
+for fire input }\6
+${}\.{PCMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{PCINT4}){}$;\C{ General interrupt Mask
+register for clear-button}\6
+${}\.{GIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{PCIE});{}$\6
+\4${}\}{}$\2\par
+\U9.\fi
+
+\M{24}
+Here is a simple function to operate the jaw.
+\Y\B\&{void} \\{jawcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
+${}\{{}$\1\6
+${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
+\T{1}\LL\.{PORTB0});{}$\6
+\4${}\}{}$\2\par
+\fi
+
+\M{25}
+Here is a simple function to operate the fuel.
+\Y\B\&{void} \\{fuelcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
+${}\{{}$\1\6
+${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB1}):\.{PORTB}\AND\CM(%
+\T{1}\LL\.{PORTB1});{}$\6
+\4${}\}{}$\2\par
+\fi
+
+\M{26}
+Here is a simple function to operate the ignition.
+\Y\B\&{void} \\{igncntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
+${}\{{}$\1\6
+${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB2}):\.{PORTB}\AND\CM(%
+\T{1}\LL\.{PORTB2});{}$\6
+\4${}\}{}$\2\par
+\fi
+
+\M{27}
+A very long prescale of 16384 counts is set by setting certain bits in \PB{%
+\.{TCCR1}}.
+
+\Y\B\4\X27:Initialize the timer\X${}\E{}$\6
+${}\{{}$\1\6
+${}\.{TCCR1}\K((\T{1}\LL\.{CS10})\OR(\T{1}\LL\.{CS11})\OR(\T{1}\LL\.{CS12})\OR(%
+\T{1}\LL\.{CS13})){}$;\SHC{Prescale }\6
+${}\.{TIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{TOIE1}){}$;\C{ Timer 1 f\_overflow
+interrupt enable }\6
+\4${}\}{}$\2\par
+\Q9.
+\U11.\fi
+
+\M{28}
+Setting these bits configure sleep\_mode() to go to ``idle''.
+Idle allows the counters and comparator to continue during sleep.
+
+\Y\B\4\X28:Configure to wake upon interrupt\X${}\E{}$\6
+${}\{{}$\1\6
+${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM1});{}$\6
+${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM0});{}$\6
+\4${}\}{}$\2\par
+
+\U13.\fi
+
+
+\inx
+\fin
+\con

@@ -51,7 +51,7 @@ and ``AVR130: Setup and Use the AVR Timers'' Rev. 2505A–AVR–02/02.
 
  @<Types@>=
 typedef struct {
-    uint8_t count; 
+    uint8_t count;
     } statestruct;
 
 
@@ -108,7 +108,7 @@ is set; usually done through calling sei().
 @c
   sei();
 @
-Rather than burning loops, waiting 16~ms for something to happen, 
+Rather than burning loops, waiting 16~ms for something to happen,
 the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
 In idle, execution stops but timers continue.
@@ -123,7 +123,7 @@ It should spend most of its time in |sleep_mode|,
 comming out at each interrupt event.
 
 @c
- for (;;) 
+ for (;;)
   {@#
 
 @
@@ -152,6 +152,16 @@ return 0; // it's the right thing to do!
 @c
 void releaseseq(statestruct *s_now )
 {
+@
+This sequence will proceed only while the button is held.
+@c
+while(!(PORTB & (1<<PORTB3)))
+     {
+
+     }
+
+
+
 }
 @
 
@@ -159,6 +169,91 @@ void releaseseq(statestruct *s_now )
 @c
 void fireseq(statestruct *s_now )
 {
+uint8_t firingstate;
+
+enum firingstates
+  {
+   ready,
+   opened,
+   warned,
+   precharged,
+   igniting,
+   burning
+  };
+
+firingstate = ready;
+
+@
+This sequence will proceed only while the button is held.
+It can terminate after and state.
+@c
+
+while(!(PORTB & (1<<PORTB4)))
+     {
+      @
+      Jaw opens for fire but partly as a warning.
+      @c
+      if(firingstate == ready)
+        {
+
+
+         firingstate = opened;
+         continue;
+        }
+      @
+      Three 250 ms warning blasts from ignitor and then a 1000 ms delay.
+      @c
+      if(firingstate == opened)
+        {
+
+         _delay_ms(250);
+
+         _delay_ms(250);
+
+         _delay_ms(250);
+
+         _delay_ms(1000); /* human duck time */
+         firingstate = warned;
+         continue;
+        }
+      @
+      Fuel opens for precharge, then 250 ms of delay.
+      @c
+
+      if(firingstate == warned)
+        {
+
+         _delay_ms(250);
+         firingstate = precharged;
+         continue;
+        }
+      @
+      Ignitor on, delay for 250 ms.
+      @c
+
+      if(firingstate == precharged)
+        {
+
+         _delay_ms(250);
+         firingstate = igniting;
+         continue;
+        }
+      @
+      Ignitor off, and we should have fire now.
+      @c
+      if(firingstate == igniting)
+        {
+
+         firingstate = burning;
+         continue;
+        }
+     }
+
+@
+Now set fuel and ignitor off and close jaw.
+@c
+
+
 }
 
 
@@ -169,8 +264,6 @@ The need for global variables is minimized.
 
 
 This is the vector for the main timer.
-When this overflows it generally means the ASE has been off for as long as it
-took |TCINT1| to overflow from it's start at |NOWAVETIME|.
 @c
 /* Timer ISR */
 ISR(TIMER1_OVF_vect)
@@ -179,12 +272,19 @@ ISR(TIMER1_OVF_vect)
 }
 
 @
-This vector responds to the jaw input at pin PB4 or PB4.
+This vector responds to the jaw input at pin PB3 or fire input at PB4.
 @c
-/* Clear Button ISR */
 ISR(PCINT0_vect)
 {
- handleirq = &releaseseq;
+
+_delay_ms(100); /* relay settle delay */
+
+if(!(PORTB & (1<<PORTB3)))
+   handleirq = &releaseseq;
+ else
+if(!(PORTB & (1<<PORTB4)))
+   handleirq = &fireseq;
+
 }
 
 

@@ -90,13 +90,13 @@ Here is \PB{\\{main}(\,)}.
 \Y\B\&{int} \\{main}(\&{void})\1\1 $\{{}$\Y\par
 \fi
 
-\M{9}The prescaler is set to clk/16484 by \PB{$\X27:Initialize the timer\X$}.
+\M{9}The prescaler is set to clk/16484 by \PB{$\X35:Initialize the timer\X$}.
 With \PB{\.{"F\_CPU"}} at 8~MHz, the math goes: $\lfloor{0.5 seconds \times (8 %
 \times 10^6 \over 16384}\rfloor = 244$.
 Then, the remainder is $256-244 = 12$, thus leaving 244 counts or about 500 ms
 until time-out, unless it's reset.
 
-\Y\B\&{statestruct} \\{s\_state}; \X23:Initialize pin inputs\X\X22:Initialize
+\Y\B\&{statestruct} \\{s\_state}; \X31:Initialize pin inputs\X\X30:Initialize
 pin outputs\X\par
 \fi
 
@@ -108,7 +108,7 @@ pin outputs\X\par
 
 \M{11}
 Here the timer is setup.
-\Y\B\X27:Initialize the timer\X\par
+\Y\B\X35:Initialize the timer\X\par
 \fi
 
 \M{12}
@@ -123,7 +123,7 @@ the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
 In idle, execution stops but timers continue.
 Interrupts are used to wake it.
-\Y\B\X28:Configure to wake upon interrupt\X\par
+\Y\B\X36:Configure to wake upon interrupt\X\par
 \fi
 
 \M{14}
@@ -155,26 +155,98 @@ $\}{}$\SHC{ end main() }\par
 
 \N{1}{17}Interrupt Handling.
 
-\Y\B\&{void} \\{releaseseq}(\&{statestruct} ${}{*}\\{s\_now}){}$\1\1\2\2\6
-${}\{\,\}{}$\par
+\Y\B\&{void} \\{releaseseq}(\&{statestruct} ${}{*}\\{s\_now}){}$\1\1 $\{{}$\par
 \fi
 
 \M{18}
-
-
-\Y\B\&{void} \\{fireseq}(\&{statestruct} ${}{*}\\{s\_now}){}$\1\1\2\2\6
-${}\{\,\}{}$\par
+This sequence will proceed only while the button is held.
+\Y\B\&{while} ${}(\R(\.{PORTB}\AND(\T{1}\LL\.{PORTB3}))){}$\5
+${}\{\,\}{}$\6
+$\}{}$\par
 \fi
 
-\M{19}The ISRs are pretty skimpy as they are only used to point \PB{%
+\M{19}
+
+
+\Y\B\&{void} \\{fireseq}(\&{statestruct} ${}{*}\\{s\_now}){}$\1\1 $\{$ \\{uint8%
+\_t}\\{firingstate};\7
+\&{enum} \&{firingstates} ${}\{{}$\1\6
+${}\\{ready},\39\\{opened},\39\\{warned},\39\\{precharged},\39\\{igniting},\39%
+\\{burning}{}$\2\6
+${}\};{}$\7
+${}\\{firingstate}\K\\{ready}{}$;\par
+\fi
+
+\M{20}
+This sequence will proceed only while the button is held.
+It can terminate after and state.
+\Y\B\&{while} ${}(\R(\.{PORTB}\AND(\T{1}\LL\.{PORTB4})))$ $\{{}$\par
+\fi
+
+\M{21}
+Jaw opens for fire but partly as a warning.
+\Y\B\&{if} ${}(\\{firingstate}\E\\{ready}){}$\5
+${}\{{}$\1\6
+${}\\{firingstate}\K\\{opened};{}$\6
+\&{continue};\6
+\4${}\}{}$\2\par
+\fi
+
+\M{22}
+Three 250 ms warning blasts from ignitor and then a 1000 ms delay.
+\Y\B\&{if} ${}(\\{firingstate}\E\\{opened}){}$\5
+${}\{{}$\1\6
+\\{\_delay\_ms}(\T{250});\6
+\\{\_delay\_ms}(\T{250});\6
+\\{\_delay\_ms}(\T{250});\6
+\\{\_delay\_ms}(\T{1000});\C{ human duck time }\6
+${}\\{firingstate}\K\\{warned};{}$\6
+\&{continue};\6
+\4${}\}{}$\2\par
+\fi
+
+\M{23}
+Fuel opens for precharge, then 250 ms of delay.
+\Y\B\&{if} ${}(\\{firingstate}\E\\{warned}){}$\5
+${}\{{}$\1\6
+\\{\_delay\_ms}(\T{250});\6
+${}\\{firingstate}\K\\{precharged};{}$\6
+\&{continue};\6
+\4${}\}{}$\2\par
+\fi
+
+\M{24}
+Ignitor on, delay for 250 ms.
+\Y\B\&{if} ${}(\\{firingstate}\E\\{precharged}){}$\5
+${}\{{}$\1\6
+\\{\_delay\_ms}(\T{250});\6
+${}\\{firingstate}\K\\{igniting};{}$\6
+\&{continue};\6
+\4${}\}{}$\2\par
+\fi
+
+\M{25}
+Ignitor off, and we should have fire now.
+\Y\B\&{if} ${}(\\{firingstate}\E\\{igniting}){}$\5
+${}\{{}$\1\6
+${}\\{firingstate}\K\\{burning};{}$\6
+\&{continue};\6
+\4${}\}{}$\2\6
+$\}{}$\par
+\fi
+
+\M{26}
+Now set fuel and ignitor off and close jaw.
+\Y\B$\}{}$\par
+\fi
+
+\M{27}The ISRs are pretty skimpy as they are only used to point \PB{%
 \\{handleirq}(\,)} to
 the correct function.
 The need for global variables is minimized.
 
 
 This is the vector for the main timer.
-When this overflows it generally means the ASE has been off for as long as it
-took \PB{\.{TCINT1}} to overflow from it's start at \PB{\.{NOWAVETIME}}.
 \Y\B\C{ Timer ISR }\6
 \.{ISR}(\\{TIMER1\_OVF\_vect})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -182,23 +254,26 @@ ${}\\{handleirq}\K\NULL;{}$\6
 \4${}\}{}$\2\par
 \fi
 
-\M{20}
-This vector responds to the jaw input at pin PB4 or PB4.
-\Y\B\C{ Clear Button ISR }\6
-\.{ISR}(\\{PCINT0\_vect})\1\1\2\2\6
+\M{28}
+This vector responds to the jaw input at pin PB3 or fire input at PB4.
+\Y\B\.{ISR}(\\{PCINT0\_vect})\1\1\2\2\6
 ${}\{{}$\1\6
-${}\\{handleirq}\K{\AND}\\{releaseseq};{}$\6
+\\{\_delay\_ms}(\T{100});\C{ relay settle delay }\6
+\&{if} ${}(\R(\.{PORTB}\AND(\T{1}\LL\.{PORTB3}))){}$\1\5
+${}\\{handleirq}\K{\AND}\\{releaseseq};{}$\2\6
+\&{else} \&{if} ${}(\R(\.{PORTB}\AND(\T{1}\LL\.{PORTB4}))){}$\1\5
+${}\\{handleirq}\K{\AND}\\{fireseq};{}$\2\6
 \4${}\}{}$\2\par
 \fi
 
-\N{1}{21}These are the supporting routines, procedures and configuration
+\N{1}{29}These are the supporting routines, procedures and configuration
 blocks.
 
 
 Here is the block that sets-up the digital I/O pins.
 \fi
 
-\M{22}\B\X22:Initialize pin outputs\X${}\E{}$\6
+\M{30}\B\X30:Initialize pin outputs\X${}\E{}$\6
 ${}\{{}$\C{ set the jaw port direction }\1\6
 ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB0}){}$;\C{ set the fuel port direction
 }\6
@@ -208,7 +283,7 @@ ${}\.{DDRB}\MRL{{\OR}{\K}}(\T{1}\LL\.{DDB2});{}$\6
 \4${}\}{}$\2\par
 \U9.\fi
 
-\M{23}\B\X23:Initialize pin inputs\X${}\E{}$\6
+\M{31}\B\X31:Initialize pin inputs\X${}\E{}$\6
 ${}\{{}$\C{ set the jaw input pull-up }\1\6
 ${}\.{PORTB}\MRL{{\OR}{\K}}(\T{1}\LL\.{PORTB3}){}$;\C{ set the fire input
 pull-up }\6
@@ -222,7 +297,7 @@ ${}\.{GIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{PCIE});{}$\6
 \4${}\}{}$\2\par
 \U9.\fi
 
-\M{24}
+\M{32}
 Here is a simple function to operate the jaw.
 \Y\B\&{void} \\{jawcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -231,7 +306,7 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{25}
+\M{33}
 Here is a simple function to operate the fuel.
 \Y\B\&{void} \\{fuelcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -240,7 +315,7 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB1}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{26}
+\M{34}
 Here is a simple function to operate the ignition.
 \Y\B\&{void} \\{igncntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
 ${}\{{}$\1\6
@@ -249,11 +324,11 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB2}):\.{PORTB}\AND\CM(%
 \4${}\}{}$\2\par
 \fi
 
-\M{27}
+\M{35}
 A very long prescale of 16384 counts is set by setting certain bits in \PB{%
 \.{TCCR1}}.
 
-\Y\B\4\X27:Initialize the timer\X${}\E{}$\6
+\Y\B\4\X35:Initialize the timer\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{TCCR1}\K((\T{1}\LL\.{CS10})\OR(\T{1}\LL\.{CS11})\OR(\T{1}\LL\.{CS12})\OR(%
 \T{1}\LL\.{CS13})){}$;\SHC{Prescale }\6
@@ -263,11 +338,11 @@ interrupt enable }\6
 \Q9.
 \U11.\fi
 
-\M{28}
+\M{36}
 Setting these bits configure sleep\_mode() to go to ``idle''.
 Idle allows the counters and comparator to continue during sleep.
 
-\Y\B\4\X28:Configure to wake upon interrupt\X${}\E{}$\6
+\Y\B\4\X36:Configure to wake upon interrupt\X${}\E{}$\6
 ${}\{{}$\1\6
 ${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM1});{}$\6
 ${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM0});{}$\6

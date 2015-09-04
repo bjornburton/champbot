@@ -22,7 +22,6 @@ Extensive use was made of the datasheet, Atmel ``Atmel ATtiny25, ATtiny45,
 and ``AVR130: Setup and Use the AVR Timers'' Rev. 2505A–AVR–02/02.
 @c
 @< Include @>@;
-@< Types @>@;
 @< Prototypes @>@;
 @< Global variables @>@;
 
@@ -47,75 +46,45 @@ and ``AVR130: Setup and Use the AVR Timers'' Rev. 2505A–AVR–02/02.
 # include <stdlib.h>
 # include <stdint.h>
 
-@ Here is a structure to keep track of the state of things.
-
- @<Types@>=
-typedef struct {
-    uint8_t count;
-    } statestruct;
-
 
 @ @<Prototypes@>=
 void jawcntl(uint8_t state); // Jaw open and close
 void fuelcntl(uint8_t state); // Fuel on and off
 void igncntl(uint8_t state); // on and off
-void fireseq(statestruct *);
-void releaseseq(statestruct *);
+void releaseseq(void);
+void fireseq(void);
 
 @
 My lone global variable is a function pointer.
-This lets me pass arguments to the actual interrupt handlers.
+This lets me pass arguments to the actual interrupt handlers, should I need to.
 This pointer gets the appropriate function attached by one of the |"ISR()"|
 functions.
 
 @<Global var...@>=
-void (*handleirq)(statestruct *) = NULL;
-
-
-@
-Here is |main()|.
-@c
+void (*handleirq)() = NULL;
 
 int main(void)
 {@#
 
-@ The prescaler is set to clk/16484 by |@<Initialize the timer@>|.
-With |"F_CPU"| at 8~MHz, the math goes: $\lfloor{0.5 seconds \times (8 \times 10^6 \over 16384}\rfloor = 244$.
-Then, the remainder is $256-244 = 12$, thus leaving 244 counts or about 500 ms until time-out, unless it's reset.
 
-@c
-
-statestruct s_state;
-
+@<Initialize interrupts@>
 @<Initialize pin inputs@>
 @<Initialize pin outputs@>
 
 @
-@c
-  jawcntl(CLOSE); /* PB0 */
-  fuelcntl(OFF);  /* PB1 */
-  igncntl(OFF);   /* PB2 */
-
-@
-Here the timer is setup.
-@c
-@<Initialize the timer@>
-
-
-@
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
-is set; usually done through calling sei().
+is set; usually done through calling sei(). Doing this after the pin setup is
+the best time.
 @c
   sei();
 @
-Rather than burning loops, waiting 16~ms for something to happen,
+Rather than burning loops, waiting for something to happen,
 the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
 In idle, execution stops but timers continue.
 Interrupts are used to wake it.
 @c
 @<Configure to wake upon interrupt...@>
-
 
 @
 This is the loop that does the work.
@@ -127,50 +96,58 @@ comming out at each interrupt event.
   {@#
 
 @
+We don't want anything cooking while we are asleap.
+@c
+
+ igncntl(OFF);
+ fuelcntl(OFF);
+ jawcntl(CLOSE);
+
+@
 Now we wait in ``idle'' for any interrupt event.
 @c
   sleep_mode();
-
 @
 If execution arrives here, some interrupt has been detected.
 @c
+
 if (handleirq != NULL)  // not sure why it would be, but to be safe
    {@#
-    handleirq(&s_state); // process the irq through it's function
+    //handleirq(); // process the irq through it's function
+    handleirq();
     handleirq = NULL; // reset so that the action cannot be repeated
     }// end if handleirq
-@#
   } // end for
-@#
 
 return 0; // it's the right thing to do!
-@#
 } // end main()
 
 @* Interrupt Handling.
 
 @c
-void releaseseq(statestruct *s_now )
-{
+void releaseseq()
+{@#
+
 @
 This sequence will proceed only while the button is held.
 @c
-while(!(PORTB & (1<<PORTB3)))
-     {
 
-     }
+jawcntl(OPEN);
 
+   while(!(PINB & (1<<PB3))) 
+         _delay_ms(10);
 
+jawcntl(CLOSE);
 
 }
 @
 
 
 @c
-void fireseq(statestruct *s_now )
-{
-uint8_t firingstate;
+void fireseq()
+{@#
 
+uint8_t firingstate;
 enum firingstates
   {
    ready,
@@ -181,59 +158,67 @@ enum firingstates
    burning
   };
 
+
 firingstate = ready;
 
 @
 This sequence will proceed only while the button is held.
 It can terminate after and state.
+|"_delay_ms()"| is a handy macro good for $2^{16}$ milliseconds of delay. 
 @c
 
-while(!(PORTB & (1<<PORTB4)))
-     {
+while( !(PINB & (1<<PB4)) )
+     {@#
+
       @
-      Jaw opens for fire but partly as a warning.
+      The jaw opens here for fire, but also partly as a warning.
       @c
       if(firingstate == ready)
-        {
+        {@#
 
 
+         jawcntl(OPEN); 
          firingstate = opened;
          continue;
         }
       @
-      Three 250 ms warning blasts from ignitor and then a 1000 ms delay.
+      Three warning bursts from the ignitor and then a 1000 ms duck delay.
       @c
       if(firingstate == opened)
-        {
+        {@#
 
-         _delay_ms(250);
-
-         _delay_ms(250);
-
-         _delay_ms(250);
+         for(int8_t count = 0;count < 3;count++)
+            {
+             igncntl(ON);
+             _delay_ms(100);
+             igncntl(OFF);
+             _delay_ms(100);
+            }
 
          _delay_ms(1000); /* human duck time */
          firingstate = warned;
          continue;
         }
       @
-      Fuel opens for precharge, then 250 ms of delay.
+      Fuel opens for precharge, then some delay.
       @c
 
       if(firingstate == warned)
-        {
+        {@#
 
-         _delay_ms(250);
+         fuelcntl(ON);
+         _delay_ms(500);
          firingstate = precharged;
          continue;
         }
       @
-      Ignitor on, delay for 250 ms.
+      Ignitor on, delay a short time.
       @c
 
       if(firingstate == precharged)
-        {
+        {@#
 
+         igncntl(ON);
          _delay_ms(250);
          firingstate = igniting;
          continue;
@@ -242,49 +227,68 @@ while(!(PORTB & (1<<PORTB4)))
       Ignitor off, and we should have fire now.
       @c
       if(firingstate == igniting)
-        {
+        {@#
 
+         igncntl(OFF);
          firingstate = burning;
          continue;
         }
      }
 
 @
-Now set fuel and ignitor off and close jaw.
+Once the loop fails we set fuel and ignitor off and close the jaw.
 @c
 
+ igncntl(OFF);
+ fuelcntl(OFF);
+ jawcntl(CLOSE);
 
 }
 
 
+@*The ISRs.
 
-@ The ISRs are pretty skimpy as they are only used to point |handleirq()| to
+The ISRs are pretty skimpy as they mostly used to point |handleirq()| to
 the correct function.
 The need for global variables is minimized.
 
-
-This is the vector for the main timer.
-@c
-/* Timer ISR */
-ISR(TIMER1_OVF_vect)
-{
- handleirq = NULL;
-}
-
 @
 This vector responds to the jaw input at pin PB3 or fire input at PB4.
+A simple debounce is included.
 @c
 ISR(PCINT0_vect)
-{
+{@#
+const int8_t high = 32;
+const int8_t low = -high;
+int8_t dbp3 = 0; 
+int8_t dbp4 = 0; 
 
-_delay_ms(100); /* relay settle delay */
 
-if(!(PORTB & (1<<PORTB3)))
+while(abs(dbp3) < high)
+     {
+      if(!(PINB & (1<<PB3)) && dbp3 > low)
+         dbp3--;
+          else
+          if((PINB & (1<<PB3)) && dbp3 < high)
+         dbp3++;
+     _delay_ms(1);
+     }
+
+while(abs(dbp4) < high)
+     {
+      if(!(PINB & (1<<PB4)) && dbp4 > low)
+         dbp4--;
+          else
+          if((PINB & (1<<PB4)) && dbp4 < high)
+         dbp4++;
+     _delay_ms(1);
+     }
+
+if(dbp3 == low)
    handleirq = &releaseseq;
  else
-if(!(PORTB & (1<<PORTB4)))
+ if(dbp4 == low)
    handleirq = &fireseq;
-
 }
 
 
@@ -293,7 +297,7 @@ if(!(PORTB & (1<<PORTB4)))
 
 Here is the block that sets-up the digital I/O pins.
 @ @<Initialize pin outputs...@>=
-{
+{@#
  /* set the jaw port direction */
   DDRB |= (1<<DDB0);
  /* set the fuel port direction */
@@ -303,54 +307,48 @@ Here is the block that sets-up the digital I/O pins.
 }
 
 @ @<Initialize pin inputs...@>=
-{
+{@#
  /* set the jaw input pull-up */
   PORTB |= (1<<PORTB3);
  /* set the fire input pull-up */
   PORTB |= (1<<PORTB4);
+}
+
+@ @<Initialize interrupts...@>=
+{@#
  /* enable  change interrupt for jaw input */
   PCMSK |= (1<<PCINT3);
  /* enable  change interrupt for fire input */
   PCMSK |= (1<<PCINT4);
- /* General interrupt Mask register for clear-button*/
+ /* General interrupt Mask register */
   GIMSK |= (1<<PCIE);
 }
 
 @
-Here is a simple function to operate the jaw.
+Here is a simple procedure to operate the jaw.
 @c
 void jawcntl(uint8_t state)
-{
+{@#
   PORTB = state ? PORTB | (1<<PORTB0) : PORTB & ~(1<<PORTB0);
 }
 
 @
-Here is a simple function to operate the fuel.
+Here is a simple procedure to operate the fuel.
 @c
 void fuelcntl(uint8_t state)
-{
+{@#
+
   PORTB = state ? PORTB | (1<<PORTB1) : PORTB & ~(1<<PORTB1);
 }
 
 @
-Here is a simple function to operate the ignition.
+Here is a simple procedure to operate the ignition.
 @c
 void igncntl(uint8_t state)
-{
+{@#
   PORTB = state ? PORTB | (1<<PORTB2) : PORTB & ~(1<<PORTB2);
 }
 
-
-@
-A very long prescale of 16384 counts is set by setting certain bits in |TCCR1|.
-
-@<Initialize the timer...@>=
-{
- TCCR1 = ((1<<CS10) | (1<<CS11) | (1<<CS12) | (1<<CS13)); //Prescale
-
- TIMSK |= (1<<TOIE1);  /* Timer 1 f\_overflow interrupt enable */
-
-}
 
 
 @
@@ -358,7 +356,7 @@ Setting these bits configure sleep\_mode() to go to ``idle''.
 Idle allows the counters and comparator to continue during sleep.
 
 @<Configure to wake upon interrupt...@>=
-{
+{@#
   MCUCR &= ~(1<<SM1);
   MCUCR &= ~(1<<SM0);
 }

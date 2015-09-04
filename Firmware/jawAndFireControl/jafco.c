@@ -12,7 +12,7 @@
 #line 23 "./jafco.w"
 
 /*4:*/
-#line 42 "./jafco.w"
+#line 41 "./jafco.w"
 
 # include <avr/io.h>  
 # include <util/delay.h>  
@@ -21,64 +21,35 @@
 # include <stdlib.h> 
 # include <stdint.h> 
 
+
 /*:4*/
 #line 24 "./jafco.w"
 
 /*5:*/
-#line 52 "./jafco.w"
+#line 50 "./jafco.w"
 
-typedef struct{
-uint8_t count;
-}statestruct;
-
+void jawcntl(uint8_t state);
+void fuelcntl(uint8_t state);
+void igncntl(uint8_t state);
+void releaseseq(void);
+void fireseq(void);
 
 /*:5*/
 #line 25 "./jafco.w"
 
 /*6:*/
-#line 58 "./jafco.w"
+#line 63 "./jafco.w"
 
-void jawcntl(uint8_t state);
-void fuelcntl(uint8_t state);
-void igncntl(uint8_t state);
-void fireseq(statestruct*);
-void releaseseq(statestruct*);
-
-/*:6*/
-#line 26 "./jafco.w"
-
-/*7:*/
-#line 71 "./jafco.w"
-
-void(*handleirq)(statestruct*)= NULL;
-
-
-/*:7*/
-#line 27 "./jafco.w"
-
-
-
-/*:1*//*8:*/
-#line 77 "./jafco.w"
-
+void(*handleirq)()= NULL;
 
 int main(void)
 {
 
-/*:8*//*9:*/
-#line 86 "./jafco.w"
 
-
-statestruct s_state;
-
-/*31:*/
-#line 305 "./jafco.w"
+/*28:*/
+#line 317 "./jafco.w"
 
 {
-
-PORTB|= (1<<PORTB3);
-
-PORTB|= (1<<PORTB4);
 
 PCMSK|= (1<<PCINT3);
 
@@ -87,11 +58,24 @@ PCMSK|= (1<<PCINT4);
 GIMSK|= (1<<PCIE);
 }
 
-/*:31*/
-#line 90 "./jafco.w"
+/*:28*/
+#line 70 "./jafco.w"
 
-/*30:*/
-#line 295 "./jafco.w"
+/*27:*/
+#line 309 "./jafco.w"
+
+{
+
+PORTB|= (1<<PORTB3);
+
+PORTB|= (1<<PORTB4);
+}
+
+/*:27*/
+#line 71 "./jafco.w"
+
+/*26:*/
+#line 299 "./jafco.w"
 
 {
 
@@ -102,45 +86,24 @@ DDRB|= (1<<DDB1);
 DDRB|= (1<<DDB2);
 }
 
-/*:30*/
-#line 91 "./jafco.w"
+/*:26*/
+#line 72 "./jafco.w"
 
 
-/*:9*//*10:*/
-#line 94 "./jafco.w"
-
-jawcntl(CLOSE);
-fuelcntl(OFF);
-igncntl(OFF);
-
-/*:10*//*11:*/
-#line 101 "./jafco.w"
-
-/*35:*/
-#line 347 "./jafco.w"
-
-{
-TCCR1= ((1<<CS10)|(1<<CS11)|(1<<CS12)|(1<<CS13));
-
-TIMSK|= (1<<TOIE1);
-
-}
-
-
-/*:35*/
-#line 102 "./jafco.w"
+/*:6*/
+#line 26 "./jafco.w"
 
 
 
-/*:11*//*12:*/
-#line 108 "./jafco.w"
+/*:1*//*7:*/
+#line 78 "./jafco.w"
 
 sei();
-/*:12*//*13:*/
-#line 116 "./jafco.w"
+/*:7*//*8:*/
+#line 86 "./jafco.w"
 
-/*36:*/
-#line 360 "./jafco.w"
+/*32:*/
+#line 358 "./jafco.w"
 
 {
 MCUCR&= ~(1<<SM1);
@@ -148,61 +111,68 @@ MCUCR&= ~(1<<SM0);
 }
 
 
-/*:36*/
-#line 117 "./jafco.w"
+/*:32*/
+#line 87 "./jafco.w"
 
 
-
-/*:13*//*14:*/
-#line 125 "./jafco.w"
+/*:8*//*9:*/
+#line 94 "./jafco.w"
 
 for(;;)
 {
 
-/*:14*//*15:*/
-#line 131 "./jafco.w"
+/*:9*//*10:*/
+#line 100 "./jafco.w"
+
+
+igncntl(OFF);
+fuelcntl(OFF);
+jawcntl(CLOSE);
+
+/*:10*//*11:*/
+#line 108 "./jafco.w"
 
 sleep_mode();
+/*:11*//*12:*/
+#line 112 "./jafco.w"
 
-/*:15*//*16:*/
-#line 136 "./jafco.w"
 
 if(handleirq!=NULL)
 {
-handleirq(&s_state);
+
+handleirq();
 handleirq= NULL;
 }
-
 }
-
 
 return 0;
-
 }
 
-/*:16*//*17:*/
-#line 152 "./jafco.w"
+/*:12*//*13:*/
+#line 127 "./jafco.w"
 
-void releaseseq(statestruct*s_now)
+void releaseseq()
 {
-/*:17*//*18:*/
-#line 157 "./jafco.w"
 
-while(!(PORTB&(1<<PORTB3)))
-{
+/*:13*//*14:*/
+#line 133 "./jafco.w"
+
+
+jawcntl(OPEN);
+
+while(!(PINB&(1<<PB3)))
+_delay_ms(10);
+
+jawcntl(CLOSE);
 
 }
+/*:14*//*15:*/
+#line 146 "./jafco.w"
 
-
-
-}
-/*:18*//*19:*/
-#line 169 "./jafco.w"
-
-void fireseq(statestruct*s_now)
+void fireseq()
 {
+
 uint8_t firingstate;
-
 enum firingstates
 {
 ready,
@@ -213,126 +183,150 @@ igniting,
 burning
 };
 
+
 firingstate= ready;
 
-/*:19*//*20:*/
-#line 189 "./jafco.w"
+/*:15*//*16:*/
+#line 168 "./jafco.w"
 
 
-while(!(PORTB&(1<<PORTB4)))
+while(!(PINB&(1<<PB4)))
 {
-/*:20*//*21:*/
-#line 195 "./jafco.w"
+
+/*:16*//*17:*/
+#line 175 "./jafco.w"
 
 if(firingstate==ready)
 {
 
 
+jawcntl(OPEN);
 firingstate= opened;
 continue;
 }
-/*:21*//*22:*/
-#line 205 "./jafco.w"
+/*:17*//*18:*/
+#line 186 "./jafco.w"
 
 if(firingstate==opened)
 {
 
-_delay_ms(250);
-
-_delay_ms(250);
-
-_delay_ms(250);
+for(int8_t count= 0;count<3;count++)
+{
+igncntl(ON);
+_delay_ms(100);
+igncntl(OFF);
+_delay_ms(100);
+}
 
 _delay_ms(1000);
 firingstate= warned;
 continue;
 }
-/*:22*//*23:*/
-#line 221 "./jafco.w"
+/*:18*//*19:*/
+#line 204 "./jafco.w"
 
 
 if(firingstate==warned)
 {
 
-_delay_ms(250);
+fuelcntl(ON);
+_delay_ms(500);
 firingstate= precharged;
 continue;
 }
-/*:23*//*24:*/
-#line 232 "./jafco.w"
+/*:19*//*20:*/
+#line 216 "./jafco.w"
 
 
 if(firingstate==precharged)
 {
 
+igncntl(ON);
 _delay_ms(250);
 firingstate= igniting;
 continue;
 }
-/*:24*//*25:*/
-#line 243 "./jafco.w"
+/*:20*//*21:*/
+#line 228 "./jafco.w"
 
 if(firingstate==igniting)
 {
 
+igncntl(OFF);
 firingstate= burning;
 continue;
 }
 }
 
-/*:25*//*26:*/
-#line 254 "./jafco.w"
+/*:21*//*22:*/
+#line 240 "./jafco.w"
 
 
+igncntl(OFF);
+fuelcntl(OFF);
+jawcntl(CLOSE);
 
 }
 
 
-
-/*:26*//*27:*/
-#line 267 "./jafco.w"
-
-
-ISR(TIMER1_OVF_vect)
-{
-handleirq= NULL;
-}
-
-/*:27*//*28:*/
-#line 276 "./jafco.w"
+/*:22*//*24:*/
+#line 258 "./jafco.w"
 
 ISR(PCINT0_vect)
 {
+const int8_t high= 32;
+const int8_t low= -high;
+int8_t dbp3= 0;
+int8_t dbp4= 0;
 
-_delay_ms(100);
 
-if(!(PORTB&(1<<PORTB3)))
+while(abs(dbp3)<high)
+{
+if(!(PINB&(1<<PB3))&&dbp3> low)
+dbp3--;
+else
+if((PINB&(1<<PB3))&&dbp3<high)
+dbp3++;
+_delay_ms(1);
+}
+
+while(abs(dbp4)<high)
+{
+if(!(PINB&(1<<PB4))&&dbp4> low)
+dbp4--;
+else
+if((PINB&(1<<PB4))&&dbp4<high)
+dbp4++;
+_delay_ms(1);
+}
+
+if(dbp3==low)
 handleirq= &releaseseq;
 else
-if(!(PORTB&(1<<PORTB4)))
+if(dbp4==low)
 handleirq= &fireseq;
-
 }
 
 
-/*:28*//*32:*/
-#line 321 "./jafco.w"
+/*:24*//*29:*/
+#line 329 "./jafco.w"
 
 void jawcntl(uint8_t state)
 {
 PORTB= state?PORTB|(1<<PORTB0):PORTB&~(1<<PORTB0);
 }
 
-/*:32*//*33:*/
-#line 329 "./jafco.w"
+/*:29*//*30:*/
+#line 337 "./jafco.w"
 
 void fuelcntl(uint8_t state)
 {
+
 PORTB= state?PORTB|(1<<PORTB1):PORTB&~(1<<PORTB1);
 }
 
-/*:33*//*34:*/
-#line 337 "./jafco.w"
+/*:30*//*31:*/
+#line 346 "./jafco.w"
 
 void igncntl(uint8_t state)
 {
@@ -340,4 +334,5 @@ PORTB= state?PORTB|(1<<PORTB2):PORTB&~(1<<PORTB2);
 }
 
 
-/*:34*/
+
+/*:31*/

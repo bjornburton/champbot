@@ -53,6 +53,7 @@ and ``AVR130: Setup and Use the AVR Timers'' Rev. 2505A–AVR–02/02.
 \8\#\&{include} \.{<util/delay.h>}\SHC{ need to delay }\6
 \8\#\&{include} \.{<avr/interrupt.h>}\SHC{ have need of an interrupt }\6
 \8\#\&{include} \.{<avr/sleep.h>}\SHC{ have need of sleep }\6
+\8\#\&{include} \.{<avr/wdt.h>}\SHC{ have need of watchdog }\6
 \8\#\&{include} \.{<stdlib.h>}\6
 \8\#\&{include} \.{<stdint.h>}\par
 \U1.\fi
@@ -91,7 +92,7 @@ the ``sleep'' mode is used.
 The specific type of sleep is `idle'.
 In idle, execution stops but timers continue.
 Interrupts are used to wake it.
-\Y\B\X32:Configure to wake upon interrupt\X\par
+\Y\B\X34:Configure to wake upon interrupt\X\par
 \fi
 
 \M{9}
@@ -332,10 +333,23 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB2}):\.{PORTB}\AND\CM(%
 \fi
 
 \M{32}
+See section the datasheet for details on the Watchdog Timer.
+We are not using it right now.
+\fi
+
+\M{33}\B\X33:Initialize watchdog timer\X${}\E{}$\6
+${}\{{}$\1\6
+${}\.{WDTCR}\MRL{{\OR}{\K}}(\T{1}\LL\.{WDCE})\OR(\T{1}\LL\.{WDE});{}$\6
+${}\.{WDTCR}\K(\T{1}\LL\.{WDIE})\OR(\T{1}\LL\.{WDP2}){}$;\SHC{ reset after
+about 0.25 seconds }\6
+\4${}\}{}$\2\par
+\fi
+
+\M{34}
 Setting these bits configure sleep\_mode() to go to ``idle''.
 Idle allows the counters and comparator to continue during sleep.
 
-\Y\B\4\X32:Configure to wake upon interrupt\X${}\E{}$\6
+\Y\B\4\X34:Configure to wake upon interrupt\X${}\E{}$\6
 ${}\{{}$\1\7
 ${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM1});{}$\6
 ${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM0});{}$\6

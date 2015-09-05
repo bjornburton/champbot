@@ -43,6 +43,7 @@ and ``AVR130: Setup and Use the AVR Timers'' Rev. 2505A–AVR–02/02.
 # include <util/delay.h> // need to delay
 # include <avr/interrupt.h> // have need of an interrupt
 # include <avr/sleep.h> // have need of sleep
+# include <avr/wdt.h> // have need of watchdog
 # include <stdlib.h>
 # include <stdint.h>
 
@@ -349,7 +350,15 @@ void igncntl(uint8_t state)
   PORTB = state ? PORTB | (1<<PORTB2) : PORTB & ~(1<<PORTB2);
 }
 
-
+@                                                                               
+See section the datasheet for details on the Watchdog Timer. 
+We are not using it right now.           
+@ @<Initialize watchdog timer...@>=                                             
+{                                                                               
+                                                                                
+ WDTCR |= (1<<WDCE) | (1<<WDE);                                                
+ WDTCR = (1<<WDIE) | (1<<WDP2); // reset after about 0.25 seconds              
+}    
 
 @
 Setting these bits configure sleep\_mode() to go to ``idle''.

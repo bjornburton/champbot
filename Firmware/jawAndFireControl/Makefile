@@ -7,9 +7,6 @@ BOARD:=trinket
 # Which microcontroller
 MCU:=attiny85
 
-# Which programmer to use
-PROGHW:=usbtiny
-
 # Which avrdude to use
 PROGSW:=avrdude
 
@@ -20,7 +17,7 @@ EFUSE:= efuse:w:0xFF:m
 
 
 # Apps and Flags
-PROGSWFLAGS:= -c $(PROGHW) -p $(BOARD)
+PROGSWFLAGS:= -p $(BOARD)
 CC       := avr-gcc 
 TANGLE   := ctangle
 WEAVE    := cweave
@@ -69,7 +66,10 @@ clean:
 	-rm -f $(CSOURCES)
 	
 install:
-	$(PROGSW) $(PROGSWFLAGS) -U flash:w:$(HEX)
+	$(PROGSW) $(PROGSWFLAGS) -c usbtiny -U flash:w:$(HEX)
+
+installasp:
+	$(PROGSW) -p $(MCU) -c usbasp -U flash:w:$(HEX)
 
 size:
 	avr-size --format=avr --mcu=$(MCU) $(ELF)

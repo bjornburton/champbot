@@ -16,9 +16,6 @@ The jaw will close by return-spring so the action will to open it.
 Fire is a  sequence of opening the jaw, releasing the butane and firing the
 ignitor.
 
-place-holder code below
-==========================
-
 Extensive use was made of the datasheet, Atmel ``Atmel ATtiny25, ATtiny45,
 ATtiny85 Datasheet'' Rev. 2586Q–AVR–08/2013 (Tue 06 Aug 2013 03:19:12 PM
 EDT)
@@ -74,9 +71,12 @@ This pointer gets the appropriate function attached by one of the \PB{%
 functions.
 
 \Y\B\4\X6:Global variables\X${}\E{}$\6
-$\&{void}({*}\\{handleirq})(\,)\K\NULL;$ \&{int} \\{main}(\&{void})\1\1 $\{{}$\7
-\X28:Initialize interrupts\X\X27:Initialize pin inputs\X\X26:Initialize pin
-outputs\X\par
+\&{void} ${}({*}\\{handleirq})(\,)\K\NULL{}$;\6
+\&{int} \\{main}(\&{void})\1\1\6
+$\{{}$\6
+\X28:Initialize interrupts\X\6
+\X27:Initialize pin inputs\X\6
+\X26:Initialize pin outputs\X\par
 \U1.\fi
 
 \M{7}
@@ -100,7 +100,8 @@ This is the loop that does the work.
 It should spend most of its time in \PB{\\{sleep\_mode}},
 comming out at each interrupt event.
 
-\Y\B\&{for} ( ;  ; \,) $\{{}$\Y\par
+\Y\B\&{for} ( ;  ; \,)\6
+$\{{}$\par
 \fi
 
 \M{10}
@@ -119,7 +120,7 @@ Now we wait in ``idle'' for any interrupt event.
 If execution arrives here, some interrupt has been detected.
 \Y\B\&{if} ${}(\\{handleirq}\I\NULL{}$)\SHC{ not sure why it would be, but to
 be safe }\6
-${}\{{}$\SHC{handleirq(); // process the irq through it's function }\1\6
+${}\{{}$\1\6
 \\{handleirq}(\,);\6
 ${}\\{handleirq}\K\NULL{}$;\SHC{ reset so that the action cannot be repeated }\6
 \4${}\}{}$\SHC{ end if handleirq }\2\6
@@ -130,7 +131,8 @@ $\}{}$\SHC{ end main() }\par
 
 \N{1}{13}Interrupt Handling.
 
-\Y\B\&{void} \\{releaseseq}(\,)\1\1 $\{{}$\Y\par
+\Y\B\&{void} \\{releaseseq}(\,)\1\1\6
+$\{{}$\par
 \fi
 
 \M{14}
@@ -144,7 +146,8 @@ This sequence will proceed only while the button is held.
 \M{15}
 
 
-\Y\B\&{void} \\{fireseq}(\,)\1\1 $\{{}$\7
+\Y\B\&{void} \\{fireseq}(\,)\1\1\6
+$\{{}$\6
 \\{uint8\_t}\\{firingstate};\7
 \&{enum} \&{firingstates} ${}\{{}$\1\6
 ${}\\{ready},\39\\{opened},\39\\{warned},\39\\{precharged},\39\\{igniting},\39%
@@ -155,16 +158,16 @@ ${}\\{firingstate}\K\\{ready}{}$;\par
 
 \M{16}
 This sequence will proceed only while the button is held.
-It can terminate after and state.
+It can terminate after any state.
 \PB{\.{"\_delay\_ms()"}} is a handy macro good for $2^{16}$ milliseconds of
 delay.
-\Y\B\&{while} ${}(\R(\.{PINB}\AND(\T{1}\LL\.{PB4})))$ $\{{}$\Y\par
+\Y\B\&{while} ${}(\R(\.{PINB}\AND(\T{1}\LL\.{PB4})))$ $\{{}$\par
 \fi
 
 \M{17}
 The jaw opens here for fire, but also partly as a warning.
 \Y\B\&{if} ${}(\\{firingstate}\E\\{ready}){}$\5
-${}\{{}$\1\7
+${}\{{}$\1\6
 \\{jawcntl}(\.{OPEN});\6
 ${}\\{firingstate}\K\\{opened};{}$\6
 \&{continue};\6
@@ -174,7 +177,7 @@ ${}\\{firingstate}\K\\{opened};{}$\6
 \M{18}
 Three warning bursts from the ignitor and then a 1000 ms duck delay.
 \Y\B\&{if} ${}(\\{firingstate}\E\\{opened}){}$\5
-${}\{{}$\1\7
+${}\{{}$\1\6
 \&{for} ${}(\\{int8\_t}\\{count}\K\T{0};{}$ ${}\\{count}<\T{3};{}$ ${}\\{count}%
 \PP){}$\5
 ${}\{{}$\1\6
@@ -192,7 +195,7 @@ ${}\\{firingstate}\K\\{warned};{}$\6
 \M{19}
 Fuel opens for precharge, then some delay.
 \Y\B\&{if} ${}(\\{firingstate}\E\\{warned}){}$\5
-${}\{{}$\1\7
+${}\{{}$\1\6
 \\{fuelcntl}(\.{ON});\6
 \\{\_delay\_ms}(\T{500});\6
 ${}\\{firingstate}\K\\{precharged};{}$\6
@@ -203,7 +206,7 @@ ${}\\{firingstate}\K\\{precharged};{}$\6
 \M{20}
 Ignitor on, delay a short time.
 \Y\B\&{if} ${}(\\{firingstate}\E\\{precharged}){}$\5
-${}\{{}$\1\7
+${}\{{}$\1\6
 \\{igncntl}(\.{ON});\6
 \\{\_delay\_ms}(\T{250});\6
 ${}\\{firingstate}\K\\{igniting};{}$\6
@@ -214,7 +217,7 @@ ${}\\{firingstate}\K\\{igniting};{}$\6
 \M{21}
 Ignitor off, and we should have fire now.
 \Y\B\&{if} ${}(\\{firingstate}\E\\{igniting}){}$\5
-${}\{{}$\1\7
+${}\{{}$\1\6
 \\{igncntl}(\.{OFF});\6
 ${}\\{firingstate}\K\\{burning};{}$\6
 \&{continue};\6
@@ -241,8 +244,8 @@ The need for global variables is minimized.
 \M{24}
 This vector responds to the jaw input at pin PB3 or fire input at PB4.
 A simple debounce is included.
-\Y\B\.{ISR}(\\{PCINT0\_vect})\1\1\2\2\6
-${}\{{}$\1\7
+\Y\B\.{ISR}(\\{PCINT0\_vect})\6
+${}\{{}$\1\6
 \&{const} \\{int8\_t}\\{high}${}\K\T{32};{}$\6
 \&{const} \\{int8\_t}\\{low}${}\K{-}\\{high};{}$\7
 ${}\\{int8\_t}\\{dbp3}\K\T{0};{}$\6
@@ -307,8 +310,8 @@ ${}\.{GIMSK}\MRL{{\OR}{\K}}(\T{1}\LL\.{PCIE});{}$\6
 
 \M{29}
 Here is a simple procedure to operate the jaw.
-\Y\B\&{void} \\{jawcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
-${}\{{}$\1\7
+\Y\B\&{void} \\{jawcntl}(\\{uint8\_t}\\{state})\6
+${}\{{}$\1\6
 ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
 \T{1}\LL\.{PORTB0});{}$\6
 \4${}\}{}$\2\par
@@ -316,8 +319,8 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB0}):\.{PORTB}\AND\CM(%
 
 \M{30}
 Here is a simple procedure to operate the fuel.
-\Y\B\&{void} \\{fuelcntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
-${}\{{}$\1\7
+\Y\B\&{void} \\{fuelcntl}(\\{uint8\_t}\\{state})\6
+${}\{{}$\1\6
 ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB1}):\.{PORTB}\AND\CM(%
 \T{1}\LL\.{PORTB1});{}$\6
 \4${}\}{}$\2\par
@@ -325,8 +328,8 @@ ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB1}):\.{PORTB}\AND\CM(%
 
 \M{31}
 Here is a simple procedure to operate the ignition.
-\Y\B\&{void} \\{igncntl}(\\{uint8\_t}\\{state})\1\1\2\2\6
-${}\{{}$\1\7
+\Y\B\&{void} \\{igncntl}(\\{uint8\_t}\\{state})\6
+${}\{{}$\1\6
 ${}\.{PORTB}\K\\{state}\?\.{PORTB}\OR(\T{1}\LL\.{PORTB2}):\.{PORTB}\AND\CM(%
 \T{1}\LL\.{PORTB2});{}$\6
 \4${}\}{}$\2\par
@@ -350,7 +353,7 @@ Setting these bits configure sleep\_mode() to go to ``idle''.
 Idle allows the counters and comparator to continue during sleep.
 
 \Y\B\4\X34:Configure to wake upon interrupt\X${}\E{}$\6
-${}\{{}$\1\7
+${}\{{}$\1\6
 ${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM1});{}$\6
 ${}\.{MCUCR}\MRL{\AND{\K}}\CM(\T{1}\LL\.{SM0});{}$\6
 \4${}\}{}$\2\par

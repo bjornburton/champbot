@@ -14,9 +14,6 @@ The jaw will close by return-spring so the action will to open it.
 Fire is a  sequence of opening the jaw, releasing the butane and firing the
 ignitor.
 
-place-holder code below
-==========================
-
 Extensive use was made of the datasheet, Atmel ``Atmel ATtiny25, ATtiny45,
  ATtiny85 Datasheet'' Rev. 2586Q–AVR–08/2013 (Tue 06 Aug 2013 03:19:12 PM EDT)
 and ``AVR130: Setup and Use the AVR Timers'' Rev. 2505A–AVR–02/02.
@@ -62,15 +59,17 @@ This pointer gets the appropriate function attached by one of the |"ISR()"|
 functions.
 
 @<Global var...@>=
-void (*handleirq)() = NULL;
-
-int main(void)
-{@#
+void @[@] (*handleirq)() = NULL;
 
 
-@<Initialize interrupts@>
-@<Initialize pin inputs@>
-@<Initialize pin outputs@>
+@/
+int main(void)@/
+{@/
+
+
+@<Initialize interrupts@>@/
+@<Initialize pin inputs@>@/
+@<Initialize pin outputs@>@/
 
 @
 Of course, any interrupt function requires that bit ``Global Interrupt Enable''
@@ -93,8 +92,8 @@ It should spend most of its time in |sleep_mode|,
 comming out at each interrupt event.
 
 @c
- for (;;)
-  {@#
+ for (;;)@/
+  {@/
 
 @
 We don't want anything cooking while we are asleap.
@@ -113,8 +112,7 @@ If execution arrives here, some interrupt has been detected.
 @c
 
 if (handleirq != NULL)  // not sure why it would be, but to be safe
-   {@#
-    //handleirq(); // process the irq through it's function
+   @/{@/
     handleirq();
     handleirq = NULL; // reset so that the action cannot be repeated
     }// end if handleirq
@@ -126,8 +124,8 @@ return 0; // it's the right thing to do!
 @* Interrupt Handling.
 
 @c
-void releaseseq()
-{@#
+void releaseseq()@/
+{@/
 
 @
 This sequence will proceed only while the button is held.
@@ -135,7 +133,7 @@ This sequence will proceed only while the button is held.
 
 jawcntl(OPEN);
 
-   while(!(PINB & (1<<PB3))) 
+   while(!(PINB & (1<<PB3)))
          _delay_ms(10);
 
 jawcntl(CLOSE);
@@ -145,8 +143,8 @@ jawcntl(CLOSE);
 
 
 @c
-void fireseq()
-{@#
+void fireseq()@/
+{@/
 
 uint8_t firingstate;
 enum firingstates
@@ -164,21 +162,21 @@ firingstate = ready;
 
 @
 This sequence will proceed only while the button is held.
-It can terminate after and state.
-|"_delay_ms()"| is a handy macro good for $2^{16}$ milliseconds of delay. 
+It can terminate after any state.
+|"_delay_ms()"| is a handy macro good for $2^{16}$ milliseconds of delay.
 @c
 
 while( !(PINB & (1<<PB4)) )
-     {@#
+     {@/
 
       @
       The jaw opens here for fire, but also partly as a warning.
       @c
       if(firingstate == ready)
-        {@#
+        {@/
 
 
-         jawcntl(OPEN); 
+         jawcntl(OPEN);
          firingstate = opened;
          continue;
         }
@@ -186,7 +184,7 @@ while( !(PINB & (1<<PB4)) )
       Three warning bursts from the ignitor and then a 1000 ms duck delay.
       @c
       if(firingstate == opened)
-        {@#
+        {@/
 
          for(int8_t count = 0;count < 3;count++)
             {
@@ -205,7 +203,7 @@ while( !(PINB & (1<<PB4)) )
       @c
 
       if(firingstate == warned)
-        {@#
+        {@/
 
          fuelcntl(ON);
          _delay_ms(500);
@@ -217,7 +215,7 @@ while( !(PINB & (1<<PB4)) )
       @c
 
       if(firingstate == precharged)
-        {@#
+        {@/
 
          igncntl(ON);
          _delay_ms(250);
@@ -228,7 +226,7 @@ while( !(PINB & (1<<PB4)) )
       Ignitor off, and we should have fire now.
       @c
       if(firingstate == igniting)
-        {@#
+        {@/
 
          igncntl(OFF);
          firingstate = burning;
@@ -257,12 +255,12 @@ The need for global variables is minimized.
 This vector responds to the jaw input at pin PB3 or fire input at PB4.
 A simple debounce is included.
 @c
-ISR(PCINT0_vect)
-{@#
+ISR(PCINT0_vect)@/
+{@/
 const int8_t high = 32;
 const int8_t low = -high;
-int8_t dbp3 = 0; 
-int8_t dbp4 = 0; 
+int8_t dbp3 = 0;
+int8_t dbp4 = 0;
 
 
 while(abs(dbp3) < high)
@@ -297,8 +295,8 @@ if(dbp3 == low)
 
 
 Here is the block that sets-up the digital I/O pins.
-@ @<Initialize pin outputs...@>=
-{@#
+@ @<Initialize pin outputs...@>=@/
+{@/
  /* set the jaw port direction */
   DDRB |= (1<<DDB0);
  /* set the fuel port direction */
@@ -307,16 +305,16 @@ Here is the block that sets-up the digital I/O pins.
   DDRB |= (1<<DDB2);
 }
 
-@ @<Initialize pin inputs...@>=
-{@#
+@ @<Initialize pin inputs...@>=@/
+{@/
  /* set the jaw input pull-up */
   PORTB |= (1<<PORTB3);
  /* set the fire input pull-up */
   PORTB |= (1<<PORTB4);
 }
 
-@ @<Initialize interrupts...@>=
-{@#
+@ @<Initialize interrupts...@>=@/
+{@/
  /* enable  change interrupt for jaw input */
   PCMSK |= (1<<PCINT3);
  /* enable  change interrupt for fire input */
@@ -328,16 +326,16 @@ Here is the block that sets-up the digital I/O pins.
 @
 Here is a simple procedure to operate the jaw.
 @c
-void jawcntl(uint8_t state)
-{@#
+void jawcntl(uint8_t state)@/
+{@/
   PORTB = state ? PORTB | (1<<PORTB0) : PORTB & ~(1<<PORTB0);
 }
 
 @
 Here is a simple procedure to operate the fuel.
 @c
-void fuelcntl(uint8_t state)
-{@#
+void fuelcntl(uint8_t state)@/
+{@/
 
   PORTB = state ? PORTB | (1<<PORTB1) : PORTB & ~(1<<PORTB1);
 }
@@ -345,27 +343,26 @@ void fuelcntl(uint8_t state)
 @
 Here is a simple procedure to operate the ignition.
 @c
-void igncntl(uint8_t state)
-{@#
+void igncntl(uint8_t state)@/
+{@/
   PORTB = state ? PORTB | (1<<PORTB2) : PORTB & ~(1<<PORTB2);
 }
 
-@                                                                               
-See section the datasheet for details on the Watchdog Timer. 
-We are not using it right now.           
-@ @<Initialize watchdog timer...@>=                                             
-{                                                                               
-                                                                                
- WDTCR |= (1<<WDCE) | (1<<WDE);                                                
- WDTCR = (1<<WDIE) | (1<<WDP2); // reset after about 0.25 seconds              
-}    
+@
+See section the datasheet for details on the Watchdog Timer.
+We are not using it right now.
+@ @<Initialize watchdog timer...@>=@/
+{@/
+ WDTCR |= (1<<WDCE) | (1<<WDE);
+ WDTCR = (1<<WDIE) | (1<<WDP2); // reset after about 0.25 seconds
+}
 
 @
 Setting these bits configure sleep\_mode() to go to ``idle''.
 Idle allows the counters and comparator to continue during sleep.
 
-@<Configure to wake upon interrupt...@>=
-{@#
+@<Configure to wake upon interrupt...@>=@/
+{@/
   MCUCR &= ~(1<<SM1);
   MCUCR &= ~(1<<SM0);
 }

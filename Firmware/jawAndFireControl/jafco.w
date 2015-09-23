@@ -158,7 +158,6 @@ enum firingstates
    ready,
    opened,
    warned,
-   precharged,
    igniting,
    burning
   };
@@ -197,7 +196,7 @@ while( !(PINB & (1<<PB4)) )
              igncntl(ON);
              _delay_ms(100);
              igncntl(OFF);
-             _delay_ms(100);
+             _delay_ms(200);
             }
 
          _delay_ms(1000); /* human duck time */
@@ -213,31 +212,34 @@ while( !(PINB & (1<<PB4)) )
 
          fuelcntl(ON);
          _delay_ms(500);
-         firingstate = precharged;
+         firingstate = igniting;
          continue;
         }
       @
       Ignitor on, delay a short time.
       @c
 
-      if(firingstate == precharged)
+      if(firingstate == igniting)
         {@/
 
          igncntl(ON);
          _delay_ms(250);
-         firingstate = igniting;
-         continue;
-        }
-      @
-      Ignitor off, and we should have fire now.
-      @c
-      if(firingstate == igniting)
-        {@/
-
-         igncntl(OFF);
+		 igncntl(OFF);
          firingstate = burning;
          continue;
         }
+
+      @
+      We should have fire now, but will tend it in case of wind.
+      @c
+      if(firingstate == burning)
+        {@/
+          _delay_ms(1000);
+          igncntl(ON);
+          _delay_ms(200);
+          igncntl(OFF);
+          continue;
+		 }
      }
 
 @

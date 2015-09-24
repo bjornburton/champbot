@@ -156,8 +156,7 @@ This sequence will proceed only while the button is held.
 $\{{}$\6
 \\{uint8\_t}\\{firingstate};\7
 \&{enum} \&{firingstates} ${}\{{}$\1\6
-${}\\{ready},\39\\{opened},\39\\{warned},\39\\{precharged},\39\\{igniting},\39%
-\\{burning}{}$\2\6
+${}\\{ready},\39\\{opened},\39\\{warned},\39\\{igniting},\39\\{burning}{}$\2\6
 ${}\};{}$\7
 ${}\\{firingstate}\K\\{ready}{}$;\par
 \fi
@@ -190,7 +189,7 @@ ${}\{{}$\1\6
 \\{igncntl}(\.{ON});\6
 \\{\_delay\_ms}(\T{100});\6
 \\{igncntl}(\.{OFF});\6
-\\{\_delay\_ms}(\T{100});\6
+\\{\_delay\_ms}(\T{200});\6
 \4${}\}{}$\2\6
 \\{\_delay\_ms}(\T{1000});\C{ human duck time }\6
 ${}\\{firingstate}\K\\{warned};{}$\6
@@ -204,28 +203,31 @@ Fuel opens for precharge, then some delay.
 ${}\{{}$\1\6
 \\{fuelcntl}(\.{ON});\6
 \\{\_delay\_ms}(\T{500});\6
-${}\\{firingstate}\K\\{precharged};{}$\6
+${}\\{firingstate}\K\\{igniting};{}$\6
 \&{continue};\6
 \4${}\}{}$\2\par
 \fi
 
 \M{20}
 Ignitor on, delay a short time.
-\Y\B\&{if} ${}(\\{firingstate}\E\\{precharged}){}$\5
+\Y\B\&{if} ${}(\\{firingstate}\E\\{igniting}){}$\5
 ${}\{{}$\1\6
 \\{igncntl}(\.{ON});\6
 \\{\_delay\_ms}(\T{250});\6
-${}\\{firingstate}\K\\{igniting};{}$\6
+\\{igncntl}(\.{OFF});\6
+${}\\{firingstate}\K\\{burning};{}$\6
 \&{continue};\6
 \4${}\}{}$\2\par
 \fi
 
 \M{21}
-Ignitor off, and we should have fire now.
-\Y\B\&{if} ${}(\\{firingstate}\E\\{igniting}){}$\5
+We should have fire now, but will tend it in case of wind.
+\Y\B\&{if} ${}(\\{firingstate}\E\\{burning}){}$\5
 ${}\{{}$\1\6
+\\{\_delay\_ms}(\T{1000});\6
+\\{igncntl}(\.{ON});\6
+\\{\_delay\_ms}(\T{200});\6
 \\{igncntl}(\.{OFF});\6
-${}\\{firingstate}\K\\{burning};{}$\6
 \&{continue};\6
 \4${}\}{}$\2\6
 $\}{}$\par

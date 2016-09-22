@@ -1,82 +1,84 @@
 <!doctype html>
-<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
-<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on https://github.com/jonrohan -->
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>ChampBot-2016 by bjornburton</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen">
-  <link rel="stylesheet" href="stylesheets/github-dark.css">
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script type="text/javascript" src="javascripts/script.js"></script>
+  </head>
+  <body>
 
-  <title>ChampBot-2015</title>
-  <meta name="description" content="A Champ-like ROV, with brief submersion capability, designed to meet the demands of the Champlain Mini Maker Faire&#39;s ChampBot Challenge  of 2015">
+      <header>
+        <h1>ChampBot-2016</h1>
+        <p>A Champ-like ROV, with brief submersion capability, designed to meet the demands of the Champlain Mini Maker Faire&#39;s ChampBot Challenge  of 2015</p>
+      </header>
 
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+      <div id="banner">
+        <span id="logo"></span>
 
-</head>
-
-<body>
-
-  <div class="wrapper">
-    <header>
-      <h1 class="title">ChampBot-2015</h1>
-    </header>
-    <div id="container">
-      <p class="tagline">A Champ-like ROV, with brief submersion capability, designed to meet the demands of the Champlain Mini Maker Faire&#39;s ChampBot Challenge  of 2015</p>
-      <div id="main" role="main">
-        <div class="download-bar">
-        <div class="inner">
-          <a href="https://github.com/bjornburton/champbot/tarball/master" class="download-button tar"><span>Download</span></a>
-          <a href="https://github.com/bjornburton/champbot/zipball/master" class="download-button zip"><span>Download</span></a>
-          <a href="https://github.com/bjornburton/champbot" class="code">View ChampBot-2015 on GitHub</a>
+        <a href="https://github.com/bjornburton/champbot" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/bjornburton/champbot/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/bjornburton/champbot/tarball/master" class="button">TAR</a></li>
+          </ul>
         </div>
-        <span class="blc"></span><span class="trc"></span>
-        </div>
-        <article class="markdown-body">
-          <p>Looking part Tanystropheus, part Gungan and sporting a wicked pair of drive-units on a pivoting boom, this bot is Done!
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <p>Looking part Tanystropheus, part Gungan and sporting a wicked pair of drive-units on a pivoting boom, this bot is Done!
 <img src="https://github.com/bjornburton/champbot/blob/master/pictures/final.jpg?raw=true" alt="ChampBot"></p>
 
-<p>The head is made of a license plate and the eyes are made of ping-pong balls lit by red LEDs. There are parts from several appliances, including a dehumidifier and computer-monitor.</p>
+<p>The head is made of a license plate and the eyes are made of ping-pong balls lit by red LEDs. There are parts from several appliances, including a dehumidifier, computer-monitor, power-drills and various building materials.</p>
 
 <p>The design is far from any boat or sub, having more in common with a compact, mobile buoy. It would be difficult to have less consideration for hydrodynamics, aside from raising up from the water when under-way.</p>
 
-<p>Unfortunately we did not complete any of the four challenges. We are disappointed but we were in good company of strong teams that, for want of a bit of luck, could have taken the prize. Between that, and the fun along the way, we don't consider it a loss, as a whole. If there is a ChampBot Challenge for 2016 we may be back.
-For specifics on what went wrong <a href="https://github.com/bjornburton/champbot/wiki/RCA-on-cause-of-lost-propulsion-early-in-the-race">https://github.com/bjornburton/champbot/wiki/RCA-on-cause-of-lost-propulsion-early-in-the-race</a> </p>
-
 <h1>
-<a id="specifications" class="anchor" href="#specifications" aria-hidden="true"><span class="octicon octicon-link"></span></a>Specifications</h1>
+<a id="specifications" class="anchor" href="#specifications" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Specifications</h1>
 
 <ul>
-<li>Launched on September 12, 2015 in Arrowhead Lake, East Georgia Vt. (It Floats!)</li>
+<li>Launched on September 12, 2015 in Arrowhead Lake, East Georgia Vt.</li>
 <li>Type: Competition ROV, ChampBot</li>
 </ul>
 
 <h2>
-<a id="key-features" class="anchor" href="#key-features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Key Features</h2>
+<a id="construction-features" class="anchor" href="#construction-features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Construction Features</h2>
 
 <ul>
 <li>Dual Hull, Over/Under, joined by 4 stanchions</li>
-<li>Dual Drive Units which support piruett turning</li>
-<li>MOSFET dual motor drive with braking</li>
-<li>Radius computer with digital PWC to PWM converters (Go Adafruit!)</li>
-<li>Rapid diving through a Pivoting drive boom
- (propulsion/rotary-dive-plane selection)</li>
+<li>Dual Drive Units on a pivoting drive-boom</li>
+<li>Microwave spread-spectum remote for an improved look (NEW for 2016)</li>
+<li>MOSFET dual motor drive with electronic braking (Improved for 2016)</li>
+<li>Radius computer with providing single-stick control and piruett turning</li>
+<li>Autonymous dive including DDC control loop
+to maintain precise depth for an exact time (NEW for 2016)</li>
+<li>Rotary Dive-Planes for rapid diving</li>
 <li>Jaw control for an "authentic" float drop</li>
-<li>Fire from the mouth</li>
+<li>Fire from the mouth, just as it should be</li>
 </ul>
 
 <h2>
-<a id="payload" class="anchor" href="#payload" aria-hidden="true"><span class="octicon octicon-link"></span></a>Payload</h2>
+<a id="payload" class="anchor" href="#payload" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Payload</h2>
 
 <ul>
 <li>1x float, 20 cm from water surface</li>
 </ul>
 
 <h2>
-<a id="dimensions" class="anchor" href="#dimensions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dimensions</h2>
+<a id="dimensions" class="anchor" href="#dimensions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dimensions</h2>
 
 <ul>
 <li>Length: 96 cm</li>
@@ -87,7 +89,7 @@ For specifics on what went wrong <a href="https://github.com/bjornburton/champbo
 </ul>
 
 <h2>
-<a id="main-propulsion" class="anchor" href="#main-propulsion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Main Propulsion</h2>
+<a id="main-propulsion" class="anchor" href="#main-propulsion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Main Propulsion</h2>
 
 <ul>
 <li>2x Johnson Electric motors with B&amp;D reduction gears and chucks</li>
@@ -97,7 +99,7 @@ For specifics on what went wrong <a href="https://github.com/bjornburton/champbo
 </ul>
 
 <h2>
-<a id="power" class="anchor" href="#power" aria-hidden="true"><span class="octicon octicon-link"></span></a>Power</h2>
+<a id="power" class="anchor" href="#power" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Power</h2>
 
 <ul>
 <li>5 Ah, 12.6 V AGM
@@ -109,40 +111,28 @@ For specifics on what went wrong <a href="https://github.com/bjornburton/champbo
 </ul>
 
 <h2>
-<a id="armament" class="anchor" href="#armament" aria-hidden="true"><span class="octicon octicon-link"></span></a>Armament</h2>
+<a id="armament" class="anchor" href="#armament" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Armament</h2>
 
 <ul>
-<li>1x 90+ kW PFI (Projected Flame Igniter)
+<li>1x 100+ kW PFI (Projected Flame Igniter) (Improved output for 2016)
 
 <ul>
-<li>Butane with water-heated evaporator</li>
-<li>Multi-spark, capacitive discharge pre-ignitor</li>
-<li>5 mm burner with wind guard</li>
-<li>40 second capacity (3.6 MJ)</li>
+<li>70/30 Butane/Propane at 2.6 Bar (NEW for 2016)</li>
+<li>Water-heated, large-surface evaporator (NEW for 2016)</li>
+<li>Multi-spark, capacitive discharge pre-ignitor (NEW for 2016)</li>
+<li>5 mm orifice with guard horn (NEW for 2016)</li>
+<li>30 second capacity (3.6 MJ) </li>
 </ul>
 </li>
 </ul>
-        </article>
-      </div>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/bjornburton">bjornburton</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+      </footer>
     </div>
-    <footer>
-      <div class="owner">
-      <p><a href="https://github.com/bjornburton" class="avatar"><img src="https://avatars1.githubusercontent.com/u/10006084?v=3&amp;s=60" width="48" height="48"></a> <a href="https://github.com/bjornburton">bjornburton</a> maintains <a href="https://github.com/bjornburton/champbot">ChampBot-2015</a></p>
-
-
-      </div>
-      <div class="creds">
-        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
-      </div>
-    </footer>
-  </div>
-  <div class="current-section">
-    <a href="#top">Scroll to top</a>
-    <a href="https://github.com/bjornburton/champbot/tarball/master" class="tar">tar</a><a href="https://github.com/bjornburton/champbot/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
-    <p class="name"></p>
-  </div>
-
-            <script type="text/javascript">
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+              <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
@@ -153,5 +143,5 @@ For specifics on what went wrong <a href="https://github.com/bjornburton/champbo
             } catch(err) {}
           </script>
 
-</body>
+  </body>
 </html>

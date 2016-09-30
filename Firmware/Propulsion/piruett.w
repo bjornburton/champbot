@@ -730,8 +730,8 @@ This is in the ``Interrupt Mode''.
 PWM setup isn't too scary.
 Timer Count 0 is configured for ``Phase Correct'' PWM which, according to the
 datasheet, is preferred for motor control.
-OC0A (port) and OC0B (starboard) are set to clear on a match which creates a
-non-inverting PWM.
+OC0A (larboard) and OC0B (starboard) are set on a match which creates an
+inverting PWM.
 The prescaler is set to clk/8 and with a 16 MHz clock the $f$ is about 3922 Hz.
 We are using |"Set"| on comparator match to invert the PWM, suiting the
 glue-logic  which drives the H-Bridge.
